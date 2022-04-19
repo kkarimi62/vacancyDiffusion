@@ -1,0 +1,11 @@
+
+OpenMPI 4.0.2 modules are obsolete.
+They are incompatible with some of the nodes on ARC and will be removed soon.
+Please use the openmpi/4.1.1-gnu module instead.
+
+Loading openmpi/4.0.2-gnu730
+  Loading requirement: gcc/7.3.0
+
+real	0m0.538s
+user	0m0.114s
+sys	0m0.070s

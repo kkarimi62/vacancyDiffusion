@@ -1,0 +1,221 @@
+                                                      Compilation and Execution details
+                                                 *****************************************
+ Revision Number  :                                                                              567c475
+ Date             :                                                                           2022-04-08
+ Compile target   :                                                           ubuntu_gfortran_mpi_lammps
+ Random seed used :                                                                               -41546
+ Walltime (user real time) in second by default (1296000 s = 15 days ):                          1296000
+  
+  
+                                                      Commons input variable details
+                                                 ****************************************
+ TEMPERATURE :                                                                                  500.0000
+ Number of atoms :                                                                                   864
+ Maximum number of neighbours :                                                                      200
+ Number of species :                                                                                   3
+ Soft activity  (SOFT_ACTIVITY)    :                                                                   T
+ Atom types:        Ni             Co             Cr             
+ Number of cores associated to force calculations :                                                    1
+ The max number of KMC steps to be executed                                                           50
+ number of steps before each KMC measure :                                                             1
+ The maximum simulation time in seconds :                                                        20.0000
+ The elapsed time for a simulation :                                                              0.0000
+  
+  
+                                                      Modifications to the KMC approach 
+                                                      (can induce wrong kinetics or thermodynamics)
+                                                 ****************************************
+ Force specific pathway  (DIRECTED_PATHWAY)  :                                                         F
+ Impose detailed balance  (DETAILED_BALANCE)  :                                                        T
+ Impose additional conditions (ADDITIONAL_CONDITIONS)  :                                               F
+  
+  
+                                                      Force field input variable details
+                                                 ********************************************
+ Type of potential used :                                                                            LAM
+ Input lammps file (info about the potential used) :                                           in.lammps
+ Units conversion :                                                                                metal
+ energy conversion is :                                                                           1.0000
+ distance conversion is :                                                                         1.0000
+ Use of local forces (LOCAL_FORCES)  :                                                                 F
+ Use of local Lanczos (LOCAL_LANCZOS) :                                                                F
+ Use of global convergence (GLOBAL_CONVERGENCE) :                                                      T
+ File name for fixed atoms :                                                                 Fixed_atoms
+  
+                                                      Basin method input variable details
+                                                 *********************************************
+ Type of flickers treatment :                                                                       BMRM
+                                                      BMRM parameters
+                                                 *************************
+                                                      (TABU parameters not used)
+ Criteria to define in an event in basin :                                                        0.1000
+ Local basin use (logical) :                                                                           F
+  
+  
+                                                      Topologies parameters
+                                                 *******************************
+ radius for topology cluster   :                                                                  6.0000
+ length-cutoff used by default to link two atoms :                                                2.7000    2.7000    2.7000
+                                                                                                  2.7000    2.7000    2.7000
+                                                                                                  2.7000    2.7000    2.7000
+ 
+ minimal length cutoff used when looking at secondary topologies  :                               2.2000    2.2000    2.2000
+                                                                                                  2.2000    2.2000    2.2000
+                                                                                                  2.2000    2.2000    2.2000
+ topo id of the crystalline-like topologies (if 0 means not used) :                               973883
+ topo id 2 of the crystalline-like topologies (if 0 means not used) :                                  0
+ radius for crystal-like topologies (default: 4.0 A) :                                            4.0000
+Define crystalline topo irrespective of atom types (def: .false.)                                      F
+ Topo ids to ignore (read at start of sim) (default: Topo_ignore)  :                         Topo_ignore
+ Maximum of nodes for the graphs, superseeds TOPO_RADIUS, default, NATOMS                            864
+Accept that cluster size can change due to external strain - def: .false.                              F
+  
+  
+                                                      Events parameters 
+                                                 ******************************** 
+  
+                                                      1) Generic events parameters 
+  
+ Event search frequency :                                                                             10
+ Number of failed attempts THRES_INCREASE_FREQ :                                                      25
+ Type of events update :                                                                            SPEC
+ Logarithmic incrementation of search frequency :                                                      T
+ - Type of events :                                                                                local
+ - Radius of deformation (local ev.) :                                                            3.0000
+ - Central atom for events           :   none (all equal)                                              0
+Prefactor computation uses HTST :                                                                      F
+  
+                                                      2) Specific events parameters 
+  
+ Probability threshold (in percent) for genering specific event (SPECIFIC_                       99.9900
+ The number of histogram bins (default: 100, MAX_HISTO) :                                            100
+ The ratio of the saddle-final distance pushed before minimizing a SPEC ev                        0.5000
+ If true, will output two txt files for each SPEC event found :                                        T
+ Min number of spec events per atom in memory :                                                       40
+ Number of attempts to refine a generic event (default: 2) :                                           2
+ Min barrier to refine an event :                                                                 0.0108
+ Max change in barrier (in %) for refined events (Gen vs SPE )(default: no                       -1.0000
+ Min barrier needed to use BARRIER_CHANGE_THRESH in eV (default: 0.1 eV)                          0.1000
+  
+                                                      3) Events analysis parameters 
+  
+ Max barrier to store an event         :                                                          5.0000
+ Criterium for comparing scalar prod  :                                                           0.9000
+ Criterium for comparing energy barr  :                                                           0.1000
+ Criterium for comparing displacements:                                                           0.1500
+ Pushover fraction                     :                                                          0.1000
+ Energy difference between the FINAL states of an event                                           0.1000
+ Check connectivity init-sad-fin (reversability - CHECK_INI_SAD_CONNECTIVI                             T
+  
+  
+                                                      SD and FIRE parameters
+                                                 ********************************
+  
+                                                      1) SD  parameters 
+  
+ MAX_ITER_SD     :                                                                                  2000
+ FTHRESHOLD_SD   :                                                                                0.1000
+ STEPSIZE        :                                                                                0.0001
+  
+                                                      2) FIRE parameters 
+  
+ FIRE max timestep in sqrt(mass)*10fs during saddle search :                                      0.2500
+ FIRE max timestep in sqrt(mass)*10fs during minimisation  :                                      0.0500
+ MAX_ITER_FIRE  :                                                                                   1500
+ NORM_CRITERIUM  :                                                                                0.0005
+ FMAX_CRITERIUM  :                                                                                0.0005
+ MAX_ITER_FIRE_PERP  :                                                                                15
+ FOR_LEAVING_BASIN_USE_FIRE  :                                                                         T
+  
+  
+                                                      Activation parameters 
+                                                 ***************************** 
+ - Eigenvalue threshold :                                                                        -1.0000
+ - Extremal Eigenvalue threshold :                                                               -5.0000
+ - Total force threshold during generic search (SADDLE):                                          0.1000
+ - Total force threshold during refinement (SADDLE):                                              0.0500
+ - Initial step size :                                                                            1.0000
+ - INCREMENT_SIZE size :                                                                          0.1000
+ - Min. number of ksteps before calling lanczos  :                                                     3
+ - Maximum number of iteractions (basin -kter)   :                                                    40
+ - Maximum number of iteractions (activation)    :                                                    30
+ - Maximum number of perpendicular moves (basin) :                                                     6
+ - Number of steps for smoothing exit from basin  (SMOOTH_DIR_CHANGE):                                 3
+ - Maximum number of attempts to converge to a SADDLE point :                                         10
+ - Force threshold for perpendicular relaxation during generic search :                           0.0500
+ - Force threshold for perpendicular relaxation during refinement  :                              0.0100
+ - Factor mult. INCREMENT_SIZE for leaving basin :                                                3.0000
+ - Number of vectors computed by Lanzcos         :                                                    15
+ - Lanczos step (for numerical derivative)       :                                                0.0010
+ - Number of points for numerical derivative in Lanzcos  :                                             2
+  
+  
+                                                      Parameters for adding pressure
+                                                 ****************************************
+Adding pressure        :                                                                               F
+Max volume change      :                                                                          0.0010
+  
+  
+                                                      Parameters for adding shear stress
+                                                 ****************************************
+Adding shear             :                                                                             F
+Amount of shear          :                                                                        0.0000
+Plane of shear stress     :                                                                             
+Direction of shear stress :                                                                             
+ Apply shear to atom number :            0           0
+  
+  
+                                                      Parameters for additional minimization in LAMMPS
+                                                 ****************************************
+Stepsize for minimization :                                                                       0.0001
+Force tolerance           :                                                                       0.0005
+Max iterations in LAMMPS  :                                                                        10000
+Max evaluations in LAMMPS :                                                                       100000
+Write minimization log    :                                                                            F
+  
+  
+                                                      Input / Output files names
+                                                 ********************************* 
+ Name of log file :                                                                          KMC-log.dat
+ Reference kART configuration :                                                            init_xyz.conf
+ Reference lammps configuration :                                                              in.lammps
+  
+  
+ Write statistics about force and event calculation :                                                  T
+ File name for statistics about the selected events :                                       selec_ev.dat
+ File name for statistics about the GEN events :                                              Gen_ev.dat
+ File name for statistics about the SPEC events :                                            Spec_ev.dat
+ File name for statistics about the energy :                                                Energies.dat
+ Events storage directory :                                                                  MinBarr.dat
+ The file name used to store the squared displacement :                                    Diffusion.dat
+  
+ Prints the details of activation and minimization :                                                   T
+ File name for details about forces  :                                                    art_detail.dat
+ Local minima and saddle storage directory :                                                  MINSAD_DIR
+ File name of minima configurations store (default : min)  :                                         min
+ File name of saddle configurations store (default : sad)  :                                         sad
+ KPRINT (print details of leaving the basin)  :                                                        1
+ IPRINT (print details of the convergence to saddle)  :                                                2
+ MPRINT (print details of the minimization process)  :                                                50
+  
+ Create file with list of all the topologies and events after each KMC ste                             T
+ Events list per KMC step storage directory :                                                 EVLIST_DIR
+  
+ The name of the uft event file :                                                             events.uft
+ IF true, will create a directory containing event files (txt format) :                                T
+ Events storage directory :                                                                   EVENTS_DIR
+  
+ Topology storage directory :                                                                 Topologies
+ Input file contaning list of atomic types :                                                Atomic_types
+ Flicker  storage directory :                                                                   FLICKERS
+ Save full events :                                                                                    F
+ IF true, the program will read the txt event files and create a new uft f                             F
+ IF true, the program will read the uft file and copy the catalogue to txt                             F
+ IF true, write the initial-sad-FINAL conf in fmt used by lammps impl. of                              F
+ NEB files storage directory :                                                                   NEB_DIR
+ Simulation box size :                                                   21.4578     21.4578     21.4578
+ The number of smallest cell in a box :                                        3           3           3
+
+   #Elapsed Time    Total energy
+   #************    ************
+  0.00000000E+00  -3733.12807283

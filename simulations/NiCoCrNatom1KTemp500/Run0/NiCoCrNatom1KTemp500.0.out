@@ -1,0 +1,637 @@
+LAMMPS (27 May 2021)
+# ---------- Initialize Simulation ---------------------
+include ${INC}/initSoftWall.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/initSoftWall.mod
+# NOTE: This script can be modified for different atomic structures,
+# units, etc. See in.elastic for more info.
+#
+
+# Define the finite deformation size. Try several values of this
+# variable to verify that results do not depend on it.
+variable up equal 1.0e-6
+
+# Define the amount of random jiggle for atoms
+# This prevents atoms from staying on saddle points
+variable atomjiggle equal 1.0e-5
+
+# Uncomment one of these blocks, depending on what units
+# you are using in LAMMPS and for output
+
+# metal units, elastic constants in eV/A^3
+#units		metal
+#variable cfac equal 6.2414e-7
+#variable cunits string eV/A^3
+
+# metal units, elastic constants in GPa
+units		metal
+atom_style      atomic
+variable cfac equal 1.0e-4
+variable cunits string GPa
+
+# real units, elastic constants in GPa
+#units		real
+#variable cfac equal 1.01325e-4
+#variable cunits string GPa
+
+# Define minimization parameters
+variable etol equal 0.0
+variable ftol equal 1.0e-03
+variable maxiter equal 100000
+variable maxeval equal 100000
+variable dmax equal 1.0e-2
+
+#---
+boundary    	p p p
+#---
+
+#--- Need to set mass to something, just to satisfy LAMMPS
+#mass 1 1.0e-20
+
+#--- discretization time
+variable            dt        equal     0.005         # Time step
+
+#--- thermostat parameters
+variable            damp_t    equal     100*${dt}     # Thermostat damping
+variable            damp_t    equal     100*0.005     
+variable            damp_p    equal     1000*${dt}    # Barostat damping
+variable            damp_p    equal     1000*0.005    
+
+
+# ---------- Create Atoms ---------------------
+include ${INC}/CreateBox.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/CreateBox.mod
+#--- comment if the box and atoms are created below!
+if "${ParseData} == 1" then 	"read_data	${DataFile}" else 	"include ${INC}/CreateCrystal.mod"
+include ${INC}/CreateCrystal.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/CreateCrystal.mod
+#--- comment this block if atoms are parsed from a data file
+#--- Create box
+variable 	a      			equal   ${cutoff}   #--- lattice constant
+variable 	a      			equal   3.52   
+variable    volume          equal   ${natoms}*${a}^3.0/4.0 #--- natom * vol. of the voronoi cell
+variable    volume          equal   1000*${a}^3.0/4.0 
+variable    volume          equal   1000*3.52^3.0/4.0 
+variable    lx              equal   floor(${volume}^(1.0/3.0)/${a})
+variable    lx              equal   floor(10903.552^(1.0/3.0)/${a})
+variable    lx              equal   floor(10903.552^(1.0/3.0)/3.52)
+
+#--- define crystal structure and lattice constant a0
+#--- define direction vectors, i.e., set x=[100], y=[010], z=[001] and origin point.
+lattice    fcc ${a} orient    x 1 0 0 orient y 0 1 0 orient z 0 0 1            origin 0.1 0.1 0.1
+lattice    fcc 3.52 orient    x 1 0 0 orient y 0 1 0 orient z 0 0 1            origin 0.1 0.1 0.1
+Lattice spacing in x,y,z = 3.5200000 3.5200000 3.5200000
+region    		mybox block 0 ${lx} 0 ${lx} 0 ${lx}   ## define box sizes along x, y, z (in the unit of a0)
+region    		mybox block 0 6 0 ${lx} 0 ${lx}   
+region    		mybox block 0 6 0 6 0 ${lx}   
+region    		mybox block 0 6 0 6 0 6   
+create_box      3 mybox              ## create the simulation box, allowing a max of three species
+Created orthogonal box = (0.0000000 0.0000000 0.0000000) to (21.120000 21.120000 21.120000)
+  1 by 1 by 1 MPI processor grid
+create_atoms    1 box               ## create type-1 metal atoms in the box
+Created 864 atoms
+  create_atoms CPU = 0.001 seconds
+#
+
+#--- Need to set mass to something, just to satisfy LAMMPS
+mass    1  58.693    #--- Ni
+mass    2  58.933195 #--- Co
+mass    3  51.9961   #--- Cr
+
+
+#--- ternary alloys
+#--- get number of atoms
+variable	natom	equal	"atoms"
+variable	natom2	equal	floor(${natom}/3)
+variable	natom2	equal	floor(864/3)
+variable	natom3	equal	floor(${natom2})
+variable	natom3	equal	floor(288)
+#
+group kind1 type 1
+864 atoms in group kind1
+set group kind1 type/subset 2 ${natom2} 12345
+set group kind1 type/subset 2 288 12345
+Setting atom values ...
+  288 settings made for type/subset
+#
+group kind2 type 2
+288 atoms in group kind2
+group remain1 subtract all  kind2
+576 atoms in group remain1
+#
+set group remain1 type/subset 3 ${natom3} 74
+set group remain1 type/subset 3 288 74
+Setting atom values ...
+  288 settings made for type/subset
+group kind3 type 3
+288 atoms in group kind3
+#---- end of block
+
+
+#---
+#change_box	all	triclinic
+
+
+# -------------------------------- EAM Interatomic Potential ------------------------------------#
+include ${INC}/potential.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/potential.mod
+# NOTE: This script can be modified for different pair styles
+# See in.elastic for more info.
+
+# Choose potential
+pair_style	eam/alloy
+pair_coeff              * * ${PathEam}/NiCoCr.lammps.eam Ni Co Cr
+pair_coeff              * * /home/kamran.karimi1/Project/git/lammps2nd/lammps/potentials/NiCoCr.lammps.eam Ni Co Cr
+#
+#pair_style                eam
+#pair_coeff                * * ${PathEam}/Ni_u3.eam
+
+
+
+# Setup neighbor style
+neighbor 1.0 nsq
+neigh_modify once no every 1 delay 0 check yes
+
+# Setup minimization style
+min_style	     cg
+min_modify	     dmax ${dmax} line quadratic
+min_modify	     dmax 0.01 line quadratic
+
+# Setup output
+thermo		1000
+#thermo_style custom step temp pe press pxx pyy pzz pxy pxz pyz lx ly lz vol
+thermo_style custom step temp pe press pxy xy vol
+thermo_modify norm no
+
+#--- fix buffer zone
+include ${INC}/buffer.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/buffer.mod
+#--- define groups
+variable xxlo	equal xlo
+variable x0		equal ${xxlo}+${buff}
+variable x0		equal 0+${buff}
+variable x0		equal 0+0.0
+#
+variable xxhi	equal xhi
+variable x1		equal ${xxhi}-${buff}
+variable x1		equal 21.12-${buff}
+variable x1		equal 21.12-0.0
+#
+variable yylo	equal ylo
+variable y0	equal ${yylo}+${buff}
+variable y0	equal 0+${buff}
+variable y0	equal 0+0.0
+
+variable yyhi	equal yhi
+variable y1		equal ${yyhi}-${buff}
+variable y1		equal 21.12-${buff}
+variable y1		equal 21.12-0.0
+#
+region up block INF INF ${y1} INF INF INF
+region up block INF INF 21.12 INF INF INF
+region down block INF INF INF ${y0} INF INF
+region down block INF INF INF 0 INF INF
+#region right block ${x1} INF INF INF INF INF
+#region left block INF ${x0} INF INF INF INF
+group upp region up
+0 atoms in group upp
+group downn region down
+0 atoms in group downn
+#group lg region left
+#group rg region right
+#
+#--- fix walls
+#fix 1 upp setforce 0.0 0.0 0.0
+#fix 2 downn setforce 0.0 0.0 0.0
+#fix 11 lg setforce 0.0 0.0 0.0
+#fix 22 rg setforce 0.0 0.0 0.0
+#velocity upp set 0 0 0
+#velocity downn set 0 0 0
+#velocity lg set 0 0 0
+#velocity rg set 0 0 0
+
+
+
+# -------------------------------------- Minimization -------------------------------------------#
+
+
+#-----------------------------
+#--- compute & dump variables
+#-----------------------------
+compute     1 all stress/atom NULL pair
+dump        1 all custom ${nevery} ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./dumpMin.xyz id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump_modify 1 flush yes format line "%d %d %15.14e %15.14e %15.14e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e"
+#run	0
+#undump		1
+
+# -------------------------------------- Minimization -------------------------------------------#
+fix 3 all box/relax  iso 0.0
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} #--- initial state is already in equilibrium!
+minimize 0 ${ftol} ${maxiter} ${maxeval} 
+minimize 0 0.001 ${maxiter} ${maxeval} 
+minimize 0 0.001 100000 ${maxeval} 
+minimize 0 0.001 100000 100000 
+Neighbor list info ...
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 6.88
+  ghost atom cutoff = 6.88
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair eam/alloy, perpetual
+      attributes: half, newton on
+      pair build: half/nsq/newton
+      stencil: none
+      bin: none
+Setting up cg style minimization ...
+  Unit style    : metal
+  Current step  : 0
+WARNING: Energy due to 1 extra global DOFs will be included in minimizer energies
+Per MPI rank memory allocation (min/avg/max) = 7.345 | 7.345 | 7.345 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+       0            0   -3725.5447     69025.99    -471.1921            0    9420.6689 
+     588            0    -3734.996  0.012569711   -134.93337            0    9707.6337 
+Loop time of 3.83825 on 1 procs for 588 steps with 864 atoms
+
+99.5% CPU use with 1 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+     -3725.54473322477  -3734.99601770875  -3734.99601770884
+  Force two-norm initial, final = 1217.6249 0.00098172082
+  Force max component initial, final = 1217.6018 0.00022620682
+  Final line search alpha, max atom move = 0.025214982 5.7038009e-06
+  Iterations, force evaluations = 588 908
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 3.6968     | 3.6968     | 3.6968     |   0.0 | 96.32
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.02227    | 0.02227    | 0.02227    |   0.0 |  0.58
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0.1191     |            |       |  3.10
+
+Nlocal:        864.000 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:        3136.00 ave        3136 max        3136 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:        57888.0 ave       57888 max       57888 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 57888
+Ave neighs/atom = 67.000000
+Neighbor list builds = 0
+Dangerous builds = 0
+
+#-----------------------------
+#--- compute & dump variables
+#-----------------------------
+#dump        1 all custom ${nevery} ${OUT_PATH}/DumpFile.xyz id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+#dump_modify 1 flush yes append yes format line "%d %d %15.14e %15.14e %15.14e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e"
+
+write_data ${WriteData}
+write_data data_minimized.txt
+System init for write_data ...
+
+run	0
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 588
+  Time step     : 0.001
+Per MPI rank memory allocation (min/avg/max) = 6.220 | 6.220 | 6.220 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+     588            0    -3734.996  0.012569711   -134.93337            0    9707.6337 
+Loop time of 1.509e-06 on 1 procs for 0 steps with 864 atoms
+
+397.6% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1.509e-06  |            |       |100.00
+
+Nlocal:        864.000 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:        3136.00 ave        3136 max        3136 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:        57888.0 ave       57888 max       57888 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 57888
+Ave neighs/atom = 67.000000
+Neighbor list builds = 0
+Dangerous builds = 0
+Total wall time: 0:00:04
+LAMMPS (27 May 2021)
+# --------------------------------------- Atomic Setup ------------------------------------------#
+include ${INC}/initSoftWall.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/initSoftWall.mod
+# NOTE: This script can be modified for different atomic structures,
+# units, etc. See in.elastic for more info.
+#
+
+# Define the finite deformation size. Try several values of this
+# variable to verify that results do not depend on it.
+variable up equal 1.0e-6
+
+# Define the amount of random jiggle for atoms
+# This prevents atoms from staying on saddle points
+variable atomjiggle equal 1.0e-5
+
+# Uncomment one of these blocks, depending on what units
+# you are using in LAMMPS and for output
+
+# metal units, elastic constants in eV/A^3
+#units		metal
+#variable cfac equal 6.2414e-7
+#variable cunits string eV/A^3
+
+# metal units, elastic constants in GPa
+units		metal
+atom_style      atomic
+variable cfac equal 1.0e-4
+variable cunits string GPa
+
+# real units, elastic constants in GPa
+#units		real
+#variable cfac equal 1.01325e-4
+#variable cunits string GPa
+
+# Define minimization parameters
+variable etol equal 0.0
+variable ftol equal 1.0e-03
+variable maxiter equal 100000
+variable maxeval equal 100000
+variable dmax equal 1.0e-2
+
+#---
+boundary    	p p p
+#---
+
+#--- Need to set mass to something, just to satisfy LAMMPS
+#mass 1 1.0e-20
+
+#--- discretization time
+variable            dt        equal     0.005         # Time step
+
+#--- thermostat parameters
+variable            damp_t    equal     100*${dt}     # Thermostat damping
+variable            damp_t    equal     100*0.005     
+variable            damp_p    equal     1000*${dt}    # Barostat damping
+variable            damp_p    equal     1000*0.005    
+
+
+# ---------- Create Atoms ---------------------
+include ${INC}/CreateBox.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/CreateBox.mod
+#--- comment if the box and atoms are created below!
+if "${ParseData} == 1" then 	"read_data	${DataFile}" else 	"include ${INC}/CreateCrystal.mod"
+read_data	${DataFile}
+read_data	data_minimized.txt
+Reading data file ...
+  orthogonal box = (-0.10615274 -0.10615274 -0.10615274) to (21.226153 21.226153 21.226153)
+  1 by 1 by 1 MPI processor grid
+  reading atoms ...
+  864 atoms
+  reading velocities ...
+  864 velocities
+  read_data CPU = 0.008 seconds
+
+#---
+#change_box	all	triclinic
+
+
+# -------------------------------- EAM Interatomic Potential ------------------------------------#
+
+include ${INC}/potential.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/potential.mod
+# NOTE: This script can be modified for different pair styles
+# See in.elastic for more info.
+
+# Choose potential
+pair_style	eam/alloy
+pair_coeff              * * ${PathEam}/NiCoCr.lammps.eam Ni Co Cr
+pair_coeff              * * /home/kamran.karimi1/Project/git/lammps2nd/lammps/potentials/NiCoCr.lammps.eam Ni Co Cr
+#
+#pair_style                eam
+#pair_coeff                * * ${PathEam}/Ni_u3.eam
+
+
+
+# Setup neighbor style
+neighbor 1.0 nsq
+neigh_modify once no every 1 delay 0 check yes
+
+# Setup minimization style
+min_style	     cg
+min_modify	     dmax ${dmax} line quadratic
+min_modify	     dmax 0.01 line quadratic
+
+# Setup output
+thermo		1000
+#thermo_style custom step temp pe press pxx pyy pzz pxy pxz pyz lx ly lz vol
+thermo_style custom step temp pe press pxy xy vol
+thermo_modify norm no
+
+#--- fix buffer zone
+include ${INC}/buffer.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/buffer.mod
+#--- define groups
+variable xxlo	equal xlo
+variable x0		equal ${xxlo}+${buff}
+variable x0		equal -0.106152741287273+${buff}
+variable x0		equal -0.106152741287273+0.0
+#
+variable xxhi	equal xhi
+variable x1		equal ${xxhi}-${buff}
+variable x1		equal 21.2261527412871-${buff}
+variable x1		equal 21.2261527412871-0.0
+#
+variable yylo	equal ylo
+variable y0	equal ${yylo}+${buff}
+variable y0	equal -0.106152741287273+${buff}
+variable y0	equal -0.106152741287273+0.0
+
+variable yyhi	equal yhi
+variable y1		equal ${yyhi}-${buff}
+variable y1		equal 21.2261527412871-${buff}
+variable y1		equal 21.2261527412871-0.0
+#
+region up block INF INF ${y1} INF INF INF
+region up block INF INF 21.2261527412871 INF INF INF
+region down block INF INF INF ${y0} INF INF
+region down block INF INF INF -0.106152741287273 INF INF
+#region right block ${x1} INF INF INF INF INF
+#region left block INF ${x0} INF INF INF INF
+group upp region up
+0 atoms in group upp
+group downn region down
+0 atoms in group downn
+#group lg region left
+#group rg region right
+#
+#--- fix walls
+#fix 1 upp setforce 0.0 0.0 0.0
+#fix 2 downn setforce 0.0 0.0 0.0
+#fix 11 lg setforce 0.0 0.0 0.0
+#fix 22 rg setforce 0.0 0.0 0.0
+#velocity upp set 0 0 0
+#velocity downn set 0 0 0
+#velocity lg set 0 0 0
+#velocity rg set 0 0 0
+
+
+
+#--- thermalize two partial dislocations
+
+# -------------------------------------- General Variables --------------------------------------#
+variable                  t_eq      equal     100.0*${damp_t}         # Equlibration time
+variable                  t_eq      equal     100.0*0.5         
+variable 				  Nstep  	equal	floor(${t_eq}/${dt}) #--- timesteps
+variable 				  Nstep  	equal	floor(50/${dt}) 
+variable 				  Nstep  	equal	floor(50/0.005) 
+
+
+
+
+# ----------------------------------- NVT Equilibration -----------------------------------------#
+compute     1 all stress/atom NULL pair
+#--- initial stress
+run	0
+WARNING: No fixes defined, atoms won't move (../verlet.cpp:55)
+Neighbor list info ...
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 6.88
+  ghost atom cutoff = 6.88
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair eam/alloy, perpetual
+      attributes: half, newton on
+      pair build: half/nsq/newton
+      stencil: none
+      bin: none
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 0
+  Time step     : 0.001
+Per MPI rank memory allocation (min/avg/max) = 4.148 | 4.148 | 4.148 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+       0            0    -3734.996  0.012569711   -134.93337            0    9707.6337 
+Loop time of 2.033e-06 on 1 procs for 0 steps with 864 atoms
+
+196.8% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 2.033e-06  |            |       |100.00
+
+Nlocal:        864.000 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:        3136.00 ave        3136 max        3136 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:        57888.0 ave       57888 max       57888 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 57888
+Ave neighs/atom = 67.000000
+Neighbor list builds = 0
+Dangerous builds = 0
+variable tmp equal press
+variable p0 equal ${tmp}
+variable p0 equal 0.0125697109917278
+
+velocity                  all       create     $T     97364  mom    yes  rot  yes  dist  gaussian  # Dynamics starts
+velocity                  all       create     500.0     97364  mom    yes  rot  yes  dist  gaussian  
+
+#thermo                    100
+#thermo_style              custom    step temp etotal pe press vol
+fix                      f1        all        npt temp   $T  $T  ${damp_t}  iso ${p0} $P ${damp_p} drag	1.0 ##fixedpoint 0.0 0.0 0.0
+fix                      f1        all        npt temp   500.0  $T  ${damp_t}  iso ${p0} $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  ${damp_t}  iso ${p0} $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso ${p0} $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso 0.0125697109917278 $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso 0.0125697109917278 0.0 ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso 0.0125697109917278 0.0 5 drag	1.0 
+
+#-----------------------------
+#--- compute & dump variables
+#-----------------------------
+dump        1 all custom ${nevery} ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./dumpThermalized.xyz id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump_modify 1 flush yes format line "%d %d %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e"
+
+#dump                      mydump all custom ${nevery} equilibrium.dump id type x y z
+run                       ${Nstep}
+run                       10000
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 0
+  Time step     : 0.001
+Per MPI rank memory allocation (min/avg/max) = 6.220 | 6.220 | 6.220 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+       0          500    -3734.996    6136.9424   -360.57349            0    9707.6337 
+    1000    298.29015   -3702.7459    14142.093    88.556954            0    9746.3341 
+    2000    332.48224   -3695.6228    8717.4824    350.57239            0    9786.6282 
+    3000    388.16479    -3691.431    5573.2655    1018.6734            0    9817.8596 
+    4000    438.16079   -3687.9456    3699.9739    1652.5271            0    9844.9844 
+    5000    467.89987   -3684.0708    3347.3926   -735.46896            0    9858.0789 
+    6000    501.84195   -3682.8602    1831.1954    834.72265            0    9869.1487 
+    7000    503.59277   -3680.2813    360.42949   -736.99752            0    9873.1171 
+    8000     498.0192   -3678.6342    3893.7493    840.72316            0    9873.7177 
+    9000    490.50984   -3677.8392    2894.0069    932.21619            0    9876.1471 
+   10000    504.90665   -3679.5276     1036.804   -170.89788            0    9879.9698 
+Loop time of 43.215 on 1 procs for 10000 steps with 864 atoms
+
+Performance: 19.993 ns/day, 1.200 hours/ns, 231.401 timesteps/s
+99.5% CPU use with 1 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 39.804     | 39.804     | 39.804     |   0.0 | 92.11
+Neigh   | 2.3634     | 2.3634     | 2.3634     |   0.0 |  5.47
+Comm    | 0.25063    | 0.25063    | 0.25063    |   0.0 |  0.58
+Output  | 0.047162   | 0.047162   | 0.047162   |   0.0 |  0.11
+Modify  | 0.65085    | 0.65085    | 0.65085    |   0.0 |  1.51
+Other   |            | 0.09842    |            |       |  0.23
+
+Nlocal:        864.000 ave         864 max         864 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Nghost:        3042.00 ave        3042 max        3042 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+Neighs:        56103.0 ave       56103 max       56103 min
+Histogram: 1 0 0 0 0 0 0 0 0 0
+
+Total # of neighbors = 56103
+Ave neighs/atom = 64.934028
+Neighbor list builds = 143
+Dangerous builds = 0
+
+unfix                     f1
+reset_timestep            0
+# -------------------------------------- Write Data ----------------------------------------------#
+
+write_data                ${WriteData}
+write_data                Equilibrated_500.dat
+System init for write_data ...
+
+Total wall time: 0:00:43
+ ERROR, INPUT_LAMMPS_FILE with name in.lammps                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        is missing.
+ The program will stop

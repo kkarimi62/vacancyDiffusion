@@ -1,0 +1,1669 @@
+LAMMPS (27 May 2021)
+# ---------- Initialize Simulation ---------------------
+include ${INC}/initSoftWall.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/initSoftWall.mod
+# NOTE: This script can be modified for different atomic structures,
+# units, etc. See in.elastic for more info.
+#
+
+# Define the finite deformation size. Try several values of this
+# variable to verify that results do not depend on it.
+variable up equal 1.0e-6
+
+# Define the amount of random jiggle for atoms
+# This prevents atoms from staying on saddle points
+variable atomjiggle equal 1.0e-5
+
+# Uncomment one of these blocks, depending on what units
+# you are using in LAMMPS and for output
+
+# metal units, elastic constants in eV/A^3
+#units		metal
+#variable cfac equal 6.2414e-7
+#variable cunits string eV/A^3
+
+# metal units, elastic constants in GPa
+units		metal
+atom_style      atomic
+variable cfac equal 1.0e-4
+variable cunits string GPa
+
+# real units, elastic constants in GPa
+#units		real
+#variable cfac equal 1.01325e-4
+#variable cunits string GPa
+
+# Define minimization parameters
+variable etol equal 0.0
+variable ftol equal 1.0e-03
+variable maxiter equal 100000
+variable maxeval equal 100000
+variable dmax equal 1.0e-2
+
+#---
+boundary    	p p p
+#---
+
+#--- Need to set mass to something, just to satisfy LAMMPS
+#mass 1 1.0e-20
+
+#--- discretization time
+variable            dt        equal     0.005         # Time step
+
+#--- thermostat parameters
+variable            damp_t    equal     100*${dt}     # Thermostat damping
+variable            damp_t    equal     100*0.005     
+variable            damp_p    equal     1000*${dt}    # Barostat damping
+variable            damp_p    equal     1000*0.005    
+
+
+# ---------- Create Atoms ---------------------
+include ${INC}/CreateBox.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/CreateBox.mod
+#--- comment if the box and atoms are created below!
+if "${ParseData} == 1" then 	"read_data	${DataFile}" else 	"include ${INC}/CreateCrystal.mod"
+include ${INC}/CreateCrystal.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/CreateCrystal.mod
+#--- comment this block if atoms are parsed from a data file
+#--- Create box
+variable 	a      			equal   ${cutoff}   #--- lattice constant
+variable 	a      			equal   3.52   
+variable    volume          equal   ${natoms}*${a}^3.0/4.0 #--- natom * vol. of the voronoi cell
+variable    volume          equal   1000*${a}^3.0/4.0 
+variable    volume          equal   1000*3.52^3.0/4.0 
+variable    lx              equal   floor(${volume}^(1.0/3.0)/${a})
+variable    lx              equal   floor(10903.552^(1.0/3.0)/${a})
+variable    lx              equal   floor(10903.552^(1.0/3.0)/3.52)
+
+#--- define crystal structure and lattice constant a0
+#--- define direction vectors, i.e., set x=[100], y=[010], z=[001] and origin point.
+lattice    fcc ${a} orient    x 1 0 0 orient y 0 1 0 orient z 0 0 1            origin 0.1 0.1 0.1
+lattice    fcc 3.52 orient    x 1 0 0 orient y 0 1 0 orient z 0 0 1            origin 0.1 0.1 0.1
+Lattice spacing in x,y,z = 3.5200000 3.5200000 3.5200000
+region    		mybox block 0 ${lx} 0 ${lx} 0 ${lx}   ## define box sizes along x, y, z (in the unit of a0)
+region    		mybox block 0 6 0 ${lx} 0 ${lx}   
+region    		mybox block 0 6 0 6 0 ${lx}   
+region    		mybox block 0 6 0 6 0 6   
+create_box      3 mybox              ## create the simulation box, allowing a max of three species
+Created orthogonal box = (0.0000000 0.0000000 0.0000000) to (21.120000 21.120000 21.120000)
+  1 by 1 by 3 MPI processor grid
+create_atoms    1 box               ## create type-1 metal atoms in the box
+Created 864 atoms
+  create_atoms CPU = 0.001 seconds
+#
+
+#--- Need to set mass to something, just to satisfy LAMMPS
+mass    1  58.693    #--- Ni
+mass    2  58.933195 #--- Co
+mass    3  51.9961   #--- Cr
+
+
+#--- ternary alloys
+#--- get number of atoms
+variable	natom	equal	"atoms"
+variable	natom2	equal	floor(${natom}/3)
+variable	natom2	equal	floor(864/3)
+variable	natom3	equal	floor(${natom2})
+variable	natom3	equal	floor(288)
+#
+group kind1 type 1
+864 atoms in group kind1
+set group kind1 type/subset 2 ${natom2} 12345
+set group kind1 type/subset 2 288 12345
+Setting atom values ...
+  288 settings made for type/subset
+#
+group kind2 type 2
+288 atoms in group kind2
+group remain1 subtract all  kind2
+576 atoms in group remain1
+#
+set group remain1 type/subset 3 ${natom3} 74
+set group remain1 type/subset 3 288 74
+Setting atom values ...
+  288 settings made for type/subset
+group kind3 type 3
+288 atoms in group kind3
+#---- end of block
+
+
+#---
+#change_box	all	triclinic
+
+
+# -------------------------------- EAM Interatomic Potential ------------------------------------#
+include ${INC}/potential.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/potential.mod
+# NOTE: This script can be modified for different pair styles
+# See in.elastic for more info.
+
+# Choose potential
+pair_style	eam/alloy
+pair_coeff              * * ${PathEam}/NiCoCr.lammps.eam Ni Co Cr
+pair_coeff              * * /home/kamran.karimi1/Project/git/lammps2nd/lammps/potentials/NiCoCr.lammps.eam Ni Co Cr
+#
+#pair_style                eam
+#pair_coeff                * * ${PathEam}/Ni_u3.eam
+
+
+
+# Setup neighbor style
+neighbor 1.0 nsq
+neigh_modify once no every 1 delay 0 check yes
+
+# Setup minimization style
+min_style	     cg
+min_modify	     dmax ${dmax} line quadratic
+min_modify	     dmax 0.01 line quadratic
+
+# Setup output
+thermo		1000
+#thermo_style custom step temp pe press pxx pyy pzz pxy pxz pyz lx ly lz vol
+thermo_style custom step temp pe press pxy xy vol
+thermo_modify norm no
+
+#--- fix buffer zone
+include ${INC}/buffer.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/buffer.mod
+#--- define groups
+variable xxlo	equal xlo
+variable x0		equal ${xxlo}+${buff}
+variable x0		equal 0+${buff}
+variable x0		equal 0+0.0
+#
+variable xxhi	equal xhi
+variable x1		equal ${xxhi}-${buff}
+variable x1		equal 21.12-${buff}
+variable x1		equal 21.12-0.0
+#
+variable yylo	equal ylo
+variable y0	equal ${yylo}+${buff}
+variable y0	equal 0+${buff}
+variable y0	equal 0+0.0
+
+variable yyhi	equal yhi
+variable y1		equal ${yyhi}-${buff}
+variable y1		equal 21.12-${buff}
+variable y1		equal 21.12-0.0
+#
+region up block INF INF ${y1} INF INF INF
+region up block INF INF 21.12 INF INF INF
+region down block INF INF INF ${y0} INF INF
+region down block INF INF INF 0 INF INF
+#region right block ${x1} INF INF INF INF INF
+#region left block INF ${x0} INF INF INF INF
+group upp region up
+0 atoms in group upp
+group downn region down
+0 atoms in group downn
+#group lg region left
+#group rg region right
+#
+#--- fix walls
+#fix 1 upp setforce 0.0 0.0 0.0
+#fix 2 downn setforce 0.0 0.0 0.0
+#fix 11 lg setforce 0.0 0.0 0.0
+#fix 22 rg setforce 0.0 0.0 0.0
+#velocity upp set 0 0 0
+#velocity downn set 0 0 0
+#velocity lg set 0 0 0
+#velocity rg set 0 0 0
+
+
+
+# -------------------------------------- Minimization -------------------------------------------#
+
+
+#-----------------------------
+#--- compute & dump variables
+#-----------------------------
+compute     1 all stress/atom NULL pair
+dump        1 all custom ${nevery} ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./dumpMin.xyz id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump_modify 1 flush yes format line "%d %d %15.14e %15.14e %15.14e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e"
+#run	0
+#undump		1
+
+# -------------------------------------- Minimization -------------------------------------------#
+fix 3 all box/relax  iso 0.0
+minimize ${etol} ${ftol} ${maxiter} ${maxeval} #--- initial state is already in equilibrium!
+minimize 0 ${ftol} ${maxiter} ${maxeval} 
+minimize 0 0.001 ${maxiter} ${maxeval} 
+minimize 0 0.001 100000 ${maxeval} 
+minimize 0 0.001 100000 100000 
+Neighbor list info ...
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 6.88
+  ghost atom cutoff = 6.88
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair eam/alloy, perpetual
+      attributes: half, newton on
+      pair build: half/nsq/newton
+      stencil: none
+      bin: none
+Setting up cg style minimization ...
+  Unit style    : metal
+  Current step  : 0
+WARNING: Energy due to 1 extra global DOFs will be included in minimizer energies
+Per MPI rank memory allocation (min/avg/max) = 7.297 | 7.297 | 7.297 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+       0            0   -3722.5113    69631.831    447.55508            0    9420.6689 
+     706            0   -3732.1141  0.012229704    429.32771            0    9711.5208 
+Loop time of 1.75922 on 3 procs for 706 steps with 864 atoms
+
+95.6% CPU use with 3 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = force tolerance
+  Energy initial, next-to-last, final = 
+     -3722.51129191196  -3732.11414634137  -3732.11414634143
+  Force two-norm initial, final = 1228.3117 0.00089898827
+  Force max component initial, final = 1228.2887 0.00022014673
+  Final line search alpha, max atom move = 0.029431133 6.4791677e-06
+  Iterations, force evaluations = 706 1131
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 1.5773     | 1.5864     | 1.5919     |   0.5 | 90.17
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0.06625    | 0.071522   | 0.081282   |   2.6 |  4.07
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 0.1013     |            |       |  5.76
+
+Nlocal:        288.000 ave         288 max         288 min
+Histogram: 3 0 0 0 0 0 0 0 0 0
+Nghost:        2112.00 ave        2112 max        2112 min
+Histogram: 3 0 0 0 0 0 0 0 0 0
+Neighs:        19296.0 ave       19728 max       18864 min
+Histogram: 1 0 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 57888
+Ave neighs/atom = 67.000000
+Neighbor list builds = 0
+Dangerous builds = 0
+
+#-----------------------------
+#--- compute & dump variables
+#-----------------------------
+#dump        1 all custom ${nevery} ${OUT_PATH}/DumpFile.xyz id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+#dump_modify 1 flush yes append yes format line "%d %d %15.14e %15.14e %15.14e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e"
+
+write_data ${WriteData}
+write_data data_minimized.txt
+System init for write_data ...
+
+run	0
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 706
+  Time step     : 0.001
+Per MPI rank memory allocation (min/avg/max) = 6.172 | 6.172 | 6.172 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+     706            0   -3732.1141  0.012229704    429.32771            0    9711.5208 
+Loop time of 1.9757e-05 on 3 procs for 0 steps with 864 atoms
+
+101.2% CPU use with 3 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1.976e-05  |            |       |100.00
+
+Nlocal:        288.000 ave         288 max         288 min
+Histogram: 3 0 0 0 0 0 0 0 0 0
+Nghost:        2112.00 ave        2112 max        2112 min
+Histogram: 3 0 0 0 0 0 0 0 0 0
+Neighs:        19296.0 ave       19728 max       18864 min
+Histogram: 1 0 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 57888
+Ave neighs/atom = 67.000000
+Neighbor list builds = 0
+Dangerous builds = 0
+Total wall time: 0:00:01
+LAMMPS (27 May 2021)
+# --------------------------------------- Atomic Setup ------------------------------------------#
+include ${INC}/initSoftWall.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/initSoftWall.mod
+# NOTE: This script can be modified for different atomic structures,
+# units, etc. See in.elastic for more info.
+#
+
+# Define the finite deformation size. Try several values of this
+# variable to verify that results do not depend on it.
+variable up equal 1.0e-6
+
+# Define the amount of random jiggle for atoms
+# This prevents atoms from staying on saddle points
+variable atomjiggle equal 1.0e-5
+
+# Uncomment one of these blocks, depending on what units
+# you are using in LAMMPS and for output
+
+# metal units, elastic constants in eV/A^3
+#units		metal
+#variable cfac equal 6.2414e-7
+#variable cunits string eV/A^3
+
+# metal units, elastic constants in GPa
+units		metal
+atom_style      atomic
+variable cfac equal 1.0e-4
+variable cunits string GPa
+
+# real units, elastic constants in GPa
+#units		real
+#variable cfac equal 1.01325e-4
+#variable cunits string GPa
+
+# Define minimization parameters
+variable etol equal 0.0
+variable ftol equal 1.0e-03
+variable maxiter equal 100000
+variable maxeval equal 100000
+variable dmax equal 1.0e-2
+
+#---
+boundary    	p p p
+#---
+
+#--- Need to set mass to something, just to satisfy LAMMPS
+#mass 1 1.0e-20
+
+#--- discretization time
+variable            dt        equal     0.005         # Time step
+
+#--- thermostat parameters
+variable            damp_t    equal     100*${dt}     # Thermostat damping
+variable            damp_t    equal     100*0.005     
+variable            damp_p    equal     1000*${dt}    # Barostat damping
+variable            damp_p    equal     1000*0.005    
+
+
+# ---------- Create Atoms ---------------------
+include ${INC}/CreateBox.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/CreateBox.mod
+#--- comment if the box and atoms are created below!
+if "${ParseData} == 1" then 	"read_data	${DataFile}" else 	"include ${INC}/CreateCrystal.mod"
+read_data	${DataFile}
+read_data	data_minimized.txt
+Reading data file ...
+  orthogonal box = (-0.10757617 -0.10757617 -0.10757617) to (21.227576 21.227576 21.227576)
+  1 by 1 by 3 MPI processor grid
+  reading atoms ...
+  864 atoms
+  reading velocities ...
+  864 velocities
+  read_data CPU = 0.008 seconds
+
+#---
+#change_box	all	triclinic
+
+
+# -------------------------------- EAM Interatomic Potential ------------------------------------#
+
+include ${INC}/potential.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/potential.mod
+# NOTE: This script can be modified for different pair styles
+# See in.elastic for more info.
+
+# Choose potential
+pair_style	eam/alloy
+pair_coeff              * * ${PathEam}/NiCoCr.lammps.eam Ni Co Cr
+pair_coeff              * * /home/kamran.karimi1/Project/git/lammps2nd/lammps/potentials/NiCoCr.lammps.eam Ni Co Cr
+#
+#pair_style                eam
+#pair_coeff                * * ${PathEam}/Ni_u3.eam
+
+
+
+# Setup neighbor style
+neighbor 1.0 nsq
+neigh_modify once no every 1 delay 0 check yes
+
+# Setup minimization style
+min_style	     cg
+min_modify	     dmax ${dmax} line quadratic
+min_modify	     dmax 0.01 line quadratic
+
+# Setup output
+thermo		1000
+#thermo_style custom step temp pe press pxx pyy pzz pxy pxz pyz lx ly lz vol
+thermo_style custom step temp pe press pxy xy vol
+thermo_modify norm no
+
+#--- fix buffer zone
+include ${INC}/buffer.mod
+include /home/kamran.karimi1/Project/git/vacancyDiffusion/simulations/lmpScripts/buffer.mod
+#--- define groups
+variable xxlo	equal xlo
+variable x0		equal ${xxlo}+${buff}
+variable x0		equal -0.107576167682072+${buff}
+variable x0		equal -0.107576167682072+0.0
+#
+variable xxhi	equal xhi
+variable x1		equal ${xxhi}-${buff}
+variable x1		equal 21.2275761676819-${buff}
+variable x1		equal 21.2275761676819-0.0
+#
+variable yylo	equal ylo
+variable y0	equal ${yylo}+${buff}
+variable y0	equal -0.107576167682072+${buff}
+variable y0	equal -0.107576167682072+0.0
+
+variable yyhi	equal yhi
+variable y1		equal ${yyhi}-${buff}
+variable y1		equal 21.2275761676819-${buff}
+variable y1		equal 21.2275761676819-0.0
+#
+region up block INF INF ${y1} INF INF INF
+region up block INF INF 21.2275761676819 INF INF INF
+region down block INF INF INF ${y0} INF INF
+region down block INF INF INF -0.107576167682072 INF INF
+#region right block ${x1} INF INF INF INF INF
+#region left block INF ${x0} INF INF INF INF
+group upp region up
+0 atoms in group upp
+group downn region down
+0 atoms in group downn
+#group lg region left
+#group rg region right
+#
+#--- fix walls
+#fix 1 upp setforce 0.0 0.0 0.0
+#fix 2 downn setforce 0.0 0.0 0.0
+#fix 11 lg setforce 0.0 0.0 0.0
+#fix 22 rg setforce 0.0 0.0 0.0
+#velocity upp set 0 0 0
+#velocity downn set 0 0 0
+#velocity lg set 0 0 0
+#velocity rg set 0 0 0
+
+
+
+#--- thermalize two partial dislocations
+
+# -------------------------------------- General Variables --------------------------------------#
+variable                  t_eq      equal     100.0*${damp_t}         # Equlibration time
+variable                  t_eq      equal     100.0*0.5         
+variable 				  Nstep  	equal	floor(${t_eq}/${dt}) #--- timesteps
+variable 				  Nstep  	equal	floor(50/${dt}) 
+variable 				  Nstep  	equal	floor(50/0.005) 
+
+
+
+
+# ----------------------------------- NVT Equilibration -----------------------------------------#
+compute     1 all stress/atom NULL pair
+#--- initial stress
+run	0
+WARNING: No fixes defined, atoms won't move (../verlet.cpp:55)
+Neighbor list info ...
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 6.88
+  ghost atom cutoff = 6.88
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair eam/alloy, perpetual
+      attributes: half, newton on
+      pair build: half/nsq/newton
+      stencil: none
+      bin: none
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 0
+  Time step     : 0.001
+Per MPI rank memory allocation (min/avg/max) = 4.148 | 4.148 | 4.148 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+       0            0   -3732.1141  0.012229704    429.32771            0    9711.5208 
+Loop time of 1.783e-05 on 3 procs for 0 steps with 864 atoms
+
+59.8% CPU use with 3 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0          | 0          | 0          |   0.0 |  0.00
+Neigh   | 0          | 0          | 0          |   0.0 |  0.00
+Comm    | 0          | 0          | 0          |   0.0 |  0.00
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0          | 0          | 0          |   0.0 |  0.00
+Other   |            | 1.783e-05  |            |       |100.00
+
+Nlocal:        288.000 ave         288 max         288 min
+Histogram: 3 0 0 0 0 0 0 0 0 0
+Nghost:        2112.00 ave        2112 max        2112 min
+Histogram: 3 0 0 0 0 0 0 0 0 0
+Neighs:        19296.0 ave       19728 max       18864 min
+Histogram: 1 0 0 0 0 1 0 0 0 1
+
+Total # of neighbors = 57888
+Ave neighs/atom = 67.000000
+Neighbor list builds = 0
+Dangerous builds = 0
+variable tmp equal press
+variable p0 equal ${tmp}
+variable p0 equal 0.0122297038010601
+
+velocity                  all       create     $T     97364  mom    yes  rot  yes  dist  gaussian  # Dynamics starts
+velocity                  all       create     500.0     97364  mom    yes  rot  yes  dist  gaussian  
+
+#thermo                    100
+#thermo_style              custom    step temp etotal pe press vol
+fix                      f1        all        npt temp   $T  $T  ${damp_t}  iso ${p0} $P ${damp_p} drag	1.0 ##fixedpoint 0.0 0.0 0.0
+fix                      f1        all        npt temp   500.0  $T  ${damp_t}  iso ${p0} $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  ${damp_t}  iso ${p0} $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso ${p0} $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso 0.0122297038010601 $P ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso 0.0122297038010601 0.0 ${damp_p} drag	1.0 
+fix                      f1        all        npt temp   500.0  500.0  0.5  iso 0.0122297038010601 0.0 5 drag	1.0 
+
+#-----------------------------
+#--- compute & dump variables
+#-----------------------------
+dump        1 all custom ${nevery} ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump        1 all custom 1000 ./dumpThermalized.xyz id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
+dump_modify 1 flush yes format line "%d %d %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e"
+
+#dump                      mydump all custom ${nevery} equilibrium.dump id type x y z
+run                       ${Nstep}
+run                       10000
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 0
+  Time step     : 0.001
+Per MPI rank memory allocation (min/avg/max) = 6.172 | 6.172 | 6.172 Mbytes
+Step Temp PotEng Press Pxy Xy Volume 
+       0          500   -3732.1141    6134.4857    203.45132            0    9711.5208 
+    1000    295.12851   -3699.4943    13928.805    1272.8958            0    9749.1947 
+    2000    344.26718   -3694.0264    8930.9431    1314.3418            0    9789.2098 
+    3000    380.01884   -3687.6134    6033.3975    1039.9103            0    9819.6633 
+    4000    430.57037   -3684.1947    4594.5439     1342.958            0    9846.7657 
+    5000    455.82504   -3679.8604    3048.7633    -1482.412            0    9862.1144 
+    6000    479.39349   -3677.4632    3745.5703   -321.26973            0    9872.4876 
+    7000    483.97462   -3675.2264    929.52299    1077.9326            0    9882.6601 
+    8000    492.66991   -3675.2708   -78.388736    1049.9069            0    9888.1914 
+    9000     522.7606   -3678.5884   -908.37411   -247.64036            0    9891.6262 
+   10000    485.80049   -3674.5153    2098.4352   -497.40773            0    9890.4616 
+Loop time of 14.9838 on 3 procs for 10000 steps with 864 atoms
+
+Performance: 57.662 ns/day, 0.416 hours/ns, 667.387 timesteps/s
+95.9% CPU use with 3 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 13.235     | 13.299     | 13.404     |   2.1 | 88.75
+Neigh   | 0.51892    | 0.54692    | 0.57437    |   3.1 |  3.65
+Comm    | 0.55424    | 0.68377    | 0.75038    |  11.1 |  4.56
+Output  | 0.017      | 0.017043   | 0.017128   |   0.0 |  0.11
+Modify  | 0.34277    | 0.34838    | 0.35483    |   0.8 |  2.33
+Other   |            | 0.08908    |            |       |  0.59
+
+Nlocal:        288.000 ave         288 max         288 min
+Histogram: 3 0 0 0 0 0 0 0 0 0
+Nghost:        2030.67 ave        2042 max        2024 min
+Histogram: 1 1 0 0 0 0 0 0 0 1
+Neighs:        18642.3 ave       18994 max       18338 min
+Histogram: 1 0 0 1 0 0 0 0 0 1
+
+Total # of neighbors = 55927
+Ave neighs/atom = 64.730324
+Neighbor list builds = 160
+Dangerous builds = 0
+
+unfix                     f1
+reset_timestep            0
+# -------------------------------------- Write Data ----------------------------------------------#
+
+write_data                ${WriteData}
+write_data                Equilibrated_500.dat
+System init for write_data ...
+
+Total wall time: 0:00:15
+ we are in the single parallelization version 
+
+ The lastest version of kART is available through gitlab repository
+ to which access can be obtained by contacting Professor & Normand Mousseau at
+ "normand.mousseau@umontreal.ca".
+
+Master rank exits read_param function in     0.55E-03 seconds
+First minimization was done in     0.70E+01 seconds
+Initialisation of kART took :    0.70E+01 seconds
+ worker (           1 ) started worker loop with rank number (            1  )
+ worker (           2 ) started worker loop with rank number (            2  )
+ atom_label           1 crystalline:  F
+ atom_label           2 crystalline:  F
+ atom_label           3 crystalline:  F
+ atom_label           4 crystalline:  F
+ atom_label           5 crystalline:  F
+ atom_label           6 crystalline:  F
+ atom_label           7 crystalline:  F
+ atom_label           8 crystalline:  F
+ atom_label           9 crystalline:  F
+ atom_label          10 crystalline:  F
+ atom_label          11 crystalline:  F
+ atom_label          12 crystalline:  F
+ atom_label          13 crystalline:  F
+ atom_label          14 crystalline:  F
+ atom_label          15 crystalline:  F
+ atom_label          16 crystalline:  F
+ atom_label          17 crystalline:  F
+ atom_label          18 crystalline:  F
+ atom_label          19 crystalline:  F
+ atom_label          20 crystalline:  F
+ atom_label          21 crystalline:  F
+ atom_label          22 crystalline:  F
+ atom_label          23 crystalline:  F
+ atom_label          24 crystalline:  F
+ atom_label          25 crystalline:  F
+ atom_label          26 crystalline:  F
+ atom_label          27 crystalline:  F
+ atom_label          28 crystalline:  F
+ atom_label          29 crystalline:  F
+ atom_label          30 crystalline:  F
+ atom_label          31 crystalline:  F
+ atom_label          32 crystalline:  F
+ atom_label          33 crystalline:  F
+ atom_label          34 crystalline:  F
+ atom_label          35 crystalline:  F
+ atom_label          36 crystalline:  F
+ atom_label          37 crystalline:  F
+ atom_label          38 crystalline:  F
+ atom_label          39 crystalline:  F
+ atom_label          40 crystalline:  F
+ atom_label          41 crystalline:  F
+ atom_label          42 crystalline:  F
+ atom_label          43 crystalline:  F
+ atom_label          44 crystalline:  F
+ atom_label          45 crystalline:  F
+ atom_label          46 crystalline:  F
+ atom_label          47 crystalline:  F
+ atom_label          48 crystalline:  F
+ atom_label          49 crystalline:  F
+ atom_label          50 crystalline:  F
+ atom_label          51 crystalline:  F
+ atom_label          52 crystalline:  F
+ atom_label          53 crystalline:  F
+ atom_label          54 crystalline:  F
+ atom_label          55 crystalline:  F
+ atom_label          56 crystalline:  F
+ atom_label          57 crystalline:  F
+ atom_label          58 crystalline:  F
+ atom_label          59 crystalline:  F
+ atom_label          60 crystalline:  F
+ atom_label          61 crystalline:  F
+ atom_label          62 crystalline:  F
+ atom_label          63 crystalline:  F
+ atom_label          64 crystalline:  F
+ atom_label          65 crystalline:  F
+ atom_label          66 crystalline:  F
+ atom_label          67 crystalline:  F
+ atom_label          68 crystalline:  F
+ atom_label          69 crystalline:  F
+ atom_label          70 crystalline:  F
+ atom_label          71 crystalline:  F
+ atom_label          72 crystalline:  F
+ atom_label          73 crystalline:  F
+ atom_label          74 crystalline:  F
+ atom_label          75 crystalline:  F
+ atom_label          76 crystalline:  F
+ atom_label          77 crystalline:  F
+ atom_label          78 crystalline:  F
+ atom_label          79 crystalline:  F
+ atom_label          80 crystalline:  F
+ atom_label          81 crystalline:  F
+ atom_label          82 crystalline:  F
+ atom_label          83 crystalline:  F
+ atom_label          84 crystalline:  F
+ atom_label          85 crystalline:  F
+ atom_label          86 crystalline:  F
+ atom_label          87 crystalline:  F
+ atom_label          88 crystalline:  F
+ atom_label          89 crystalline:  F
+ atom_label          90 crystalline:  F
+ atom_label          91 crystalline:  F
+ atom_label          92 crystalline:  F
+ atom_label          93 crystalline:  F
+ atom_label          94 crystalline:  F
+ atom_label          95 crystalline:  F
+ atom_label          96 crystalline:  F
+ atom_label          97 crystalline:  F
+ atom_label          98 crystalline:  F
+ atom_label          99 crystalline:  F
+ atom_label         100 crystalline:  F
+ atom_label         101 crystalline:  F
+ atom_label         102 crystalline:  F
+ atom_label         103 crystalline:  F
+ atom_label         104 crystalline:  F
+ atom_label         105 crystalline:  F
+ atom_label         106 crystalline:  F
+ atom_label         107 crystalline:  F
+ atom_label         108 crystalline:  F
+ atom_label         109 crystalline:  F
+ atom_label         110 crystalline:  F
+ atom_label         111 crystalline:  F
+ atom_label         112 crystalline:  F
+ atom_label         113 crystalline:  F
+ atom_label         114 crystalline:  F
+ atom_label         115 crystalline:  F
+ atom_label         116 crystalline:  F
+ atom_label         117 crystalline:  F
+ atom_label         118 crystalline:  F
+ atom_label         119 crystalline:  F
+ atom_label         120 crystalline:  F
+ atom_label         121 crystalline:  F
+ atom_label         122 crystalline:  F
+ atom_label         123 crystalline:  F
+ atom_label         124 crystalline:  F
+ atom_label         125 crystalline:  F
+ atom_label         126 crystalline:  F
+ atom_label         127 crystalline:  F
+ atom_label         128 crystalline:  F
+ atom_label         129 crystalline:  F
+ atom_label         130 crystalline:  F
+ atom_label         131 crystalline:  F
+ atom_label         132 crystalline:  F
+ atom_label         133 crystalline:  F
+ atom_label         134 crystalline:  F
+ atom_label         135 crystalline:  F
+ atom_label         136 crystalline:  F
+ atom_label         137 crystalline:  F
+ atom_label         138 crystalline:  F
+ atom_label         139 crystalline:  F
+ atom_label         140 crystalline:  F
+ atom_label         141 crystalline:  F
+ atom_label         142 crystalline:  F
+ atom_label         143 crystalline:  F
+ atom_label         144 crystalline:  F
+ atom_label         145 crystalline:  F
+ atom_label         146 crystalline:  F
+ atom_label         147 crystalline:  F
+ atom_label         148 crystalline:  F
+ atom_label         149 crystalline:  F
+ atom_label         150 crystalline:  F
+ atom_label         151 crystalline:  F
+ atom_label         152 crystalline:  F
+ atom_label         153 crystalline:  F
+ atom_label         154 crystalline:  F
+ atom_label         155 crystalline:  F
+ atom_label         156 crystalline:  F
+ atom_label         157 crystalline:  F
+ atom_label         158 crystalline:  F
+ atom_label         159 crystalline:  F
+ atom_label         160 crystalline:  F
+ atom_label         161 crystalline:  F
+ atom_label         162 crystalline:  F
+ atom_label         163 crystalline:  F
+ atom_label         164 crystalline:  F
+ atom_label         165 crystalline:  F
+ atom_label         166 crystalline:  F
+ atom_label         167 crystalline:  F
+ atom_label         168 crystalline:  F
+ atom_label         169 crystalline:  F
+ atom_label         170 crystalline:  F
+ atom_label         171 crystalline:  F
+ atom_label         172 crystalline:  F
+ atom_label         173 crystalline:  F
+ atom_label         174 crystalline:  F
+ atom_label         175 crystalline:  F
+ atom_label         176 crystalline:  F
+ atom_label         177 crystalline:  F
+ atom_label         178 crystalline:  F
+ atom_label         179 crystalline:  F
+ atom_label         180 crystalline:  F
+ atom_label         181 crystalline:  F
+ atom_label         182 crystalline:  F
+ atom_label         183 crystalline:  F
+ atom_label         184 crystalline:  F
+ atom_label         185 crystalline:  F
+ atom_label         186 crystalline:  F
+ atom_label         187 crystalline:  F
+ atom_label         188 crystalline:  F
+ atom_label         189 crystalline:  F
+ atom_label         190 crystalline:  F
+ atom_label         191 crystalline:  F
+ atom_label         192 crystalline:  F
+ atom_label         193 crystalline:  F
+ atom_label         194 crystalline:  F
+ atom_label         195 crystalline:  F
+ atom_label         196 crystalline:  F
+ atom_label         197 crystalline:  F
+ atom_label         198 crystalline:  F
+ atom_label         199 crystalline:  F
+ atom_label         200 crystalline:  F
+ atom_label         201 crystalline:  F
+ atom_label         202 crystalline:  F
+ atom_label         203 crystalline:  F
+ atom_label         204 crystalline:  F
+ atom_label         205 crystalline:  F
+ atom_label         206 crystalline:  F
+ atom_label         207 crystalline:  F
+ atom_label         208 crystalline:  F
+ atom_label         209 crystalline:  F
+ atom_label         210 crystalline:  F
+ atom_label         211 crystalline:  F
+ atom_label         212 crystalline:  F
+ atom_label         213 crystalline:  F
+ atom_label         214 crystalline:  F
+ atom_label         215 crystalline:  F
+ atom_label         216 crystalline:  F
+ atom_label         217 crystalline:  F
+ atom_label         218 crystalline:  F
+ atom_label         219 crystalline:  F
+ atom_label         220 crystalline:  F
+ atom_label         221 crystalline:  F
+ atom_label         222 crystalline:  F
+ atom_label         223 crystalline:  F
+ atom_label         224 crystalline:  F
+ atom_label         225 crystalline:  F
+ atom_label         226 crystalline:  F
+ atom_label         227 crystalline:  F
+ atom_label         228 crystalline:  F
+ atom_label         229 crystalline:  F
+ atom_label         230 crystalline:  F
+ atom_label         231 crystalline:  F
+ atom_label         232 crystalline:  F
+ atom_label         233 crystalline:  F
+ atom_label         234 crystalline:  F
+ atom_label         235 crystalline:  F
+ atom_label         236 crystalline:  F
+ atom_label         237 crystalline:  F
+ atom_label         238 crystalline:  F
+ atom_label         239 crystalline:  F
+ atom_label         240 crystalline:  F
+ atom_label         241 crystalline:  F
+ atom_label         242 crystalline:  F
+ atom_label         243 crystalline:  F
+ atom_label         244 crystalline:  F
+ atom_label         245 crystalline:  F
+ atom_label         246 crystalline:  F
+ atom_label         247 crystalline:  F
+ atom_label         248 crystalline:  F
+ atom_label         249 crystalline:  F
+ atom_label         250 crystalline:  F
+ atom_label         251 crystalline:  F
+ atom_label         252 crystalline:  F
+ atom_label         253 crystalline:  F
+ atom_label         254 crystalline:  F
+ atom_label         255 crystalline:  F
+ atom_label         256 crystalline:  F
+ atom_label         257 crystalline:  F
+ atom_label         258 crystalline:  F
+ atom_label         259 crystalline:  F
+ atom_label         260 crystalline:  F
+ atom_label         261 crystalline:  F
+ atom_label         262 crystalline:  F
+ atom_label         263 crystalline:  F
+ atom_label         264 crystalline:  F
+ atom_label         265 crystalline:  F
+ atom_label         266 crystalline:  F
+ atom_label         267 crystalline:  F
+ atom_label         268 crystalline:  F
+ atom_label         269 crystalline:  F
+ atom_label         270 crystalline:  F
+ atom_label         271 crystalline:  F
+ atom_label         272 crystalline:  F
+ atom_label         273 crystalline:  F
+ atom_label         274 crystalline:  F
+ atom_label         275 crystalline:  F
+ atom_label         276 crystalline:  F
+ atom_label         277 crystalline:  F
+ atom_label         278 crystalline:  F
+ atom_label         279 crystalline:  F
+ atom_label         280 crystalline:  F
+ atom_label         281 crystalline:  F
+ atom_label         282 crystalline:  F
+ atom_label         283 crystalline:  F
+ atom_label         284 crystalline:  F
+ atom_label         285 crystalline:  F
+ atom_label         286 crystalline:  F
+ atom_label         287 crystalline:  F
+ atom_label         288 crystalline:  F
+ atom_label         289 crystalline:  F
+ atom_label         290 crystalline:  F
+ atom_label         291 crystalline:  F
+ atom_label         292 crystalline:  F
+ atom_label         293 crystalline:  F
+ atom_label         294 crystalline:  F
+ atom_label         295 crystalline:  F
+ atom_label         296 crystalline:  F
+ atom_label         297 crystalline:  F
+ atom_label         298 crystalline:  F
+ atom_label         299 crystalline:  F
+ atom_label         300 crystalline:  F
+ atom_label         301 crystalline:  F
+ atom_label         302 crystalline:  F
+ atom_label         303 crystalline:  F
+ atom_label         304 crystalline:  F
+ atom_label         305 crystalline:  F
+ atom_label         306 crystalline:  F
+ atom_label         307 crystalline:  F
+ atom_label         308 crystalline:  F
+ atom_label         309 crystalline:  F
+ atom_label         310 crystalline:  F
+ atom_label         311 crystalline:  F
+ atom_label         312 crystalline:  F
+ atom_label         313 crystalline:  F
+ atom_label         314 crystalline:  F
+ atom_label         315 crystalline:  F
+ atom_label         316 crystalline:  F
+ atom_label         317 crystalline:  F
+ atom_label         318 crystalline:  F
+ atom_label         319 crystalline:  F
+ atom_label         320 crystalline:  F
+ atom_label         321 crystalline:  F
+ atom_label         322 crystalline:  F
+ atom_label         323 crystalline:  F
+ atom_label         324 crystalline:  F
+ atom_label         325 crystalline:  F
+ atom_label         326 crystalline:  F
+ atom_label         327 crystalline:  F
+ atom_label         328 crystalline:  F
+ atom_label         329 crystalline:  F
+ atom_label         330 crystalline:  F
+ atom_label         331 crystalline:  F
+ atom_label         332 crystalline:  F
+ atom_label         333 crystalline:  F
+ atom_label         334 crystalline:  F
+ atom_label         335 crystalline:  F
+ atom_label         336 crystalline:  F
+ atom_label         337 crystalline:  F
+ atom_label         338 crystalline:  F
+ atom_label         339 crystalline:  F
+ atom_label         340 crystalline:  F
+ atom_label         341 crystalline:  F
+ atom_label         342 crystalline:  F
+ atom_label         343 crystalline:  F
+ atom_label         344 crystalline:  F
+ atom_label         345 crystalline:  F
+ atom_label         346 crystalline:  F
+ atom_label         347 crystalline:  F
+ atom_label         348 crystalline:  F
+ atom_label         349 crystalline:  F
+ atom_label         350 crystalline:  F
+ atom_label         351 crystalline:  F
+ atom_label         352 crystalline:  F
+ atom_label         353 crystalline:  F
+ atom_label         354 crystalline:  F
+ atom_label         355 crystalline:  F
+ atom_label         356 crystalline:  F
+ atom_label         357 crystalline:  F
+ atom_label         358 crystalline:  F
+ atom_label         359 crystalline:  F
+ atom_label         360 crystalline:  F
+ atom_label         361 crystalline:  F
+ atom_label         362 crystalline:  F
+ atom_label         363 crystalline:  F
+ atom_label         364 crystalline:  F
+ atom_label         365 crystalline:  F
+ atom_label         366 crystalline:  F
+ atom_label         367 crystalline:  F
+ atom_label         368 crystalline:  F
+ atom_label         369 crystalline:  F
+ atom_label         370 crystalline:  F
+ atom_label         371 crystalline:  F
+ atom_label         372 crystalline:  F
+ atom_label         373 crystalline:  F
+ atom_label         374 crystalline:  F
+ atom_label         375 crystalline:  F
+ atom_label         376 crystalline:  F
+ atom_label         377 crystalline:  F
+ atom_label         378 crystalline:  F
+ atom_label         379 crystalline:  F
+ atom_label         380 crystalline:  F
+ atom_label         381 crystalline:  F
+ atom_label         382 crystalline:  F
+ atom_label         383 crystalline:  F
+ atom_label         384 crystalline:  F
+ atom_label         385 crystalline:  F
+ atom_label         386 crystalline:  F
+ atom_label         387 crystalline:  F
+ atom_label         388 crystalline:  F
+ atom_label         389 crystalline:  F
+ atom_label         390 crystalline:  F
+ atom_label         391 crystalline:  F
+ atom_label         392 crystalline:  F
+ atom_label         393 crystalline:  F
+ atom_label         394 crystalline:  F
+ atom_label         395 crystalline:  F
+ atom_label         396 crystalline:  F
+ atom_label         397 crystalline:  F
+ atom_label         398 crystalline:  F
+ atom_label         399 crystalline:  F
+ atom_label         400 crystalline:  F
+ atom_label         401 crystalline:  F
+ atom_label         402 crystalline:  F
+ atom_label         403 crystalline:  F
+ atom_label         404 crystalline:  F
+ atom_label         405 crystalline:  F
+ atom_label         406 crystalline:  F
+ atom_label         407 crystalline:  F
+ atom_label         408 crystalline:  F
+ atom_label         409 crystalline:  F
+ atom_label         410 crystalline:  F
+ atom_label         411 crystalline:  F
+ atom_label         412 crystalline:  F
+ atom_label         413 crystalline:  F
+ atom_label         414 crystalline:  F
+ atom_label         415 crystalline:  F
+ atom_label         416 crystalline:  F
+ atom_label         417 crystalline:  F
+ atom_label         418 crystalline:  F
+ atom_label         419 crystalline:  F
+ atom_label         420 crystalline:  F
+ atom_label         421 crystalline:  F
+ atom_label         422 crystalline:  F
+ atom_label         423 crystalline:  F
+ atom_label         424 crystalline:  F
+ atom_label         425 crystalline:  F
+ atom_label         426 crystalline:  F
+ atom_label         427 crystalline:  F
+ atom_label         428 crystalline:  F
+ atom_label         429 crystalline:  F
+ atom_label         430 crystalline:  F
+ atom_label         431 crystalline:  F
+ atom_label         432 crystalline:  F
+ atom_label         433 crystalline:  F
+ atom_label         434 crystalline:  F
+ atom_label         435 crystalline:  F
+ atom_label         436 crystalline:  F
+ atom_label         437 crystalline:  F
+ atom_label         438 crystalline:  F
+ atom_label         439 crystalline:  F
+ atom_label         440 crystalline:  F
+ atom_label         441 crystalline:  F
+ atom_label         442 crystalline:  F
+ atom_label         443 crystalline:  F
+ atom_label         444 crystalline:  F
+ atom_label         445 crystalline:  F
+ atom_label         446 crystalline:  F
+ atom_label         447 crystalline:  F
+ atom_label         448 crystalline:  F
+ atom_label         449 crystalline:  F
+ atom_label         450 crystalline:  F
+ atom_label         451 crystalline:  F
+ atom_label         452 crystalline:  F
+ atom_label         453 crystalline:  F
+ atom_label         454 crystalline:  F
+ atom_label         455 crystalline:  F
+ atom_label         456 crystalline:  F
+ atom_label         457 crystalline:  F
+ atom_label         458 crystalline:  F
+ atom_label         459 crystalline:  F
+ atom_label         460 crystalline:  F
+ atom_label         461 crystalline:  F
+ atom_label         462 crystalline:  F
+ atom_label         463 crystalline:  F
+ atom_label         464 crystalline:  F
+ atom_label         465 crystalline:  F
+ atom_label         466 crystalline:  F
+ atom_label         467 crystalline:  F
+ atom_label         468 crystalline:  F
+ atom_label         469 crystalline:  F
+ atom_label         470 crystalline:  F
+ atom_label         471 crystalline:  F
+ atom_label         472 crystalline:  F
+ atom_label         473 crystalline:  F
+ atom_label         474 crystalline:  F
+ atom_label         475 crystalline:  F
+ atom_label         476 crystalline:  F
+ atom_label         477 crystalline:  F
+ atom_label         478 crystalline:  F
+ atom_label         479 crystalline:  F
+ atom_label         480 crystalline:  F
+ atom_label         481 crystalline:  F
+ atom_label         482 crystalline:  F
+ atom_label         483 crystalline:  F
+ atom_label         484 crystalline:  F
+ atom_label         485 crystalline:  F
+ atom_label         486 crystalline:  F
+ atom_label         487 crystalline:  F
+ atom_label         488 crystalline:  F
+ atom_label         489 crystalline:  F
+ atom_label         490 crystalline:  F
+ atom_label         491 crystalline:  F
+ atom_label         492 crystalline:  F
+ atom_label         493 crystalline:  F
+ atom_label         494 crystalline:  F
+ atom_label         495 crystalline:  F
+ atom_label         496 crystalline:  F
+ atom_label         497 crystalline:  F
+ atom_label         498 crystalline:  F
+ atom_label         499 crystalline:  F
+ atom_label         500 crystalline:  F
+ atom_label         501 crystalline:  F
+ atom_label         502 crystalline:  F
+ atom_label         503 crystalline:  F
+ atom_label         504 crystalline:  F
+ atom_label         505 crystalline:  F
+ atom_label         506 crystalline:  F
+ atom_label         507 crystalline:  F
+ atom_label         508 crystalline:  F
+ atom_label         509 crystalline:  F
+ atom_label         510 crystalline:  F
+ atom_label         511 crystalline:  F
+ atom_label         512 crystalline:  F
+ atom_label         513 crystalline:  F
+ atom_label         514 crystalline:  F
+ atom_label         515 crystalline:  F
+ atom_label         516 crystalline:  F
+ atom_label         517 crystalline:  F
+ atom_label         518 crystalline:  F
+ atom_label         519 crystalline:  F
+ atom_label         520 crystalline:  F
+ atom_label         521 crystalline:  F
+ atom_label         522 crystalline:  F
+ atom_label         523 crystalline:  F
+ atom_label         524 crystalline:  F
+ atom_label         525 crystalline:  F
+ atom_label         526 crystalline:  F
+ atom_label         527 crystalline:  F
+ atom_label         528 crystalline:  F
+ atom_label         529 crystalline:  F
+ atom_label         530 crystalline:  F
+ atom_label         531 crystalline:  F
+ atom_label         532 crystalline:  F
+ atom_label         533 crystalline:  F
+ atom_label         534 crystalline:  F
+ atom_label         535 crystalline:  F
+ atom_label         536 crystalline:  F
+ atom_label         537 crystalline:  F
+ atom_label         538 crystalline:  F
+ atom_label         539 crystalline:  F
+ atom_label         540 crystalline:  F
+ atom_label         541 crystalline:  F
+ atom_label         542 crystalline:  F
+ atom_label         543 crystalline:  F
+ atom_label         544 crystalline:  F
+ atom_label         545 crystalline:  F
+ atom_label         546 crystalline:  F
+ atom_label         547 crystalline:  F
+ atom_label         548 crystalline:  F
+ atom_label         549 crystalline:  F
+ atom_label         550 crystalline:  F
+ atom_label         551 crystalline:  F
+ atom_label         552 crystalline:  F
+ atom_label         553 crystalline:  F
+ atom_label         554 crystalline:  F
+ atom_label         555 crystalline:  F
+ atom_label         556 crystalline:  F
+ atom_label         557 crystalline:  F
+ atom_label         558 crystalline:  F
+ atom_label         559 crystalline:  F
+ atom_label         560 crystalline:  F
+ atom_label         561 crystalline:  F
+ atom_label         562 crystalline:  F
+ atom_label         563 crystalline:  F
+ atom_label         564 crystalline:  F
+ atom_label         565 crystalline:  F
+ atom_label         566 crystalline:  F
+ atom_label         567 crystalline:  F
+ atom_label         568 crystalline:  F
+ atom_label         569 crystalline:  F
+ atom_label         570 crystalline:  F
+ atom_label         571 crystalline:  F
+ atom_label         572 crystalline:  F
+ atom_label         573 crystalline:  F
+ atom_label         574 crystalline:  F
+ atom_label         575 crystalline:  F
+ atom_label         576 crystalline:  F
+ atom_label         577 crystalline:  F
+ atom_label         578 crystalline:  F
+ atom_label         579 crystalline:  F
+ atom_label         580 crystalline:  F
+ atom_label         581 crystalline:  F
+ atom_label         582 crystalline:  F
+ atom_label         583 crystalline:  F
+ atom_label         584 crystalline:  F
+ atom_label         585 crystalline:  F
+ atom_label         586 crystalline:  F
+ atom_label         587 crystalline:  F
+ atom_label         588 crystalline:  F
+ atom_label         589 crystalline:  F
+ atom_label         590 crystalline:  F
+ atom_label         591 crystalline:  F
+ atom_label         592 crystalline:  F
+ atom_label         593 crystalline:  F
+ atom_label         594 crystalline:  F
+ atom_label         595 crystalline:  F
+ atom_label         596 crystalline:  F
+ atom_label         597 crystalline:  F
+ atom_label         598 crystalline:  F
+ atom_label         599 crystalline:  F
+ atom_label         600 crystalline:  F
+ atom_label         601 crystalline:  F
+ atom_label         602 crystalline:  F
+ atom_label         603 crystalline:  F
+ atom_label         604 crystalline:  F
+ atom_label         605 crystalline:  F
+ atom_label         606 crystalline:  F
+ atom_label         607 crystalline:  F
+ atom_label         608 crystalline:  F
+ atom_label         609 crystalline:  F
+ atom_label         610 crystalline:  F
+ atom_label         611 crystalline:  F
+ atom_label         612 crystalline:  F
+ atom_label         613 crystalline:  F
+ atom_label         614 crystalline:  F
+ atom_label         615 crystalline:  F
+ atom_label         616 crystalline:  F
+ atom_label         617 crystalline:  F
+ atom_label         618 crystalline:  F
+ atom_label         619 crystalline:  F
+ atom_label         620 crystalline:  F
+ atom_label         621 crystalline:  F
+ atom_label         622 crystalline:  F
+ atom_label         623 crystalline:  F
+ atom_label         624 crystalline:  F
+ atom_label         625 crystalline:  F
+ atom_label         626 crystalline:  F
+ atom_label         627 crystalline:  F
+ atom_label         628 crystalline:  F
+ atom_label         629 crystalline:  F
+ atom_label         630 crystalline:  F
+ atom_label         631 crystalline:  F
+ atom_label         632 crystalline:  F
+ atom_label         633 crystalline:  F
+ atom_label         634 crystalline:  F
+ atom_label         635 crystalline:  F
+ atom_label         636 crystalline:  F
+ atom_label         637 crystalline:  F
+ atom_label         638 crystalline:  F
+ atom_label         639 crystalline:  F
+ atom_label         640 crystalline:  F
+ atom_label         641 crystalline:  F
+ atom_label         642 crystalline:  F
+ atom_label         643 crystalline:  F
+ atom_label         644 crystalline:  F
+ atom_label         645 crystalline:  F
+ atom_label         646 crystalline:  F
+ atom_label         647 crystalline:  F
+ atom_label         648 crystalline:  F
+ atom_label         649 crystalline:  F
+ atom_label         650 crystalline:  F
+ atom_label         651 crystalline:  F
+ atom_label         652 crystalline:  F
+ atom_label         653 crystalline:  F
+ atom_label         654 crystalline:  F
+ atom_label         655 crystalline:  F
+ atom_label         656 crystalline:  F
+ atom_label         657 crystalline:  F
+ atom_label         658 crystalline:  F
+ atom_label         659 crystalline:  F
+ atom_label         660 crystalline:  F
+ atom_label         661 crystalline:  F
+ atom_label         662 crystalline:  F
+ atom_label         663 crystalline:  F
+ atom_label         664 crystalline:  F
+ atom_label         665 crystalline:  F
+ atom_label         666 crystalline:  F
+ atom_label         667 crystalline:  F
+ atom_label         668 crystalline:  F
+ atom_label         669 crystalline:  F
+ atom_label         670 crystalline:  F
+ atom_label         671 crystalline:  F
+ atom_label         672 crystalline:  F
+ atom_label         673 crystalline:  F
+ atom_label         674 crystalline:  F
+ atom_label         675 crystalline:  F
+ atom_label         676 crystalline:  F
+ atom_label         677 crystalline:  F
+ atom_label         678 crystalline:  F
+ atom_label         679 crystalline:  F
+ atom_label         680 crystalline:  F
+ atom_label         681 crystalline:  F
+ atom_label         682 crystalline:  F
+ atom_label         683 crystalline:  F
+ atom_label         684 crystalline:  F
+ atom_label         685 crystalline:  F
+ atom_label         686 crystalline:  F
+ atom_label         687 crystalline:  F
+ atom_label         688 crystalline:  F
+ atom_label         689 crystalline:  F
+ atom_label         690 crystalline:  F
+ atom_label         691 crystalline:  F
+ atom_label         692 crystalline:  F
+ atom_label         693 crystalline:  F
+ atom_label         694 crystalline:  F
+ atom_label         695 crystalline:  F
+ atom_label         696 crystalline:  F
+ atom_label         697 crystalline:  F
+ atom_label         698 crystalline:  F
+ atom_label         699 crystalline:  F
+ atom_label         700 crystalline:  F
+ atom_label         701 crystalline:  F
+ atom_label         702 crystalline:  F
+ atom_label         703 crystalline:  F
+ atom_label         704 crystalline:  F
+ atom_label         705 crystalline:  F
+ atom_label         706 crystalline:  F
+ atom_label         707 crystalline:  F
+ atom_label         708 crystalline:  F
+ atom_label         709 crystalline:  F
+ atom_label         710 crystalline:  F
+ atom_label         711 crystalline:  F
+ atom_label         712 crystalline:  F
+ atom_label         713 crystalline:  F
+ atom_label         714 crystalline:  F
+ atom_label         715 crystalline:  F
+ atom_label         716 crystalline:  F
+ atom_label         717 crystalline:  F
+ atom_label         718 crystalline:  F
+ atom_label         719 crystalline:  F
+ atom_label         720 crystalline:  F
+ atom_label         721 crystalline:  F
+ atom_label         722 crystalline:  F
+ atom_label         723 crystalline:  F
+ atom_label         724 crystalline:  F
+ atom_label         725 crystalline:  F
+ atom_label         726 crystalline:  F
+ atom_label         727 crystalline:  F
+ atom_label         728 crystalline:  F
+ atom_label         729 crystalline:  F
+ atom_label         730 crystalline:  F
+ atom_label         731 crystalline:  F
+ atom_label         732 crystalline:  F
+ atom_label         733 crystalline:  F
+ atom_label         734 crystalline:  F
+ atom_label         735 crystalline:  F
+ atom_label         736 crystalline:  F
+ atom_label         737 crystalline:  F
+ atom_label         738 crystalline:  F
+ atom_label         739 crystalline:  F
+ atom_label         740 crystalline:  F
+ atom_label         741 crystalline:  F
+ atom_label         742 crystalline:  F
+ atom_label         743 crystalline:  F
+ atom_label         744 crystalline:  F
+ atom_label         745 crystalline:  F
+ atom_label         746 crystalline:  F
+ atom_label         747 crystalline:  F
+ atom_label         748 crystalline:  F
+ atom_label         749 crystalline:  F
+ atom_label         750 crystalline:  F
+ atom_label         751 crystalline:  F
+ atom_label         752 crystalline:  F
+ atom_label         753 crystalline:  F
+ atom_label         754 crystalline:  F
+ atom_label         755 crystalline:  F
+ atom_label         756 crystalline:  F
+ atom_label         757 crystalline:  F
+ atom_label         758 crystalline:  F
+ atom_label         759 crystalline:  F
+ atom_label         760 crystalline:  F
+ atom_label         761 crystalline:  F
+ atom_label         762 crystalline:  F
+ atom_label         763 crystalline:  F
+ atom_label         764 crystalline:  F
+ atom_label         765 crystalline:  F
+ atom_label         766 crystalline:  F
+ atom_label         767 crystalline:  F
+ atom_label         768 crystalline:  F
+ atom_label         769 crystalline:  F
+ atom_label         770 crystalline:  F
+ atom_label         771 crystalline:  F
+ atom_label         772 crystalline:  F
+ atom_label         773 crystalline:  F
+ atom_label         774 crystalline:  F
+ atom_label         775 crystalline:  F
+ atom_label         776 crystalline:  F
+ atom_label         777 crystalline:  F
+ atom_label         778 crystalline:  F
+ atom_label         779 crystalline:  F
+ atom_label         780 crystalline:  F
+ atom_label         781 crystalline:  F
+ atom_label         782 crystalline:  F
+ atom_label         783 crystalline:  F
+ atom_label         784 crystalline:  F
+ atom_label         785 crystalline:  F
+ atom_label         786 crystalline:  F
+ atom_label         787 crystalline:  F
+ atom_label         788 crystalline:  F
+ atom_label         789 crystalline:  F
+ atom_label         790 crystalline:  F
+ atom_label         791 crystalline:  F
+ atom_label         792 crystalline:  F
+ atom_label         793 crystalline:  F
+ atom_label         794 crystalline:  F
+ atom_label         795 crystalline:  F
+ atom_label         796 crystalline:  F
+ atom_label         797 crystalline:  F
+ atom_label         798 crystalline:  F
+ atom_label         799 crystalline:  F
+ atom_label         800 crystalline:  F
+ atom_label         801 crystalline:  F
+ atom_label         802 crystalline:  F
+ atom_label         803 crystalline:  F
+ atom_label         804 crystalline:  F
+ atom_label         805 crystalline:  F
+ atom_label         806 crystalline:  F
+ atom_label         807 crystalline:  F
+ atom_label         808 crystalline:  F
+ atom_label         809 crystalline:  F
+ atom_label         810 crystalline:  F
+ atom_label         811 crystalline:  F
+ atom_label         812 crystalline:  F
+ atom_label         813 crystalline:  F
+ atom_label         814 crystalline:  F
+ atom_label         815 crystalline:  F
+ atom_label         816 crystalline:  F
+ atom_label         817 crystalline:  F
+ atom_label         818 crystalline:  F
+ atom_label         819 crystalline:  F
+ atom_label         820 crystalline:  F
+ atom_label         821 crystalline:  F
+ atom_label         822 crystalline:  F
+ atom_label         823 crystalline:  F
+ atom_label         824 crystalline:  F
+ atom_label         825 crystalline:  F
+ atom_label         826 crystalline:  F
+ atom_label         827 crystalline:  F
+ atom_label         828 crystalline:  F
+ atom_label         829 crystalline:  F
+ atom_label         830 crystalline:  F
+ atom_label         831 crystalline:  F
+ atom_label         832 crystalline:  F
+ atom_label         833 crystalline:  F
+ atom_label         834 crystalline:  F
+ atom_label         835 crystalline:  F
+ atom_label         836 crystalline:  F
+ atom_label         837 crystalline:  F
+ atom_label         838 crystalline:  F
+ atom_label         839 crystalline:  F
+ atom_label         840 crystalline:  F
+ atom_label         841 crystalline:  F
+ atom_label         842 crystalline:  F
+ atom_label         843 crystalline:  F
+ atom_label         844 crystalline:  F
+ atom_label         845 crystalline:  F
+ atom_label         846 crystalline:  F
+ atom_label         847 crystalline:  F
+ atom_label         848 crystalline:  F
+ atom_label         849 crystalline:  F
+ atom_label         850 crystalline:  F
+ atom_label         851 crystalline:  F
+ atom_label         852 crystalline:  F
+ atom_label         853 crystalline:  F
+ atom_label         854 crystalline:  F
+ atom_label         855 crystalline:  F
+ atom_label         856 crystalline:  F
+ atom_label         857 crystalline:  F
+ atom_label         858 crystalline:  F
+ atom_label         859 crystalline:  F
+ atom_label         860 crystalline:  F
+ atom_label         861 crystalline:  F
+ atom_label         862 crystalline:  F
+ atom_label         863 crystalline:  F
+ atom_label         864 crystalline:  F
+   9.0337283759999991      : worker_0, sending task to worker with id:           1
+   9.0348677399999993      : worker_0, sent task on atom:          864
+   9.0349264569999992      : worker_0, sending task to worker with id:           2
+   9.0361472549999995      : worker_0, sent task on atom:          864
+   9.0362029110000002      : 0 waiting to receive data
+   33.671662744000002      :           1 about to send data
+   33.671723094999997      :           1 sent atm_label         138 and eventId          -1
+   33.671790704999999      : 0 received atm_label         138
+   33.671813424000000      : extracted source           1
+   33.671882644000000      : from           1 , 0 received eventId          -1
+   33.671968491999998      :           1 sent fin_pos, length        2592
+   33.671967414000001      : from           1 , 0 received fin_pos        2592
+   33.672051363999998      :           1 sent all the data
+   33.672114370999999      : 0 received all the data
+   33.672161619000001      :0 starting analysis of event now, success was T
+   33.672275276000001      : 0, analysis : enter
+   33.672419177999998      : 0, analysis : displacement
+   33.672458861000003      : worker_0 in new_prepare_info
+   33.770855623999999      : 0  update_neighbour
+   33.772842247000000      : 0 new_find_topo
+   33.861437453000001      : 0  update_neighbour 2
+   33.863322922999998      : 0 new_find_topo 2
+   33.951816377000000      : 0  update_neighbour 3
+   33.960838027000001      : 0, analysis : prepare_info
+   33.960897035000002      : 0, analysis : check_event
+   33.961569744999998      : 0, analysis : displacement 2
+   33.961769427999997      : 0, analysis : compute_rates
+   33.961779556000003      : 0, analysis : update_event2topo
+   33.961838954999997      : 0, analysis : pbc 2
+   33.961847923000001      : 0, analysis : pbc 2
+   33.961875681000002      : 0, analysis : pbc 2
+   33.961903585000002      : 0, analysis : pbc 2
+   33.961931688000000      : 0, analysis : pbc 2
+   33.961959688999997      : 0, analysis : pbc 2
+   33.961987475000001      : 0, analysis : pbc 2
+   33.962015262000001      : 0, analysis : pbc 2
+   33.962042848999999      : 0, analysis : pbc 2
+   33.962070601000001      : 0, analysis : pbc 2
+   33.962098159000000      : 0, analysis : pbc 2
+   33.962125964000002      : 0, analysis : pbc 2
+   33.962153903999997      : 0, analysis : pbc 2
+   33.962181553999997      : 0, analysis : pbc 2
+   33.962209278000003      : 0, analysis : pbc 2
+   33.962253068000003      : 0, analysis : pbc 2
+   33.962283298999999      : 0, analysis : pbc 2
+   33.962311567999997      : 0, analysis : pbc 2
+   33.962339499000002      : 0, analysis : pbc 2
+   33.962367702999998      : 0, analysis : pbc 2
+   33.962395825999998      : 0, analysis : pbc 2
+   33.962423776000001      : 0, analysis : pbc 2
+   33.962451741999999      : 0, analysis : pbc 2
+   33.962479860000002      : 0, analysis : pbc 2
+   33.962507694000003      : 0, analysis : pbc 2
+   33.962535308000000      : 0, analysis : pbc 2
+   33.962563074999998      : 0, analysis : pbc 2
+   33.962591246000002      : 0, analysis : pbc 2
+   33.962619101999998      : 0, analysis : pbc 2
+   33.962647074000003      : 0, analysis : pbc 2
+   33.962674964000001      : 0, analysis : pbc 2
+   33.962702438000001      : 0, analysis : pbc 2
+   33.962730145999998      : 0, analysis : pbc 2
+   33.962759267999999      : 0, analysis : pbc 2
+   33.962787873000003      : 0, analysis : pbc 2
+   33.962815933999998      : 0, analysis : pbc 2
+   33.962843941000003      : 0, analysis : pbc 2
+   33.962871989999996      : 0, analysis : pbc 2
+   33.962899753000002      : 0, analysis : pbc 2
+   33.962927587000003      : 0, analysis : pbc 2
+   33.962955489999999      : 0, analysis : pbc 2
+   33.962983313000002      : 0, analysis : pbc 2
+   33.963011549000001      : 0, analysis : pbc 2
+   33.963039520000002      : 0, analysis : pbc 2
+   33.963067793999997      : 0, analysis : pbc 2
+   33.963095653000003      : 0, analysis : pbc 2
+   33.963123004000003      : 0, analysis : pbc 2
+   33.963150667999997      : 0, analysis : pbc 2
+   33.963178468999999      : 0, analysis : pbc 2
+   33.963206128000003      : 0, analysis : pbc 2
+   33.963240339000002      : 0, analysis : pbc 2
+   33.963269981000003      : 0, analysis : pbc 2
+   33.963298492000000      : 0, analysis : pbc 2
+   33.963326277999997      : 0, analysis : pbc 2
+   33.963354367000001      : 0, analysis : pbc 2
+   33.963382172000003      : 0, analysis : pbc 2
+   33.963410015000001      : 0, analysis : pbc 2
+   33.963437714000001      : 0, analysis : pbc 2
+   33.963465634999999      : 0, analysis : pbc 2
+   33.963493344000000      : 0, analysis : pbc 2
+   33.963521018000002      : 0, analysis : pbc 2
+   33.963548514000003      : 0, analysis : pbc 2
+   33.963576367000002      : 0, analysis : pbc 2
+   33.963604154000002      : 0, analysis : pbc 2
+   33.963631827999997      : 0, analysis : pbc 2
+   33.963659776999997      : 0, analysis : pbc 2
+   33.963687497999999      : 0, analysis : pbc 2
+   33.963715452000002      : 0, analysis : pbc 2
+   33.963743221999998      : 0, analysis : pbc 2
+   33.963771201999997      : 0, analysis : pbc 2
+   33.963798951000001      : 0, analysis : pbc 2
+   33.963826869999998      : 0, analysis : pbc 2
+   33.963854863999998      : 0, analysis : pbc 2
+   33.963883060000001      : 0, analysis : pbc 2
+   33.963910687999999      : 0, analysis : pbc 2
+   33.963938624999997      : 0, analysis : pbc 2
+   33.963966485000000      : 0, analysis : pbc 2
+   33.963993973999997      : 0, analysis : pbc 2
+   33.964021891999998      : 0, analysis : pbc 2
+   34.061110255000003      : 0, analysis : write_events
+   34.061243447000003      : 0, analysis : displacement 3
+   34.061270966999999      : 0, analysis : reset_old_config
+   34.152722375000003      : 0, analysis : new_find_topo
+   34.152744740000003      : worker_0 in new_prepare_info
+   34.249683859999998      : 0  update_neighbour
+   34.253195251000001      : 0 new_find_topo
+   34.341823165000001      : 0  update_neighbour 2
+   34.343697417999998      : 0 new_find_topo 2
+   34.432210670000003      : 0  update_neighbour 3
+   34.441243116999999      : 0, analysis : new_prepare_info
+   34.531238307000002      : 0, analysis : order_cluster
+   34.531257340000003      : 0, analysis : pbc 3
+   34.531300893000001      : 0, analysis : pbc 4
+   34.531487206999998      : 0, analysis : displacement 4
+   34.531660735000003      : 0, analysis : compute_rates 2
+   34.531698183000003      : 0, analysis : event2topo 2
+   34.629420721999999      : 0, analysis : update_neighbor
+   34.629439085000001      : 0, analysis : leave
+   34.629655941000003      : 0, finished analysis
+   34.629716158000001      : 0, finished whole recvEventFromWorker procedure
+   34.629759290999999      : worker_0, sending task to worker with id:           1
+   34.630558866000001      : worker_0, sent task on atom:          864
+   34.630612118999998      : 0 waiting to receive data
+   199.11716929799999      :           1 about to send data
+   199.11721140600000      :           1 sent atm_label         864 and eventId          -1
+   199.11734002099999      : 0 received atm_label         864
+   199.11736512300001      : extracted source           1
+   199.11738573500000      : from           1 , 0 received eventId          -1
+   199.11743158499999      : from           1 , 0 received fin_pos        2592
+   199.11748555400001      : 0 received all the data
+   199.11750639400000      :0 starting analysis of event now, success was F
+   199.11751543200000      : 0, finished whole recvEventFromWorker procedure
+   199.11752745699999      : worker_0, sending task to worker with id:           1
+   199.11743380300001      :           1 sent fin_pos, length        2592
+   199.11747529900001      :           1 sent all the data
+   199.11859194700000      : worker_0, sent task on atom:          864
+   199.11865431199999      : 0 waiting to receive data
+   217.81913480899999      :           2 about to send data
+   217.81919369100001      :           2 sent atm_label         864 and eventId          -1
+   217.81926482000000      : 0 received atm_label         864
+   217.81928745100001      : extracted source           2
+   217.81935776399999      : from           2 , 0 received eventId          -1
+   217.81942534300001      :           2 sent fin_pos, length        2592
+   217.81942688399999      : from           2 , 0 received fin_pos        2592
+   217.81950895800000      :           2 sent all the data
+   217.81955434200000      : 0 received all the data
+   217.81960075399999      :0 starting analysis of event now, success was F
+   217.81963528899999      : 0, finished whole recvEventFromWorker procedure
+   217.81967335300001      : worker_0, sending task to worker with id:           2
+   217.82077447300000      : worker_0, sent task on atom:          864
+   217.82083802000000      : 0 waiting to receive data

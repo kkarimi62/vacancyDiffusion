@@ -1,0 +1,3 @@
+   # CPU time           currTOPO      activeTOPO         newTOPO  Cumul searched       CumulTOPO        diffTOPO             KMC          SimulT
+   # in s          found in step   found in step   found in step   TOPO in total       ever seen         USELESS                            in s
+   # *********       ***********      **********     ***********     ***********      **********      **********      **********     ***********
