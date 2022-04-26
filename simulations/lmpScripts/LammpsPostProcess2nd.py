@@ -132,7 +132,7 @@ class ReadDumpFile:
 
         return np.array([slist.readline().split() for i in range( nrows )]), CellVector, itime, cols
     
-    def ReadData( self, ncount = 1, columns = {} ):
+    def ReadData( self, ncount = 1, columns = {}, tilt = False ):
         itime = 0
         slist = open( self.path )    
         #
@@ -144,7 +144,10 @@ class ReadDumpFile:
         slist.readline()
         #
         cell_vector = np.array([slist.readline().split()[0:2] for i in range( 3 )])
+        if tilt:
+            slist.readline()
         #
+#        pdb.set_trace()
         [slist.readline() for i in range(3)]
         #
         sarr = np.array([slist.readline().split() for i in range( ntype )]) #--- get coord
@@ -217,16 +220,21 @@ class WriteDataFile:
         self.Mass = mass
 #        assert len(set(atomm.type)) == len(mass), 'wrong atom types!'
         
-    def Write(self, outpt ):
+    def Write(self, outpt, tilt=False ):
         natom = len(self.atom.x)
         ntype = len(self.Mass)
         (xlo,xhi,xy)=self.box.BoxBounds[0,:]
         (ylo,yhi,junk)=self.box.BoxBounds[1,:]
         (zlo,zhi,junk)=self.box.BoxBounds[2,:]
         sfile=open(outpt,'w')
-        sfile.write('LAMMPS Description\n\n%s atoms\n\n%s atom types\n\n\
+        if tilt:
+            sfile.write('LAMMPS Description\n\n%s atoms\n%s atom types\n\n\
                      %15.14e %15.14e xlo xhi\n%15.14e %15.14e ylo yhi\n%15.14e %15.14e zlo zhi\n%15.14e %15.14e %15.14e xy xz yz\n\nMasses\n\n'\
                      %(natom,ntype,float(xlo),float(xhi)-float(xy),float(ylo),float(yhi),float(zlo),float(zhi),float(xy),0.0,0.0)) #--- tilted box for data file: xhi-xy
+        else:
+            sfile.write('LAMMPS Description\n\n%s atoms\n%s atom types\n\n\
+                     %15.14e %15.14e xlo xhi\n%15.14e %15.14e ylo yhi\n%15.14e %15.14e zlo zhi\n\nMasses\n\n'\
+                     %(natom,ntype,float(xlo),float(xhi)-float(xy),float(ylo),float(yhi),float(zlo),float(zhi))) #--- tilted box for data file: xhi-xy
 
         for typee in self.Mass: #set(self.atom.type):
             sfile.write('%s %s\n'%(int(typee),self.Mass[typee]))
