@@ -145,7 +145,12 @@ class ReadDumpFile:
         #
         cell_vector = np.array([slist.readline().split()[0:2] for i in range( 3 )])
         #
-        [slist.readline() for i in range(6+ntype)]
+        [slist.readline() for i in range(3)]
+        #
+        sarr = np.array([slist.readline().split() for i in range( ntype )]) #--- get coord
+        self.mass = dict(zip(sarr[:,0],sarr[:,1]))
+        #
+        [slist.readline() for i in range(3)]
         #       
         sarr = np.array([slist.readline().split()[:5] for i in range( natom )]) #--- get coord
 

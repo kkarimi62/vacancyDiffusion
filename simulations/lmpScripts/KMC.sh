@@ -39,7 +39,7 @@ setenv MIN_SIG_BARRIER                 0.1    # Max height of barrier and inv. b
 #################################### Topology Params ##################################
 
 setenv TOPO_RADIUS                    6.0     # radius for topology cluster 
-setenv MAX_TOPO_CUTOFF                2.7     # length-cutoff used by default to link two atoms
+setenv MAX_TOPO_CUTOFF                3.0 #2.7     # length-cutoff used by default to link two atoms
 setenv MIN_TOPO_CUTOFF                2.2     # minimal length cutoff used when looking at secondary topologies 
 setenv CRYST_TOPOID                   973883  # topo id of the crystalline-like topologies
 setenv CRYST_TOPO_RADIUS              4.0     # radius for crystal-like topologies (default: 4.0 A) 
@@ -134,6 +134,8 @@ setenv OUTPUT_CONFIG_EVENTS          .true.   # IF true, will create a txt file 
 setenv OUTPUT_SPECIFIC   	     .true.
 #setenv OUTPUT_NEB_GEN_EVENT        .true.    # Can be useful
 
+############## added by KK ###########################
+setenv UNIQUE_CRYST_STRUCT	.true.
  
 
 ############### Run the simulation ######################################################################
