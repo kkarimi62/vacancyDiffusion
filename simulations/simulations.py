@@ -27,11 +27,11 @@ if __name__ == '__main__':
 
 	nruns	 = 1
 	#
-	nThreads = 3
+	nThreads = 4
 	nNode	 = 1
 	#
 	jobname  = {
-				1:'test', 
+				1:'NiCoCrNatom1KTemp600', 
 			   }[1]
 	sourcePath = os.getcwd() +\
 				{	
@@ -74,6 +74,7 @@ if __name__ == '__main__':
 					'p1':'WriteDump.py',
 					'p2':'DislocateEdge.py',
                                         'p3':'KartInput.py',
+                                        'p4':'takeOneOut.py',
                                         1.0:'KMC.sh', #--- bash script
 				} 
 	#
@@ -81,8 +82,8 @@ if __name__ == '__main__':
 				0:' -var natoms 100000 -var cutoff 3.52 -var ParseData 0  -var DumpFile dumpInit.xyz -var WriteData data_init.txt',
 				6:' -var T 300 -var DataFile Equilibrated_300.dat',
 				4:' -var T 600.0 -var t_sw 20.0 -var DataFile Equilibrated_600.dat -var nevery 1000 -var ParseData 1 -var WriteData swapped_600.dat', 
-				5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 1000 -var cutoff 3.52  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt', 
-				7:' -var buff 0.0 -var T 500.0 -var P 0.0 -var nevery 1000 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_500.dat',
+				5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 125 -var cutoff 3.52  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt', 
+				7:' -var buff 0.0 -var T 600.0 -var P 0.0 -var nevery 1000 -var ParseData 1 -var DataFile data_vac.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_500.dat',
 				71:' -var buff 0.0 -var T 0.1 -var P 0.0 -var nevery 1000 -var ParseData 1 -var DataFile swapped_600.dat -var DumpFile dumpThermalized2.xyz -var WriteData Equilibrated_0.dat',
 				8:' -var buff 0.0 -var T 0.1 -var sigm 1.0 -var sigmdt 0.0001 -var ndump 100 -var ParseData 1 -var DataFile Equilibrated_0.dat -var DumpFile dumpSheared.xyz',
 				9:' -var natoms 1000 -var cutoff 3.52 -var ParseData 1',
@@ -90,12 +91,13 @@ if __name__ == '__main__':
 				'p0':' swapped_600.dat 10.0 %s'%(os.getcwd()+'/../postprocess'),
 				'p1':' swapped_600.dat ElasticConst.txt DumpFileModu.xyz %s'%(os.getcwd()+'/../postprocess'),
 				'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
-				'p3':' Equilibrated_500.dat init_xyz.conf %s'%(os.getcwd()+'/lmpScripts'),
+				'p3':' Equilibrated_500.dat init_xyz.conf %s 600.0'%(os.getcwd()+'/lmpScripts'),
+				'p4':' data_minimized.txt data_vac.txt %s'%(os.getcwd()+'/lmpScripts'),
                                 1.0:' -x DataFile=Equilibrated_500.dat',
 				} 
 	#--- different scripts in a pipeline
 	indices = {
-				0:[5,7,'p3',1.0], #--- minimize, thermalize, kart input, invoke kart
+				0:[5,'p4',7,'p3',1.0], #--- minimize, add vacancy, thermalize, kart input, invoke kart
 				1:[9],     #--- elastic constants
 				2:[0,'p0',10,'p1'],	   #--- local elastic constants (zero temp)
 				3:[5,7,4,'p0',10,'p1'],	   #--- local elastic constants (annealed)
@@ -107,7 +109,7 @@ if __name__ == '__main__':
 #        print('EXEC=',EXEC)
 	#
 	EXEC_lmp = ['lmp_mpi','lmp_serial'][0]
-	durtn = ['95:59:59','00:59:59'][1]
+	durtn = ['95:59:59','00:59:59'][ 0 ]
 	mem = '8gb'
 	partition = ['gpu-v100','parallel','cpu2019','single'][1]
 	#---

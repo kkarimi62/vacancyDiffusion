@@ -6,6 +6,7 @@ import numpy as np
 path = sys.argv[1]
 output = sys.argv[2]
 lib_path = sys.argv[3]
+temp = sys.argv[4]
 
 sys.path.append(lib_path)
 import LammpsPostProcess2nd as lp
@@ -32,4 +33,8 @@ sfile.close()
 
 sfile = open('.lx.txt','w')
 sfile.write( '%s\n'%(np.ceil(lx)))
+sfile.close()
+
+sfile = open('.temp.txt','w')
+sfile.write( '%s\n'%temp)
 sfile.close()

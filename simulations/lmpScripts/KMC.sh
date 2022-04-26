@@ -3,6 +3,7 @@
 #--- set natom and box size (output of KartInput.py)
 set natom=`cat .natom.txt`
 set lx=`cat .lx.txt`
+set temp=`cat .temp.txt`
 
 #--- set directories for lmp scripts
 setenv	INCLUDE ${INC}
@@ -16,7 +17,7 @@ setenv INI_FILE_NAME             'init_xyz.conf'   # The file name containing th
 ###################################### Simulation Details ##################################################
 
 setenv NBRE_KMC_STEPS                 50       # The max number of KMC steps to be executed
-setenv TEMPERATURE                   500.0    # The simulated temperature in kelvin
+setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperature in kelvin
 
 setenv NUMBER_ATOMS                   ${natom} #864     # The total number of atoms 
 setenv SIMULATION_BOX                ${lx} #21.47   # The size of the simulation box (x, y and z)
