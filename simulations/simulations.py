@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiNatom1KTemp0K', 
-				2:'NiCoCrNatom1KTemp700K', 
+				2:'NiCoCrNatom1KTemp700K2nd', 
 				3:'NiNatom1000Temp700', 
 				4:'NiCoCrNatom1000Temp700', 
 			   }[2]
