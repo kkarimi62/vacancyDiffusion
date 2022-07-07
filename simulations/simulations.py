@@ -31,7 +31,7 @@ if __name__ == '__main__':
 	nNode	 = 1
 	#
 	jobname  = {
-				0:'test14th', 
+				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiCoCrNatom10KTemp700', 
 				2:'FeNiNatom1KTemp2000', 
 				3:'NiNatom1000Temp700', 
@@ -110,9 +110,9 @@ if __name__ == '__main__':
 				2:[0,'p0',10,'p1'],	   #--- local elastic constants (zero temp)
 				3:[5,7,4,'p0',10,'p1'],	   #--- local elastic constants (annealed)
 				4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
-				5:['p3',1.0], #--- kart input, invoke kart
+				5:[5], #--- minimize
 				6:[5,7,'p3',2.0], #--- minimize, thermalize, kart input, invoke kart
-			  }[0]
+			  }[5]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
