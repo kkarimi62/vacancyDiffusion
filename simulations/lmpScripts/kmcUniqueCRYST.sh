@@ -39,11 +39,11 @@ setenv MIN_SIG_BARRIER                 0.1    # Max height of barrier and inv. b
 
 #################################### Topology Params ##################################
 
-setenv TOPO_RADIUS                    2.5 #kam 6.0     # radius for topology cluster 
+setenv TOPO_RADIUS                    3.0 #kam 6.0     # radius for topology cluster 
 setenv MAX_TOPO_CUTOFF                3.0 #kam 2.7     # length-cutoff used by default to link two atoms
 setenv MIN_TOPO_CUTOFF                2.2     # minimal length cutoff used when looking at secondary topologies 
 #setenv CRYST_TOPOID                   1278245  # topo id of the crystalline-like topologies
-setenv CRYST_TOPO_RADIUS              2.5     # radius for crystal-like topologies (default: 4.0 A) 
+setenv CRYST_TOPO_RADIUS              3.0     # radius for crystal-like topologies (default: 4.0 A) 
 setenv TOPOLOGY_FILE 				  'Topologies' # Store info about topologies
 setenv TOPO_STAT_FILE 				  'topos.list' # Store statistics about topologies
 #setenv MAX_NODES_GRAPH				  22 #kam
