@@ -162,11 +162,11 @@ atomd.id=np.arange(1,len(atomd.id)+1) #--- reset id
 boxd = lp.Box( BoxBounds = rd.BoxBounds[0], AddMissing = np.array([0.0,0.0,0.0] ))
 
 #--- center atom positions
-CenterAtoms( atoms, box,
-             atomd, boxd, #--- will be modified
-            idcent = idout,
-            CenterAtZero=True, #--- don't change!
-            )
+#CenterAtoms( atoms, box,
+#             atomd, boxd, #--- will be modified
+#            idcent = idout,
+#            CenterAtZero=True, #--- don't change!
+#            )
 #--- write
 lp.WriteDataFile(atomd,boxd,rd.mass).Write(output)
 

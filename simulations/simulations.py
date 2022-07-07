@@ -11,12 +11,12 @@ def makeOAR( EXEC_DIR, node, core, time ):
 #	cutoff = 1.0 / rho ** (1.0/3.0)
 	for script,var,indx, execc in zip(Pipeline,Variables,range(100),EXEC):
 		if execc == 'lmp': #_mpi' or EXEC == 'lmp_serial':
-			print >> someFile, "mpirun --oversubscribe -np %s $EXEC_DIR/lmp_mpi < %s -echo screen -var OUT_PATH \'%s\' -var PathEam \'%s\' -var INC \'%s\' %s\n"%(nThreads*nNode, script, OUT_PATH, MEAM_library_DIR, SCRPT_DIR, var)
+			print >> someFile, "mpirun --oversubscribe -np %s $EXEC_DIR/lmp_mpi < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(nThreads*nNode, script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
 		elif execc == 'py':
 			print >> someFile, "python3 %s %s\n"%(script, var)
 		elif execc == 'kmc':
 #			print >> someFile, "time mpiexec %s %s\n"%(script, var)
-			print >> someFile, "mpirun --oversubscribe -np %s -x PathEam=\'%s\' -x INC=\'%s\' %s %s\n"%(nThreads*nNode,MEAM_library_DIR, SCRPT_DIR,var,script)
+			print >> someFile, "mpirun --oversubscribe -np %s -x PathEam=%s -x INC=\'%s\' %s %s\n"%(nThreads*nNode,'${MEAM_library_DIR}', SCRPT_DIR,var,script)
 			
 	someFile.close()										  
 
@@ -31,14 +31,19 @@ if __name__ == '__main__':
 	nNode	 = 1
 	#
 	jobname  = {
-				1:'NiCoCrNatom1KTemp600', 
-			   }[1]
+				0:'test14th', 
+				1:'NiCoCrNatom10KTemp700', 
+				2:'FeNiNatom1KTemp2000', 
+				3:'NiNatom1000Temp700', 
+				4:'NiCoCrNatom1000Temp700', 
+			   }[0]
 	sourcePath = os.getcwd() +\
 				{	
+					0:'/junk',
 					1:'/../postprocess/NiCoCrNatom1K',
 					2:'/NiCoCrNatom100K',
-					4:'/junk',
-				}[4] #--- must be different than sourcePath
+					5:'/dataFiles/reneData',
+				}[0] #--- must be different than sourcePath. set it to 'junk' if no path
         #
 	sourceFiles = { 0:False,
 					1:['Equilibrated_300.dat'],
@@ -46,7 +51,8 @@ if __name__ == '__main__':
 					3:['data.txt'], 
 					4:['data_minimized.txt'],
 					5:['data_init.txt','ScriptGroup.0.txt'], #--- only one partition! for multiple ones, use 'submit.py'
-				 }[0] #--- to be copied from the above directory
+					6:['FeNi_2000.dat'], 
+				 }[0] #--- to be copied from the above directory. set it to '0' if no file
 	#
 	EXEC_DIR = '/home/kamran.karimi1/Project/git/lammps2nd/lammps/src' #--- path for executable file
 	#
@@ -73,17 +79,18 @@ if __name__ == '__main__':
 					'p0':'partition.py', #--- python file
 					'p1':'WriteDump.py',
 					'p2':'DislocateEdge.py',
-                                        'p3':'KartInput.py',
+                                        'p3':'kartInput.py',
                                         'p4':'takeOneOut.py',
-                                        1.0:'KMC.sh', #--- bash script
+                                        1.0:'kmc.sh', #--- bash script
+                                        2.0:'kmcUniqueCRYST.sh', #--- bash script
 				} 
 	#
 	Variable = {
 				0:' -var natoms 100000 -var cutoff 3.52 -var ParseData 0  -var DumpFile dumpInit.xyz -var WriteData data_init.txt',
 				6:' -var T 300 -var DataFile Equilibrated_300.dat',
 				4:' -var T 600.0 -var t_sw 20.0 -var DataFile Equilibrated_600.dat -var nevery 1000 -var ParseData 1 -var WriteData swapped_600.dat', 
-				5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 125 -var cutoff 3.52  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt', 
-				7:' -var buff 0.0 -var T 600.0 -var P 0.0 -var nevery 1000 -var ParseData 1 -var DataFile data_vac.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_500.dat',
+				5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 1000 -var cutoff 3.52  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt', 
+				7:' -var buff 0.0 -var T 700.0 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_700.dat',
 				71:' -var buff 0.0 -var T 0.1 -var P 0.0 -var nevery 1000 -var ParseData 1 -var DataFile swapped_600.dat -var DumpFile dumpThermalized2.xyz -var WriteData Equilibrated_0.dat',
 				8:' -var buff 0.0 -var T 0.1 -var sigm 1.0 -var sigmdt 0.0001 -var ndump 100 -var ParseData 1 -var DataFile Equilibrated_0.dat -var DumpFile dumpSheared.xyz',
 				9:' -var natoms 1000 -var cutoff 3.52 -var ParseData 1',
@@ -91,9 +98,10 @@ if __name__ == '__main__':
 				'p0':' swapped_600.dat 10.0 %s'%(os.getcwd()+'/../postprocess'),
 				'p1':' swapped_600.dat ElasticConst.txt DumpFileModu.xyz %s'%(os.getcwd()+'/../postprocess'),
 				'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
-				'p3':' Equilibrated_500.dat init_xyz.conf %s 600.0'%(os.getcwd()+'/lmpScripts'),
-				'p4':' data_minimized.txt data_vac.txt %s'%(os.getcwd()+'/lmpScripts'),
-                                1.0:' -x DataFile=Equilibrated_500.dat',
+				'p3':' Equilibrated_700.dat init_xyz.conf %s 700.0'%(os.getcwd()+'/lmpScripts'),
+				'p4':' data_minimized.txt data_minimized.txt %s'%(os.getcwd()+'/lmpScripts'),
+                                1.0:' -x DataFile=Equilibrated_700.dat',
+                                2.0:' -x DataFile=Equilibrated_700.dat',
 				} 
 	#--- different scripts in a pipeline
 	indices = {
@@ -102,6 +110,8 @@ if __name__ == '__main__':
 				2:[0,'p0',10,'p1'],	   #--- local elastic constants (zero temp)
 				3:[5,7,4,'p0',10,'p1'],	   #--- local elastic constants (annealed)
 				4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
+				5:['p3',1.0], #--- kart input, invoke kart
+				6:[5,7,'p3',2.0], #--- minimize, thermalize, kart input, invoke kart
 			  }[0]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 	Variables = list(map(lambda x:Variable[x], indices))

@@ -14,9 +14,9 @@ create_atoms    1 box               ## create type-1 metal atoms in the box
 #
 
 #--- Need to set mass to something, just to satisfy LAMMPS
-mass    1  58.693    #--- Ni
-mass    2  58.933195 #--- Co
-mass    3  51.9961   #--- Cr
+#mass    1  58.693    #--- Ni
+#mass    2  58.933195 #--- Co
+#mass    3  51.9961   #--- Cr
 
 
 #--- ternary alloys
