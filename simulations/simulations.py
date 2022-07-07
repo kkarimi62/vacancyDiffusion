@@ -33,10 +33,10 @@ if __name__ == '__main__':
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiNatom1KTemp0K', 
-				2:'FeNiNatom1KTemp2000', 
+				2:'NiCoCrNatom1KTemp700K', 
 				3:'NiNatom1000Temp700', 
 				4:'NiCoCrNatom1000Temp700', 
-			   }[1]
+			   }[2]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 				'p0':' swapped_600.dat 10.0 %s'%(os.getcwd()+'/../postprocess'),
 				'p1':' swapped_600.dat ElasticConst.txt DumpFileModu.xyz %s'%(os.getcwd()+'/../postprocess'),
 				'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
-				'p3':' data_minimized.txt init_xyz.conf %s 5.0'%(os.getcwd()+'/lmpScripts'),
+				'p3':' Equilibrated_700.dat init_xyz.conf %s 5.0'%(os.getcwd()+'/lmpScripts'),
 				'p4':' data_minimized.txt data_minimized.txt %s'%(os.getcwd()+'/lmpScripts'),
                  1.0:' -x DataFile=Equilibrated_700.dat',
                  2.0:' -x DataFile=data_minimized.txt',
@@ -111,8 +111,9 @@ if __name__ == '__main__':
 				3:[5,7,4,'p0',10,'p1'],	   #--- local elastic constants (annealed)
 				4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
 				5:[5], #--- minimize
-				6:[5,'p3',2.0], #--- kart input, invoke kart
-			  }[6]
+				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
+				7:[5,'p4',7,'p3',1.0], #--- minimize, add vacancy, thermalize, kart input, invoke kart
+			  }[7]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
