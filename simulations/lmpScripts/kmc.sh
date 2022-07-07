@@ -16,7 +16,7 @@ setenv INI_FILE_NAME             'init_xyz.conf'   # The file name containing th
  
 ###################################### Simulation Details ##################################################
 
-setenv NBRE_KMC_STEPS                 1 #kam 50       # The max number of KMC steps to be executed
+setenv NBRE_KMC_STEPS                50       # The max number of KMC steps to be executed
 setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperature in kelvin
 
 setenv NUMBER_ATOMS                   ${natom} #864     # The total number of atoms 
@@ -39,7 +39,7 @@ setenv MIN_SIG_BARRIER                 0.1    # Max height of barrier and inv. b
 
 #################################### Topology Params ##################################
 
-setenv TOPO_RADIUS                    4.0     # radius for topology cluster > CRYST_TOPO_RADIUS 
+setenv TOPO_RADIUS                    6.0     # radius for topology cluster > CRYST_TOPO_RADIUS 
 setenv MAX_TOPO_CUTOFF                2.7     # length-cutoff used by default to link two atoms
 setenv MIN_TOPO_CUTOFF                2.2     # minimal length cutoff used when looking at secondary topologies 
 setenv CRYST_TOPOID                   1079097  # topo id of the crystalline-like topologies

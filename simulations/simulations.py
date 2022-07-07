@@ -33,9 +33,9 @@ if __name__ == '__main__':
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiNatom1KTemp0K', 
-				2:'NiCoCrNatom1KTemp700K2nd', 
-				3:'NiNatom1000Temp700', 
-				4:'NiCoCrNatom1000Temp700', 
+				2:'NiCoCrNatom1KTemp1300K', 
+				3:'NiNatom1000Temp1300', 
+				4:'NiCoCrNatom1000Temp1300', 
 			   }[2]
 	sourcePath = os.getcwd() +\
 				{	
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 				6:' -var T 300 -var DataFile Equilibrated_300.dat',
 				4:' -var T 600.0 -var t_sw 20.0 -var DataFile Equilibrated_600.dat -var nevery 1000 -var ParseData 1 -var WriteData swapped_600.dat', 
 				5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 1000 -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt', 
-				7:' -var buff 0.0 -var T 700.0 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_700.dat',
+				7:' -var buff 0.0 -var T 1300.0 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_1300.dat',
 				71:' -var buff 0.0 -var T 0.1 -var P 0.0 -var nevery 1000 -var ParseData 1 -var DataFile swapped_600.dat -var DumpFile dumpThermalized2.xyz -var WriteData Equilibrated_0.dat',
 				8:' -var buff 0.0 -var T 0.1 -var sigm 1.0 -var sigmdt 0.0001 -var ndump 100 -var ParseData 1 -var DataFile Equilibrated_0.dat -var DumpFile dumpSheared.xyz',
 				9:' -var natoms 1000 -var cutoff 3.52 -var ParseData 1',
@@ -98,9 +98,9 @@ if __name__ == '__main__':
 				'p0':' swapped_600.dat 10.0 %s'%(os.getcwd()+'/../postprocess'),
 				'p1':' swapped_600.dat ElasticConst.txt DumpFileModu.xyz %s'%(os.getcwd()+'/../postprocess'),
 				'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
-				'p3':' Equilibrated_700.dat init_xyz.conf %s 5.0'%(os.getcwd()+'/lmpScripts'),
+				'p3':' Equilibrated_1300.dat init_xyz.conf %s 5.0'%(os.getcwd()+'/lmpScripts'),
 				'p4':' data_minimized.txt data_minimized.txt %s'%(os.getcwd()+'/lmpScripts'),
-                 1.0:' -x DataFile=Equilibrated_700.dat',
+                 1.0:' -x DataFile=Equilibrated_1300.dat',
                  2.0:' -x DataFile=data_minimized.txt',
 				} 
 	#--- different scripts in a pipeline
