@@ -112,7 +112,7 @@ if __name__ == '__main__':
 				2:[0,'p0',10,'p1'],	   #--- local elastic constants (zero temp)
 				3:[5,7,4,'p0',10,'p1'],	   #--- local elastic constants (annealed)
 				4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
-				8:[5,7,4,51,'p3',2.0], #--- minimize, thermalize, anneal, minimize, kart input, invoke kart
+				8:[5,7,4,51,'p4','p3',2.0], #--- minimize, thermalize, anneal, minimize, add vacancy, kart input, invoke kart
 				5:[5], #--- minimize
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
