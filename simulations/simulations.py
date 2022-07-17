@@ -27,14 +27,14 @@ if __name__ == '__main__':
 
 	nruns	 = 1
 	#
-	nThreads = [4,9][1]
+	nThreads = [4,16][1]
 	nNode	 = 1
 	#
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiNatom1KTemp0K', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'NiCoCrNatom100Kannealed', 
+				3:'NiCoCrNatom50Kannealed', 
 				4:'NiCoCrNatom1000Temp1300', 
 			   }[3]
 	sourcePath = os.getcwd() +\
