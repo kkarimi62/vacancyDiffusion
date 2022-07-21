@@ -27,14 +27,14 @@ if __name__ == '__main__':
 
 	nruns	 = 1
 	#
-	nThreads = [4,12][1]
+	nThreads = [4,36][1]
 	nNode	 = 1
 	#
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiNatom1KTemp0K', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'NiCoCrNatom50Kannealed', 
+				3:'NiCoCrNatom50Kannealed4th', 
 				4:'NiCoCrNatom1000Temp1300', 
 			   }[3]
 	sourcePath = os.getcwd() +\
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 	EXEC_lmp = ['lmp_mpi','lmp_serial'][0]
 	durtn = ['95:59:59','00:59:59'][ 0 ]
 	mem = '22gb'
-	partition = ['gpu-v100','parallel','cpu2019','single'][1]
+	partition = ['gpu-v100','parallel','cpu2019','single'][2]
 	#---
 	os.system( 'rm -rf %s' % jobname ) #--- rm existing
 	os.system( 'rm jobID.txt' )
