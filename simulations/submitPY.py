@@ -4,7 +4,7 @@ if __name__ == '__main__':
 	import numpy as np
 	#---
 	lnums = [ 30, 37, 93   ]
-	string=open('Preparation.py').readlines() #--- python script
+	string=open('simulations.py').readlines() #--- python script
 	#---
 	PHI ={
              '0':2,
