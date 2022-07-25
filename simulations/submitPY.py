@@ -7,11 +7,12 @@ if __name__ == '__main__':
 	string=open('simulations.py').readlines() #--- python script
 	#---
 	PHI ={
-             '0':2,
+             '0':1,
              '1':4,
-            '2':8,
+            '2':9,
             '3' :16,
-             '4':32,
+             '4':25,
+             '5':36,
          }
 	nphi = len(PHI)
 	#---
@@ -20,7 +21,9 @@ if __name__ == '__main__':
 	times=[0]
 	#--- 
 	count = 0
-	for iphi in PHI:
+	keyss= list(PHI.keys())
+	keyss.sort()
+	for iphi in keyss:
 		for epsi in EPS:
 			for itime in times:
 			#---	
