@@ -18,7 +18,7 @@ pair_coeff              * * ${PathEam}/NiCoCr.lammps.eam Ni Co Cr
 #neighbor 1.0 nsq
 #neigh_modify once no every 1 delay 0 check yes
 #--- kart settings
-#neighbor        0.0  bin # multi
+neighbor        0.0  bin # multi
 #neigh_modify    delay 0 every 1 check no one 50 page 550 #binsize 0.1
 
 
