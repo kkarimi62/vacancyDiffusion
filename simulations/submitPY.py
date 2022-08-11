@@ -3,39 +3,31 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 	#---
-	lnums = [ 30, 37, 93   ]
+	lnums = [ 37, 103   ]
 	string=open('simulations.py').readlines() #--- python script
 	#---
-	PHI ={
-             '0':1,
-             '1':2**3,
-            '2':3**3,
-#            '3' :16,
-#             '4':25,
-#             '5':36,
-         }
+	PHI = dict(zip(range(11),np.linspace(1000,1400,11)))
+#		{
+#             '0':1,
+#             '1':2**3,
+#            '2':3**3,
+#         }
 	nphi = len(PHI)
 	#---
 	#---
-	EPS={'0':0}
-	times=[0]
 	#--- 
 	count = 0
 	keyss= list(PHI.keys())
 	keyss.sort()
 	for iphi in keyss:
-		for epsi in EPS:
-			for itime in times:
 			#---	
 			#---	densities
 				inums = lnums[ 0 ] - 1
-				string[ inums ] = "\tnThreads = %s\n"%(PHI[iphi]) #--- change job name
-			#---	densities
-				inums = lnums[ 1 ] - 1
-				string[ inums ] = "\t3:\'NiCoCrNatom50Kannealed%s\',\n"%(count) #--- change job name
+				string[ inums ] = "\t3:\'NiNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
-				inums = lnums[ 2 ] - 1
-				string[ inums ] = "\t5:' -var buff 0.0 -var nevery 100 -var ParseData 0 -var natoms %s -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt',\n"%(PHI[iphi]*2000)
+				inums = lnums[ 1 ] - 1
+				string[ inums ] = 
+"\t\'p3\':\' data_minimized.txt init_xyz.conf %s %s\'%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])
 				#---
 
 				sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
