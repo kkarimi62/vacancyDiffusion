@@ -26,8 +26,7 @@ if __name__ == '__main__':
 				string[ inums ] = "\t3:\'NiNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
-				string[ inums ] = 
-"\t\'p3\':\' data_minimized.txt init_xyz.conf %s %s\'%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])
+				string[ inums ] = "\t\'p3\':\' data_minimized.txt init_xyz.conf %s %s\'%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])
 				#---
 
 				sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
