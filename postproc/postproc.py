@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	durtn = '23:59:59'
 	mem = '8gb'
 	partition = ['parallel','cpu2019','bigmem','single'][3] 
-	argv = "path=%s"%(readPath) #--- don't change! 
+	argv = "%s"%(readPath) #--- don't change! 
 	PYFILdic = { 
 		0:'postproc.ipynb',
 		}
