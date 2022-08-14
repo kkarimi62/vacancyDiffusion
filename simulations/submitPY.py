@@ -3,7 +3,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 	#---
-	lnums = [ 37, 103   ]
+	lnums = [ 37, 102   ]
 	string=open('simulations.py').readlines() #--- python script
 	#---
 	PHI = dict(zip(range(11),np.linspace(1000,1400,11)))
