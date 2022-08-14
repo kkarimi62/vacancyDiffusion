@@ -23,7 +23,7 @@ if __name__ == '__main__':
 			#---	
 			#---	densities
 				inums = lnums[ 0 ] - 1
-				string[ inums ] = "\t3:\'NiNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
+				string[ inums ] = "\t3:\'CantorNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
 				string[ inums ] = "\t\'p3\':\' data_minimized.txt init_xyz.conf"+" %"+"s"+" %s\'%%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])
@@ -31,5 +31,5 @@ if __name__ == '__main__':
 
 				sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
 				os.system( 'python junk%s.py'%count )
-#				os.system( 'rm junk%s.py'%count )
+				os.system( 'rm junk%s.py'%count )
 				count += 1
