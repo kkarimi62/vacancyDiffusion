@@ -9,7 +9,7 @@ variable    lx              equal   floor(${volume}^(1.0/3.0)/${a})
 lattice    fcc ${a} orient    x 1 0 0 orient y 0 1 0 orient z 0 0 1 &   
            origin 0.1 0.1 0.1
 region    		mybox block 0 ${lx} 0 ${lx} 0 ${lx}   ## define box sizes along x, y, z (in the unit of a0)
-create_box      3 mybox              ## create the simulation box, allowing a max of three species
+create_box      5 mybox              ## create the simulation box, allowing a max of three species
 create_atoms    1 box               ## create type-1 metal atoms in the box
 #
 
@@ -23,17 +23,42 @@ create_atoms    1 box               ## create type-1 metal atoms in the box
 
 #--- ternary alloys
 #--- get number of atoms
+#variable	natom	equal	"atoms"
+#variable	natom2	equal	floor(${natom}/3)
+#variable	natom3	equal	floor(${natom2})
+#
+#group kind1 type 1
+#set group kind1 type/subset 2 ${natom2} 12345
+#
+#group kind2 type 2
+#group remain1 subtract all  kind2 
+#
+#set group remain1 type/subset 3 ${natom3} 74
+#group kind3 type 3
+#---- end of block
+
+#--- 5-component alloy
+#--- get number of atoms
 variable	natom	equal	"atoms"
-variable	natom2	equal	floor(${natom}/3)
+variable	natom2	equal	floor(${natom}/5)
 variable	natom3	equal	floor(${natom2})
+variable	natom4	equal	floor(${natom2})
+variable	natom5	equal	floor(${natom2})
 #
 group kind1 type 1
 set group kind1 type/subset 2 ${natom2} 12345
-#
 group kind2 type 2
+
 group remain1 subtract all  kind2 
-#
-set group remain1 type/subset 3 ${natom3} 74
+set group remain1 type/subset 3 ${natom3} 11645
 group kind3 type 3
+
+group remain2 subtract remain1  kind3 
+set group remain2 type/subset 4 ${natom4} 99999
+group kind4 type 4
+
+group remain3 subtract remain2  kind4 
+set group remain3 type/subset 5 ${natom5} 56890
+group kind5 type 5
 #---- end of block
 
