@@ -35,7 +35,7 @@ if __name__ == '__main__':
 				1:'test', 
 				2:'NiCoCrNatom10KTemp1300K', 
 				3:'CantorNatom16KTemp1300K', 
-			   }[1]
+			   }[3]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
@@ -113,10 +113,11 @@ if __name__ == '__main__':
 				4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
 				8:[5,7,4,51,'p4','p3',1.0], #--- minimize, thermalize, anneal, minimize, add vacancy, kart input, invoke kart
 				9:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
+				10:['p3',1.0], #--- restart from 9
 				5:[5], #--- minimize
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-			  }[9]
+			  }[10]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
@@ -126,8 +127,10 @@ if __name__ == '__main__':
 	durtn = ['95:59:59','00:59:59','167:59:59'][ 2 ]
 	mem = '22gb'
 	partition = ['gpu-v100','parallel','cpu2019','single'][2]
-	#---
-	os.system( 'rm -rf %s' % jobname ) #--- rm existing
+	#--
+	DeleteExistingFolder = False
+	if DeleteExistingFolder:
+		os.system( 'rm -rf %s' % jobname ) #--- rm existing
 	os.system( 'rm jobID.txt' )
 	# --- loop for submitting multiple jobs
 	counter = 0
