@@ -32,10 +32,10 @@ if __name__ == '__main__':
 	#
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
-				1:'NiNatom1KTemp0K', 
+				1:'test', 
 				2:'NiCoCrNatom10KTemp1300K', 
 				3:'CantorNatom16KTemp1300K', 
-			   }[3]
+			   }[1]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 #        print('EXEC=',EXEC)
 	#
 	EXEC_lmp = ['lmp_mpi','lmp_serial'][0]
-	durtn = ['95:59:59','00:59:59'][ 0 ]
+	durtn = ['95:59:59','00:59:59','167:59:59'][ 2 ]
 	mem = '22gb'
 	partition = ['gpu-v100','parallel','cpu2019','single'][2]
 	#---
