@@ -21,14 +21,14 @@ setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperatu
 
 setenv NUMBER_ATOMS                   ${natom} #864     # The total number of atoms 
 setenv SIMULATION_BOX                ${lx} #21.47   # The size of the simulation box (x, y and z)
-setenv NSPECIES                         5#3     # The number of different atom types (default: 2)
-setenv ATOMIC_SYMBOLS					"Ni Co Cr Fe Mn"#"Ni Co Cr"
+setenv NSPECIES                         1#5#3     # The number of different atom types (default: 2)
+setenv ATOMIC_SYMBOLS					"Ni"#"Ni Co Cr Fe Mn"#"Ni Co Cr"
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
-setenv RESTART_KMC                   .true.  # IF true, restart from previous run
+setenv RESTART_KMC                   .false.  # IF true, restart from previous run
 setenv RESTART_FILE               "this_conf" # The file name used to continue a simulation from where it was last stopped
-setenv RESTART_IMPORT                .true. #.false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
+setenv RESTART_IMPORT                .false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
 setenv NEW_CATALOGUE                 .false.  # IF true, will continue simulation but will rebuild event catalogue from scratch
 
 

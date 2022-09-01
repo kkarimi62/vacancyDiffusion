@@ -32,10 +32,10 @@ if __name__ == '__main__':
 	#
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
-				1:'test', 
+				1:'NiNatom16KTemp1300K', 
 				2:'NiCoCrNatom10KTemp1300K', 
 				3:'CantorNatom16KTemp1300K', 
-			   }[3]
+			   }[1]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 				5:[5], #--- minimize
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-			  }[10]
+			  }[9]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
