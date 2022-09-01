@@ -128,7 +128,7 @@ if __name__ == '__main__':
 	mem = '22gb'
 	partition = ['gpu-v100','parallel','cpu2019','single'][2]
 	#--
-	DeleteExistingFolder = False
+	DeleteExistingFolder = True
 	if DeleteExistingFolder:
 		os.system( 'rm -rf %s' % jobname ) #--- rm existing
 	os.system( 'rm jobID.txt' )
