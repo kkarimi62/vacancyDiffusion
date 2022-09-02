@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	jobname  = {
 				'3':'NiNatom16KTemp1300K', 
 				}['3']
-	DeleteExistingFolder = False
+	DeleteExistingFolder = True
 	readPath = os.getcwd() + {
 								'3':'/../simulations/NiNatom16KTemp1300K',
  							}['3'] #--- source
