@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = 1
+	nruns	 = 3
 	#
 	nThreads = 8
 	nNode	 = 1
@@ -34,8 +34,8 @@ if __name__ == '__main__':
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiNatom16KTemp1300K', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'CantorNatom16KTemp1300K', 
-			   }[1]
+				3:'CantorNatom16KTemp1300K_ensemble', 
+			   }[3]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 				0:' -var natoms 100000 -var cutoff 3.52 -var ParseData 0  -var DumpFile dumpInit.xyz -var WriteData data_init.txt',
 				6:' -var T 300 -var DataFile Equilibrated_300.dat',
 				4:' -var T 600.0 -var t_sw 20.0 -var DataFile Equilibrated_600.dat -var nevery 100 -var ParseData 1 -var WriteData swapped_600.dat', 
-				5:' -var buff 0.0 -var nevery 100 -var ParseData 0 -var natoms 16000 -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt', 
+				5:' -var buff 0.0 -var nevery 100 -var ParseData 0 -var natoms 16000 -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt -var seed0 %s -var seed1 %s -var seed2 %s -var seed3 %s'%tuple(np.random.randint(1001,9999,size=4)), 
 				51:' -var buff 0.0 -var nevery 100 -var ParseData 1 -var DataFile swapped_600.dat -var DumpFile dumpMin.xyz -var WriteData data_minimized.txt', 
 				7:' -var buff 0.0 -var T 600.0 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_600.dat',
 				71:' -var buff 0.0 -var T 0.1 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile swapped_600.dat -var DumpFile dumpThermalized2.xyz -var WriteData Equilibrated_0.dat',
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 				4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
 				8:[5,7,4,51,'p4','p3',1.0], #--- minimize, thermalize, anneal, minimize, add vacancy, kart input, invoke kart
 				9:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-				10:['p3',1.0], #--- restart from 9
+				10:['p3',1.0], #--- restart from 9: change Restart options in kmc.sh
 				5:[5], #--- minimize
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart

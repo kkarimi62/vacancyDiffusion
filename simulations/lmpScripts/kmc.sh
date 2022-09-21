@@ -22,7 +22,7 @@ setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperatu
 setenv NUMBER_ATOMS                   ${natom} #864     # The total number of atoms 
 setenv SIMULATION_BOX                ${lx} #21.47   # The size of the simulation box (x, y and z)
 setenv NSPECIES                         1#5#3     # The number of different atom types (default: 2)
-setenv ATOMIC_SYMBOLS					"Ni"#"Ni Co Cr Fe Mn"#"Ni Co Cr"
+setenv ATOMIC_SYMBOLS					"Ni Co Cr Fe Mn"#"Ni Co Cr"
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
