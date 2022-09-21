@@ -85,7 +85,8 @@ if __name__ == '__main__':
                                         2.0:'kmcUniqueCRYST.sh', #--- bash script
 				} 
 	#
-	Variable = {
+	def SetVariables():
+		Variable = {
 				0:' -var natoms 100000 -var cutoff 3.52 -var ParseData 0  -var DumpFile dumpInit.xyz -var WriteData data_init.txt',
 				6:' -var T 300 -var DataFile Equilibrated_300.dat',
 				4:' -var T 600.0 -var t_sw 20.0 -var DataFile Equilibrated_600.dat -var nevery 100 -var ParseData 1 -var WriteData swapped_600.dat', 
@@ -104,6 +105,7 @@ if __name__ == '__main__':
                                  1.0:' -x DataFile=data_minimized.txt',
                                  2.0:' -x DataFile=data_minimized.txt',
 				} 
+		return Variable
 	#--- different scripts in a pipeline
 	indices = {
 				0:[5,'p4',7,'p3',1.0], #--- minimize, add vacancy, thermalize, kart input, invoke kart
@@ -119,7 +121,7 @@ if __name__ == '__main__':
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
 			  }[9]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
-	Variables = list(map(lambda x:Variable[x], indices))
+#	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
 #        print('EXEC=',EXEC)
 	#
@@ -135,7 +137,8 @@ if __name__ == '__main__':
 	# --- loop for submitting multiple jobs
 	counter = 0
 	for irun in xrange( nruns ):
-#               cutoff = cutoffs[ irun ]
+		Variable = SetVariables()
+		Variables = list(map(lambda x:Variable[x], indices))
 		print ' i = %s' % counter
 		writPath = os.getcwd() + '/%s/Run%s' % ( jobname, counter ) # --- curr. dir
 		os.system( 'mkdir -p %s' % ( writPath ) ) # --- create folder
