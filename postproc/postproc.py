@@ -23,11 +23,11 @@ if __name__ == '__main__':
 #
 	runs	 = [0]
 	jobname  = {
-				'3':'NiNatom16KTemp1300K', 
+				'3':'CantorNatom16KTemp1000K_ensemble', 
 				}['3']
 	DeleteExistingFolder = True
 	readPath = os.getcwd() + {
-								'3':'/../simulations/NiNatom16KTemp1300K',
+								'3':'/../simulations/CantorNatom16KTemp1000K_ensemble',
  							}['3'] #--- source
 	EXEC_DIR = '.'     #--- path for executable file
 	durtn = '23:59:59'
