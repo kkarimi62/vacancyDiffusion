@@ -21,7 +21,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
 if __name__ == '__main__':
 	import os
 #
-	runs	 = [0]
+	runs	 = [0,1,2]
 	jobname  = {
 				'3':'CantorNatom16KTemp1000K_ensemble', 
 				}['3']
