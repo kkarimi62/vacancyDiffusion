@@ -24,11 +24,13 @@ if __name__ == '__main__':
 	runs	 = [0,1,2]
 	jobname  = {
 				'3':'CantorNatom16KTemp1000K_ensemble', 
-				}['3']
+				'4':'CantorNatom16KTemp1000K_ensemble_min', 
+				}['4']
 	DeleteExistingFolder = True
 	readPath = os.getcwd() + {
 								'3':'/../simulations/CantorNatom16KTemp1000K_ensemble',
- 							}['3'] #--- source
+								'4':'/../simulations/CantorNatom16KTemp1000K_ensemble_min',
+ 							}['4'] #--- source
 	EXEC_DIR = '.'     #--- path for executable file
 	durtn = '23:59:59'
 	mem = '8gb'
