@@ -7,7 +7,8 @@ if __name__ == '__main__':
 	string=open('simulations.py').readlines() #--- python script
 	#---
 #	PHI = dict(zip(range(11),np.linspace(1000,1400,11)))
-	PHI = dict(zip(range(11),np.arange(300,1000,100)))
+#	PHI = dict(zip(range(11),np.arange(300,1000,100)))
+	PHI = dict(zip(range(11),np.arange(1400,2100,100)))
 #		{
 #             '0':1,
 #             '1':2**3,
