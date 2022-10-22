@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = 3
+	nruns	 = 8
 	#
 	nThreads = 8
 	nNode	 = 1
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'NiNatom16KTemp1300K', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'CantorNatom16KTemp1300K_ensemble_min', 
+				3:'CantorNatom16KTemp1400K_ensemble_min', 
 			   }[3]
 	sourcePath = os.getcwd() +\
 				{	
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 				'p0':' swapped_600.dat 10.0 %s'%(os.getcwd()+'/../postprocess'),
 				'p1':' swapped_600.dat ElasticConst.txt DumpFileModu.xyz %s'%(os.getcwd()+'/../postprocess'),
 				'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
-				'p3':' data_minimized.txt init_xyz.conf %s 1300.0'%(os.getcwd()+'/lmpScripts'),
+				'p3':' data_minimized.txt init_xyz.conf %s 1400.0'%(os.getcwd()+'/lmpScripts'),
 				'p4':' data_minimized.txt data_minimized.txt %s'%(os.getcwd()+'/lmpScripts'),
                                  1.0:' -x DataFile=data_minimized.txt',
                                  2.0:' -x DataFile=data_minimized.txt',
