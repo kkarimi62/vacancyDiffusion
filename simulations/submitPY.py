@@ -6,7 +6,7 @@ if __name__ == '__main__':
 	lnums = [ 37, 103   ]
 	string=open('simulations.py').readlines() #--- python script
 	#---
-	PHI = dict(zip(range(11),np.linspace(1000,1400,11)))
+	PHI = dict(zip(range(11),np.linspace(1000,1400,6)))
 #	PHI = dict(zip(range(11),np.arange(300,1000,100)))
 #	PHI = dict(zip(range(11),np.arange(1400,2100,100)))
 #		{
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 			#---	
 			#---	densities
 				inums = lnums[ 0 ] - 1
-				string[ inums ] = "\t3:\'CantorNatom16KTemp%sK_ensemble_min_rcut\',\n"%(int(PHI[iphi])) #--- change job name
+				string[ inums ] = "\t3:\'CantorNatom16KTemp%sKEnsemble8\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
 				string[ inums ] = "\t\'p3\':\' data_minimized.txt init_xyz.conf"+" %"+"s"+" %s\'%%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])
