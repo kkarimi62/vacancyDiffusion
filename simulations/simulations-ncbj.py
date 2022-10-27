@@ -14,7 +14,7 @@ def makeOAR( EXEC_DIR, node, core, time ):
 			print >> someFile, "python3 %s %s\n"%(script, var)
 		elif execc == 'kmc':
 			print >> someFile, "export PathEam=${MEAM_library_DIR}\nexport INC=%s\nexport %s\n"%(SCRPT_DIR,var)
-			print >> someFile, "source %s \n"%(script)
+			print >> someFile, "source %s \n"%('kmc_bash.sh')
 			print >> someFile, "srun %s\n"%(kmc_exec)
 			
 	someFile.close()										  
@@ -81,6 +81,7 @@ if __name__ == '__main__':
 					'p2':'DislocateEdge.py',
                                         'p3':'kartInput.py',
                                         'p4':'takeOneOut.py',
+                                        'p5':'bash-to-csh.py',
                                         1.0:'kmc.sh', #--- bash script
                                         2.0:'kmcUniqueCRYST.sh', #--- bash script
 				} 
@@ -114,7 +115,7 @@ if __name__ == '__main__':
 				3:[5,7,4,'p0',10,'p1'],	   #--- local elastic constants (annealed)
 				4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
 				8:[5,7,4,51,'p4','p3',1.0], #--- minimize, thermalize, anneal, minimize, add vacancy, kart input, invoke kart
-				9:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
+				9:[5,'p4',51,'p3','p5',1.0], #--- minimize, add vacancy, kart input, kart.sh to bash shell ,invoke kart
 				10:['p3',1.0], #--- restart from 9: change Restart options in kmc.sh
 				5:[5], #--- minimize
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart

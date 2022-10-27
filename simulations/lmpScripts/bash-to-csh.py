@@ -11,6 +11,9 @@ for xstr,indx in zip(strs,range(len(strs))):
 		elif xstr.split()[2] == '.false.':
 			val = False
 		ystr = 'export %s=%s\n'%(xstr.split()[1],val)
+		strs[indx] = ystr
+	elif xstr[:3] == 'set':
+		ystr = xstr[4:] #'=%s\n'%(xstr.split()[1],val)
 #		print(xstr.split())
 #		print(ystr)
 
