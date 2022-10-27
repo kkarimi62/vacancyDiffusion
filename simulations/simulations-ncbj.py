@@ -103,6 +103,7 @@ if __name__ == '__main__':
 				'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
 				'p3':' data_minimized.txt init_xyz.conf %s 1400.0'%(os.getcwd()+'/lmpScripts'),
 				'p4':' data_minimized.txt data_minimized.txt %s'%(os.getcwd()+'/lmpScripts'),
+				'p5':' ',
                                  1.0:'DataFile=data_minimized.txt',
                                  2.0:'DataFile=data_minimized.txt',
 				} 
