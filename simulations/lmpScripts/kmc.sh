@@ -22,7 +22,7 @@ setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperatu
 setenv NUMBER_ATOMS                   ${natom} #864     # The total number of atoms 
 setenv SIMULATION_BOX                ${lx} #21.47   # The size of the simulation box (x, y and z)
 setenv NSPECIES                         5     # The number of different atom types (default: 2)
-setenv ATOMIC_SYMBOLS					"Ni Co Cr Fe Mn"#"Ni Co Cr"
+setenv ATOMIC_SYMBOLS					'Ni Co Cr Fe Mn' #"Ni Co Cr"
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
@@ -62,10 +62,10 @@ setenv UNITS_CONVERSION       'metal'      # Converts the energy and distance un
                                           # be very careful when choosing other units, you must change parameters of energy 
                                           # and distance (if it's not in Angstrom) in input files for LAMMPS 
  
- setenv UPDATE_VER_NEIB           TTL      # choose TTL for total force calculation and PAR for partial force
- setenv NEIB_CALC                 ALL      # choose ALL or VER
- setenv UPDATE_TOPO               TTL       # choose TTL or PAR
- setenv PAR_DISP_THRESH2       0.00001     # max displacement squared which triggers an update of the neighbor 
+setenv UPDATE_VER_NEIB           TTL      # choose TTL for total force calculation and PAR for partial force
+setenv NEIB_CALC                 ALL      # choose ALL or VER
+setenv UPDATE_TOPO               TTL       # choose TTL or PAR
+setenv PAR_DISP_THRESH2       0.00001     # max displacement squared which triggers an update of the neighbor 
                                            # list when using VER lists (default: 0.00001)                                                              
                                             
 ################ FIRE MINIMIZATION ###############
@@ -144,6 +144,3 @@ setenv OUTPUT_SPECIFIC   	     .true.
 unlimit stacksize
 ln -s ../../lmpScripts/${INPUT_LAMMPS_FILE} . #--- lmp script 
 /home/kamran.karimi1/Project/git/kart/src/KMCART_exec
-# xterm -e lldb -o run ../../src/KMCART_exec
-#../../src/KMCART_briareelammps_v1655 
-
