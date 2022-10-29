@@ -143,6 +143,7 @@ def isEmpty( val ):
 path = sys.argv[1]
 output = sys.argv[2]
 lib_path = sys.argv[3]
+nout = int(sys.argv[4])
 
 sys.path.append(lib_path)
 import LammpsPostProcess2nd as lp
@@ -155,8 +156,8 @@ box = lp.Box( BoxBounds = rd.BoxBounds[0], AddMissing = np.array([0.0,0.0,0.0] )
 
 #--- pick at random & remove
 df=pd.DataFrame(atoms.__dict__)
-df=df.sample(n=df.shape[0]-1)
-idout = np.sum(atoms.id)-np.sum(df['id']) #--- atom id taken out
+df=df.sample(n=df.shape[0]-nout)
+#idout = np.sum(atoms.id)-np.sum(df['id']) #--- atom id taken out
 atomd = lp.Atoms(**df.to_dict(orient='series'))
 atomd.id=np.arange(1,len(atomd.id)+1) #--- reset id
 boxd = lp.Box( BoxBounds = rd.BoxBounds[0], AddMissing = np.array([0.0,0.0,0.0] ))
