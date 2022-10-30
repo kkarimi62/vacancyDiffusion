@@ -6,7 +6,7 @@ if __name__ == '__main__':
 	lnums = [ 27, 32 ]
 	string=open('postproc.py').readlines() #--- python script
 	#---
-	PHI  = dict(zip(range(11),np.linspace(1000,1400,11)))
+	PHI  = dict(zip(range(6),np.linspace(1000,1400,6)))
 #	PHI = dict(zip(range(11),np.arange(300,1000,100)))
 #	PHI = dict(zip(range(1000),np.arange(1400,2100,100)))
 #		{ 
