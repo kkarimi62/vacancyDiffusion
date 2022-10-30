@@ -6,7 +6,7 @@ if __name__ == '__main__':
 	lnums = [ 37, 103   ]
 	string=open('simulations.py').readlines() #--- python script
 	#---
-	PHI = dict(zip(range(11),np.linspace(1000,1400,6)))
+	PHI = dict(zip(range(6),np.linspace(1000,2000,6)))
 #	PHI = dict(zip(range(11),np.arange(300,1000,100)))
 #	PHI = dict(zip(range(11),np.arange(1400,2100,100)))
 #		{
