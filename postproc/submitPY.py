@@ -6,8 +6,8 @@ if __name__ == '__main__':
 	lnums = [ 27, 32 ]
 	string=open('postproc.py').readlines() #--- python script
 	#---
-#	PHI  = dict(zip(range(6),np.linspace(1000,1400,6)))
-	PHI  = dict(zip(range(3),np.array([1240,1320,1400])))
+	PHI  = dict(zip(range(11),np.linspace(1000,1400,11)))
+#	PHI  = dict(zip(range(3),np.array([1240,1320,1400])))
 #	PHI = dict(zip(range(11),np.arange(300,1000,100)))
 #	PHI = dict(zip(range(1000),np.arange(1400,2100,100)))
 #		{ 
@@ -26,10 +26,10 @@ if __name__ == '__main__':
 	for key in PHI:
 			#---	
 				inums = lnums[ 0 ] - 1
-				string[ inums ] = "\t\'4\':\'CantorNatom16KTemp%sKEnsemble8\',\n" % (int(PHI[key])) #--- change job name
+				string[ inums ] = "\t\'4\':\'NiNatom16KTemp%sK\',\n" % (int(PHI[key])) #--- change job name
 		#---	densities
 				inums = lnums[ 1 ] - 1
-				string[ inums ] = "\t\'4\':\'/../simulations/CantorNatom16KTemp%sKEnsemble8',\n"%(int(PHI[key]))
+				string[ inums ] = "\t\'4\':\'/../simulations/NiNatom16KTemp%sK',\n"%(int(PHI[key]))
 		#
 				sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
 				os.system( 'python3 junk%s.py'%count )
