@@ -135,6 +135,7 @@ if __name__ == '__main__':
 		os.system( 'rm -rf %s' % jobname ) #--- rm existing
 	os.system( 'rm jobID.txt' )
 	# --- loop for submitting multiple jobs
+	kount = 0
 	for irun in nruns:
 		counter = irun
 		Variable = SetVariables()
@@ -142,7 +143,7 @@ if __name__ == '__main__':
 		print ' i = %s' % counter
 		writPath = os.getcwd() + '/%s/Run%s' % ( jobname, counter ) # --- curr. dir
 		os.system( 'mkdir -p %s' % ( writPath ) ) # --- create folder
-		if irun == 0: #--- cp to directory
+		if kount == 0: #--- cp to directory
 			path=os.getcwd() + '/%s' % ( jobname)
 			os.system( 'ln -s %s/%s %s' % ( EXEC_DIR, EXEC_lmp, path ) ) # --- create folder & mv oar script & cp executable
 		#---
@@ -159,5 +160,5 @@ if __name__ == '__main__':
 						    --chdir %s -c %s -n %s %s/oarScript.sh >> jobID.txt'\
 						   % ( partition, mem, durtn, jobname, counter, jobname, counter, jobname, counter \
 						       , writPath, nThreads, nNode, writPath ) ) # --- runs oarScript.sh! 
-											 
+		kount += 1									 
 	os.system( 'mv jobID.txt %s' % ( os.getcwd() + '/%s' % ( jobname ) ) )
