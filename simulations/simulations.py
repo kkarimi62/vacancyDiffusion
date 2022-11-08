@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = 6
+	nruns	 = np.arange(7,9)
 	#
 	nThreads = 8
 	nNode	 = 1
@@ -130,13 +130,13 @@ if __name__ == '__main__':
 	mem = '22gb'
 	partition = ['gpu-v100','parallel','cpu2019','single'][2]
 	#--
-	DeleteExistingFolder = True
+	DeleteExistingFolder = False
 	if DeleteExistingFolder:
 		os.system( 'rm -rf %s' % jobname ) #--- rm existing
 	os.system( 'rm jobID.txt' )
 	# --- loop for submitting multiple jobs
-	counter = 0
-	for irun in xrange( nruns ):
+	for irun in nruns:
+		counter = irun
 		Variable = SetVariables()
 		Variables = list(map(lambda x:Variable[x], indices))
 		print ' i = %s' % counter
@@ -159,6 +159,5 @@ if __name__ == '__main__':
 						    --chdir %s -c %s -n %s %s/oarScript.sh >> jobID.txt'\
 						   % ( partition, mem, durtn, jobname, counter, jobname, counter, jobname, counter \
 						       , writPath, nThreads, nNode, writPath ) ) # --- runs oarScript.sh! 
-		counter += 1
 											 
 	os.system( 'mv jobID.txt %s' % ( os.getcwd() + '/%s' % ( jobname ) ) )
