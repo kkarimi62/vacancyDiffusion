@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = np.arange(7,9)
+	nruns	 = np.arange(6,8)
 	#
 	nThreads = 8
 	nNode	 = 1
