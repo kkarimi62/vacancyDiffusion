@@ -25,17 +25,17 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = np.arange(6,8)
+	nruns	 = [0,1,2]#np.arange(6,8)
 	#
 	nThreads = 8
 	nNode	 = 1
 	#
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
-				1:'NiNatom16KTemp1300K', 
+				1:'NiNatom16KTemp1400KTrajectories', 
 				2:'NiCoCrNatom10KTemp1300K', 
 				3:'CantorNatom16KTemp1400KDensity1Percent', 
-			   }[3]
+			   }[1]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
@@ -79,10 +79,10 @@ if __name__ == '__main__':
 					'p0':'partition.py', #--- python file
 					'p1':'WriteDump.py',
 					'p2':'DislocateEdge.py',
-                                        'p3':'kartInput.py',
-                                        'p4':'takeOneOut.py',
-                                        1.0:'kmc.sh', #--- bash script
-                                        2.0:'kmcUniqueCRYST.sh', #--- bash script
+                    'p3':'kartInput.py',
+                    'p4':'takeOneOut.py',
+                     1.0:'kmc.sh', #--- bash script
+                     2.0:'kmcUniqueCRYST.sh', #--- bash script
 				} 
 	#
 	def SetVariables():
@@ -102,8 +102,8 @@ if __name__ == '__main__':
 				'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
 				'p3':' data_minimized.txt init_xyz.conf %s 1400.0'%(os.getcwd()+'/lmpScripts'),
 				'p4':' data_minimized.txt data_minimized.txt %s 1'%(os.getcwd()+'/lmpScripts'),
-                                 1.0:' -x DataFile=data_minimized.txt',
-                                 2.0:' -x DataFile=data_minimized.txt',
+                 1.0:' -x DataFile=data_minimized.txt',
+                 2.0:' -x DataFile=data_minimized.txt',
 				} 
 		return Variable
 	#--- different scripts in a pipeline
