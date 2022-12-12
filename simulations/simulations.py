@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = [0,1,2]#np.arange(6,8)
+	nruns	 = [0]#np.arange(6,8)
 	#
 	nThreads = 8
 	nNode	 = 1
@@ -34,8 +34,8 @@ if __name__ == '__main__':
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'CantorNatom16KTemp1400KTrajectories', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'CantorNatom16KTemp1400KDensity1Percent', 
-			   }[1]
+				3:'test', 
+			   }[3]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
