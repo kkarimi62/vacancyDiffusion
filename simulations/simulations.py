@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	#
 	jobname  = {
 				0:'NiCoCrNatom1KTemp0K', 
-				1:'NiNatom16KTemp1400KTrajectories', 
+				1:'CantorNatom16KTemp1400KTrajectories', 
 				2:'NiCoCrNatom10KTemp1300K', 
 				3:'CantorNatom16KTemp1400KDensity1Percent', 
 			   }[1]
