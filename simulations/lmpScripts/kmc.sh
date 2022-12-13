@@ -127,6 +127,20 @@ setenv CHECK_INI_SAD_CONNECTIVITY .true. # When GENERIC saddle is found, pushes 
                                           #  and minimizes.
                                           # If minimized config. not the same as the initial one, the saddle is rejected.
 
+##################################### Specific event parameters ########################
+
+#setenv MAX_HISTO                 20       # The number of histogram bins (default: 100)
+#setenv REFINE_PUSH               0.1       # The ratio of the saddle-final distance pushed before minimizing a SPEC event
+#setenv OUTPUT_SPECIFIC           .false.  # IF true, will create a SPEC_EVENT_DIR and output two txt files for each SPEC event found
+#setenv SPEC_EVENTS_DIR  'SPEC_EVENTS_DIR' # Name of the SPEC_EVENT_DIR directory
+#setenv MAX_SPEC_EV_NBRE          40       # The min number of spec events per atom in memory (if more, array is doubled, tripled, etc.
+)
+#setenv REFINE_ATTEMPTS            2       # The number of attempts to refine a generic event (default: 2)
+#setenv MIN_REFINE_BARRIER                 # minimal barrier to be refined, all barriers lower are cloned (default: 0.25d0 * Bconst*temperature)
+#setenv BARRIER_CHANGE_THRESH              # Maximum acceptable change in barrier (in %) for refined events comp. to original GEN (default: not used)
+#setenv BARRIER_CHANGE_MIN                 # Minimum barrier needed to use BARRIER_CHANGE_THRESH in eV (default: 0.1 eV)
+
+
 ############### Printing details ######################################################################
 
 setenv ALLCONF_WITH_SADDLE           .true.
