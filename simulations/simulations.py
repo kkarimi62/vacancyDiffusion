@@ -25,7 +25,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = [0]#np.arange(6,8)
+	nruns	 = np.arange(0,8)
 	#
 	nThreads = 8
 	nNode	 = 1
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'CantorNatom16KTemp1400KTrajectories', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'test', 
+				3:'CantorNatom16KTemp1400KEnsemble8', 
 			   }[3]
 	sourcePath = os.getcwd() +\
 				{	
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 				5:[5], #--- minimize
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-			  }[9]
+			  }[10]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 #	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
