@@ -26,9 +26,9 @@ setenv ATOMIC_SYMBOLS					"Ni Co Cr" #'Ni Co Cr Fe Mn' #"Ni Co Cr"
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
-setenv RESTART_KMC                   .true.#kamfalse.  # IF true, restart from previous run
+setenv RESTART_KMC                   .true. #kamfalse.  # IF true, restart from previous run
 setenv RESTART_FILE               "this_conf" # The file name used to continue a simulation from where it was last stopped
-setenv RESTART_IMPORT                .true.#false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
+setenv RESTART_IMPORT                .true. #false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
 setenv NEW_CATALOGUE                 .false.  # IF true, will continue simulation but will rebuild event catalogue from scratch
 
 
@@ -134,7 +134,7 @@ setenv CHECK_INI_SAD_CONNECTIVITY .true. # When GENERIC saddle is found, pushes 
 #setenv OUTPUT_SPECIFIC           .false.  # IF true, will create a SPEC_EVENT_DIR and output two txt files for each SPEC event found
 #setenv SPEC_EVENTS_DIR  'SPEC_EVENTS_DIR' # Name of the SPEC_EVENT_DIR directory
 #setenv MAX_SPEC_EV_NBRE          40       # The min number of spec events per atom in memory (if more, array is doubled, tripled, etc.
-)
+
 #setenv REFINE_ATTEMPTS            2       # The number of attempts to refine a generic event (default: 2)
 #setenv MIN_REFINE_BARRIER                 # minimal barrier to be refined, all barriers lower are cloned (default: 0.25d0 * Bconst*temperature)
 #setenv BARRIER_CHANGE_THRESH              # Maximum acceptable change in barrier (in %) for refined events comp. to original GEN (default: not used)
