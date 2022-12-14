@@ -1,4 +1,4 @@
-	def makeOAR( EXEC_DIR, node, core, time ):
+def makeOAR( EXEC_DIR, node, core, time ):
 		someFile = open( 'oarScript.sh', 'w' )
 		print >> someFile, '#!/bin/bash\n'
 		print >> someFile, 'EXEC_DIR=%s\n' %( EXEC_DIR )
