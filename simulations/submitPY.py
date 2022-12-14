@@ -3,7 +3,7 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 	#---
-	lnums = [ 34, 104   ]
+	lnums = [ 33, 104   ]
 	string=open('simulations-ncbj.py').readlines() #--- python script
 	#---
 	PHI = dict(zip(range(6),np.linspace(1000,2000,6)))
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 			#---	
 			#---	densities
 				inums = lnums[ 0 ] - 1
-				string[ inums ] = "\t1:\'NiNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
+				string[ inums ] = "\t0:\'NiCoCrNatom1KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
 				string[ inums ] = "\t\'p3\':\' data_minimized.txt init_xyz.conf"+" %"+"s"+" %s\'%%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])
