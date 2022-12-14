@@ -161,6 +161,7 @@ if __name__ == '__main__':
 								--chdir %s --ntasks-per-node=%s --nodes=%s %s/oarScript.sh >> jobID.txt'\
 						   % ( partition, mem, durtn, jobname, counter, jobname, counter, jobname, counter \
 						       , writPath, nThreads, nNode, writPath ) ) # --- runs oarScript.sh! 
-		counter += 1
+			counter += 1
 											 
-	os.system( 'mv jobID.txt %s' % ( os.getcwd() + '/%s' % ( jobname ) ) )
+		
+		os.system( 'mv jobID.txt %s' % ( os.getcwd() + '/%s' % ( jobname ) ) )
