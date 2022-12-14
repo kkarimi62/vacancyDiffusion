@@ -20,7 +20,7 @@ def makeOAR( EXEC_DIR, node, core, time ):
 		someFile.close()										  
 
 
-	if __name__ == '__main__':
+if __name__ == '__main__':
 		import os
 		import numpy as np
 
