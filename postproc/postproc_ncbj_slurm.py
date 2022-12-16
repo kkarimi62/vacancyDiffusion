@@ -2,14 +2,12 @@ from backports import configparser
 def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
 	#--- parse conf. file
 	confParser = configparser.ConfigParser()
-	confParser.read('config.ini')
+	confParser.read('configuration.ini')
 	#--- set parameters
-	confParser.set('parameters','itime0','0')
-	confParser.set('parameters','itime','2000000')
-	confParser.set('input files','path',argv)
-	confParser.set('input files','fileIndex','5')
+	confParser.set('input files','lib_path',os.getcwd()+'/../../HeaDef/postprocess')
+	confParser.set('input files','input_path',argv)
 	#--- write
-	confParser.write(open('config.ini','w'))	
+	confParser.write(open('configuration.ini','w'))	
 	#--- set environment variables
 
 	someFile = open( 'oarScript.sh', 'w' )
