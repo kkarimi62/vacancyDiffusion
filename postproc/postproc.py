@@ -24,13 +24,13 @@ if __name__ == '__main__':
 	runs	 = range(8)
 	jobname  = {
 				'3':'NiCoCrNatom1KTemp1000K', 
-				'4':'CantorNatom16KTemp1400K_ensemble_min', 
-				}['3']
+				'4':'CantorNatom16KTemp1400KEnsemble8', 
+				}['4']
 	DeleteExistingFolder = True
 	readPath = os.getcwd() + {
 								'3':'/../simulations/NiCoCrNatom1KTemp1000K',
-								'4':'/../simulations/CantorNatom16KTemp1400K_ensemble_min',
- 							}['3'] #--- source
+								'4':'/../simulations/CantorNatom16KTemp1000KEnsemble8',
+ 							}['4'] #--- source
 	EXEC_DIR = '.'     #--- path for executable file
 	durtn = '23:59:59'
 	mem = '8gb'
