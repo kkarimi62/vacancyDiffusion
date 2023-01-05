@@ -21,16 +21,16 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
 if __name__ == '__main__':
 	import os
 #
-	runs	 = range(8)
+	runs	 = range(1)#8)
 	jobname  = {
-				'3':'NiCoCrNatom1KTemp1000K', 
+				'3':'NiNatom16KTemp1400K', 
 				'4':'CantorNatom16KTemp1400KEnsemble8', 
-				}['4']
+				}['3']
 	DeleteExistingFolder = True
 	readPath = os.getcwd() + {
-								'3':'/../simulations/NiCoCrNatom1KTemp1000K',
+								'3':'/../simulations/NiNatom16KTemp1400K',
 								'4':'/../simulations/CantorNatom16KTemp1000KEnsemble8',
- 							}['4'] #--- source
+ 							}['3'] #--- source
 	EXEC_DIR = '.'     #--- path for executable file
 	durtn = '23:59:59'
 	mem = '8gb'
