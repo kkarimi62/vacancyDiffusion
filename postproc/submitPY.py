@@ -11,7 +11,7 @@ if __name__ == '__main__':
 	PHI  = dict(zip(range(6),np.linspace(1000,2000,6)))
 #	PHI  = dict(zip(range(11),np.arange(1000,1440,40)))
 #		{ 
-#            '0':'FeNi',
+#             '0':'FeNi',
 #            '1':'CoNiFe',
 #           '2':'CoNiCrFe',
 #           '3' :'CoCrFeMn',
