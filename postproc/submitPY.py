@@ -27,11 +27,11 @@ if __name__ == '__main__':
 			#---	
 				inums = lnums[ 0 ] - 1
 #				string[ inums ] = "\t\'3\':\'NiNatom16KTemp%sK\',\n" % (int(PHI[key])) #--- change job name
-				string[ inums ] = "\t\'1\':\'NiCoCrNatom1KTemp%sK\',\n" % (int(PHI[key])) #--- change job name
+				string[ inums ] = "\t\'1\':\'NiNatom1KTemp%sK\',\n" % (int(PHI[key])) #--- change job name
 		#---	densities
 				inums = lnums[ 1 ] - 1
 #				string[ inums ] = "\t\'3\':\'/../simulations/NiNatom16KTemp%sK\',\n"%(int(PHI[key]))
-				string[ inums ] = "\t\'1\':\'/../simulations/NiCoCrNatom1KTemp%sK\',\n"%(int(PHI[key]))
+				string[ inums ] = "\t\'1\':\'/../simulations/NiNatom1KTemp%sK\',\n"%(int(PHI[key]))
 		#
 				sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
 				os.system( 'python3 junk%s.py'%count )
