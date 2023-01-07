@@ -27,7 +27,7 @@ if __name__ == '__main__':
 			#---	
 			#---	densities
 				inums = lnums[ 0 ] - 1
-				string[ inums ] = "\t1:\'NiNatom1KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
+				string[ inums ] = "\t1:\'NiNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 #				string[ inums ] = "\t3:\'CantorNatom16KTemp%sKEnsemble8\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
