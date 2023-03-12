@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	keyss= list(PHI.keys())
 	keyss.sort()
 	for iphi in keyss:
-			temp = int(PHI[iphi])
+				temp = int(PHI[iphi])
 			#---	
 			#---	densities
 				inums = lnums[ 0 ] - 1
