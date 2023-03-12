@@ -3,7 +3,8 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 	#---
-	lnums = [ 33, 96   ]
+#	lnums = [ 33, 96   ]
+	lnums = [ 36, 96   ]
 #	lnums = [ 37, 103   ]
 	string=open('simulations-ncbj.py').readlines() #--- python script
 #	string=open('simulations.py').readlines() #--- python script
@@ -29,7 +30,8 @@ if __name__ == '__main__':
 				inums = lnums[ 0 ] - 1
 #				string[ inums ] = "\t1:\'NiNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 #				string[ inums ] = "\t3:\'CantorNatom16KTemp%sKEnsemble8\',\n"%(int(PHI[iphi])) #--- change job name
-				string[ inums ] = "\t0:\'NiMultTemp/Temp%sK\',\n"%(int(PHI[iphi])) #--- change job name
+#				string[ inums ] = "\t0:\'NiMultTemp/Temp%sK\',\n"%(int(PHI[iphi])) #--- change job name
+				string[ inums ] = "\t3:\'NiCoCrMultTemp/Temp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
 #				string[ inums ] = "\t\'p3\':\' data_minimized.txt init_xyz.conf"+" %"+"s"+" %s\'%%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])

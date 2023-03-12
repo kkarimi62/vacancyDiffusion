@@ -33,8 +33,8 @@ if __name__ == '__main__':
 					0:'NiMultTemp/Temp600K', 
 					1:'NiNatom16KTemp1400K', 
 					2:'NiCoCrNatom1KTemp1400K', 
-					3:'CantorNatom128KTemp1400K', 
-				   }[0]
+					3:'NicoCrMultTemp/Temp600K',#'CantorNatom128KTemp1400K', 
+				   }[3]
 		sourcePath = os.getcwd() +\
 					{	
 						0:'/junk',
