@@ -31,7 +31,7 @@ if __name__ == '__main__':
 #				string[ inums ] = "\t1:\'NiNatom16KTemp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 #				string[ inums ] = "\t3:\'CantorNatom16KTemp%sKEnsemble8\',\n"%(int(PHI[iphi])) #--- change job name
 #				string[ inums ] = "\t0:\'NiMultTemp/Temp%sK\',\n"%(int(PHI[iphi])) #--- change job name
-				string[ inums ] = "\t3:\'CantorMultTemp/Temp%sK\',\n"%(int(PHI[iphi])) #--- change job name
+				string[ inums ] = "\t3:\'Ni2ndMultTemp/Temp%sK\',\n"%(int(PHI[iphi])) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
 #				string[ inums ] = "\t\'p3\':\' data_minimized.txt init_xyz.conf"+" %"+"s"+" %s\'%%(os.getcwd()+\'/lmpScripts\'),\n"%(PHI[iphi])
