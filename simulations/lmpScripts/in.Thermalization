@@ -39,6 +39,10 @@ fix                      f1        all        npt temp   $T  $T  ${damp_t}  iso 
 dump        1 all custom ${nevery} ${OUT_PATH}/${DumpFile} id type x y z c_1[1] c_1[2] c_1[3] c_1[4] c_1[5] c_1[6]
 dump_modify 1 flush yes format line "%d %d %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e %4.3e"
 
+#--- include thermo info
+include ${INC}/thermo.mod
+
+
 #dump                      mydump all custom ${nevery} equilibrium.dump id type x y z
 run                       ${Nstep}
 
