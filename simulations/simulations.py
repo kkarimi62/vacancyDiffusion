@@ -34,15 +34,16 @@ if __name__ == '__main__':
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'CantorNatom16KTemp1400KTrajectories', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'topoIgnore',#'cantorNatom16KTemp1400K', 
-			   }[3]
+				3:'topoIgnore',
+                4:'cantorNatom16KTemp1400K', 
+			   }[4]
 	sourcePath = os.getcwd() +\
 				{	
 					0:'/junk',
 					1:'/../postprocess/NiCoCrNatom1K',
 					2:'/NiCoCrNatom1KTemp0K',
-					5:'/dataFiles/reneData',
-				}[0] #--- must be different than sourcePath. set it to 'junk' if no path
+					5:'/topoIgnore',
+				}[5] #--- must be different than sourcePath. set it to 'junk' if no path
         #
 	sourceFiles = { 0:False,
 					1:['Equilibrated_300.dat'],
@@ -52,7 +53,7 @@ if __name__ == '__main__':
 					5:['data_init.txt','ScriptGroup.0.txt'], #--- only one partition! for multiple ones, use 'submit.py'
 					6:['FeNi_2000.dat'], 
                     7:['sortieproc.0'], 
-				 }[0] #--- to be copied from the above directory. set it to '0' if no file
+				 }[7] #--- to be copied from the above directory. set it to '0' if no file
 	#
 	EXEC_DIR = '/home/kamran.karimi1/Project/git/lammps2nd/lammps/src' #--- path for executable file
 	#
@@ -124,10 +125,10 @@ if __name__ == '__main__':
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
 				9:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-                92:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, minimize, kart input ,invoke kart
                 93:[5,'p4','p7','p3',1.0], #--- minimize, add vacancy, create Topo_ignore, kart input ,invoke kart
 				91:[5,'p3',3.0], #--- minimize, kart input, invoke kart
-			  }[91]
+                92:[5,'p4',51,'p7','p3',1.0], #--- minimize, add vacancy, minimize, create Topo_ignore, kart input ,invoke kart
+			  }[92]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 #	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
