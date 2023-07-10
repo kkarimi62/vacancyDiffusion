@@ -26,9 +26,9 @@ setenv ATOMIC_SYMBOLS					'Ni Co Cr Fe Mn' #"Ni Co Cr" #'Ni Co Cr Fe Mn' #"Ni Co
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
-setenv RESTART_KMC                   .true.  # IF true, restart from previous run
+setenv RESTART_KMC                   .false.  # IF true, restart from previous run
 setenv RESTART_FILE               "this_conf" # The file name used to continue a simulation from where it was last stopped
-setenv RESTART_IMPORT                .true.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
+setenv RESTART_IMPORT                .false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
 setenv NEW_CATALOGUE                 .false.  #don't change! IF true, will continue simulation but will rebuild event catalogue from scratch
 
 
@@ -42,11 +42,12 @@ setenv MIN_SIG_BARRIER                 0.1    # Max height of barrier and inv. b
 setenv TOPO_RADIUS                    4.0     # radius for topology cluster > CRYST_TOPO_RADIUS 
 setenv MAX_TOPO_CUTOFF                3.0     # length-cutoff used by default to link two atoms
 setenv MIN_TOPO_CUTOFF                2.2     # minimal length cutoff used when looking at secondary topologies 
-setenv CRYST_TOPOID                   1079097  # topo id of the crystalline-like topologies
+#setenv CRYST_TOPOID                   1079097  # topo id of the crystalline-like topologies
 setenv CRYST_TOPO_RADIUS              3.0     # radius for crystal-like topologies (default: 4.0 A) 
 setenv TOPOLOGY_FILE 				  'Topologies' # Store info about topologies
 setenv TOPO_STAT_FILE 				  'topos.list' # Store statistics about topologies
-#setenv MAX_NODES_GRAPH				  22 #kam
+setenv EVENT_IGNORE_FILE 			  'Event_ignore' # File where events to ignore are stored# (default: Event_ignore)
+setenv EVENT_REMOVE_FILE 			  'Event_remove' # File where events ids to remove from catalogue are stored #(applied at #setenv MAX_NODES_GRAPH				  22 #kam
 setenv UNIQUE_CRYST_STRUCT	.true. #kam
 
 #################################### Force calculations ###############################
@@ -143,13 +144,13 @@ setenv CHECK_INI_SAD_CONNECTIVITY .true. # When GENERIC saddle is found, pushes 
 
 ############### Printing details ######################################################################
 
-setenv ALLCONF_WITH_SADDLE           .true.
-setenv PRINT_DETAILS                 .true.  # Prints the details of activation and minimization 
+setenv ALLCONF_WITH_SADDLE           .false.
+setenv PRINT_DETAILS                 .false.  # Prints the details of activation and minimization 
 setenv MINSAD_DETAILS                .false.  # Prints the details of activation and minimization 
-setenv USE_TXT_EVENTFILE             .true.
-setenv STATISTICS                    .true.   # Write statistics about force and event calculation  
-setenv OUTPUT_CONFIG_EVENTS          .true.   # IF true, will create a txt file with the list of all the topologies and events after each KMC step
-setenv OUTPUT_SPECIFIC   	     .true.
+setenv USE_TXT_EVENTFILE             .false.
+setenv STATISTICS                    .false.   # Write statistics about force and event calculation  
+setenv OUTPUT_CONFIG_EVENTS          .false.   # IF true, will create a txt file with the list of all the topologies and events after each KMC step
+setenv OUTPUT_SPECIFIC   	     .false.
 #setenv OUTPUT_NEB_GEN_EVENT        .true.    # Can be useful
 
  
