@@ -123,8 +123,9 @@ if __name__ == '__main__':
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
 				9:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
 				91:[5,'p3',1.0], #--- minimize, kart input, invoke kart
-                92:[5,'p4','p7','p3',1.0], #--- minimize, add vacancy, create Topo_ignore, kart input ,invoke kart
-			  }[91]
+                92:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, minimize, kart input ,invoke kart
+                93:[5,'p4','p7','p3',1.0], #--- minimize, add vacancy, create Topo_ignore, kart input ,invoke kart
+			  }[92]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 #	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
@@ -135,7 +136,7 @@ if __name__ == '__main__':
 	mem = '22gb'
 	partition = ['gpu-v100','parallel','cpu2019','single'][2]
 	#--
-	DeleteExistingFolder = False
+	DeleteExistingFolder = True
 	if DeleteExistingFolder:
 		os.system( 'rm -rf %s' % jobname ) #--- rm existing
 	os.system( 'rm jobID.txt' )
