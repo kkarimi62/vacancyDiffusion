@@ -34,7 +34,7 @@ if __name__ == '__main__':
 				0:'NiCoCrNatom1KTemp0K', 
 				1:'CantorNatom16KTemp1400KTrajectories', 
 				2:'NiCoCrNatom10KTemp1300K', 
-				3:'cantorNatom16KTemp1400K', 
+				3:'topoIgnore',#'cantorNatom16KTemp1400K', 
 			   }[3]
 	sourcePath = os.getcwd() +\
 				{	
