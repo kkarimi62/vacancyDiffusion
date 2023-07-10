@@ -98,7 +98,7 @@ setenv INCREMENT_SIZE             0.1     # Overall scale for the increment move
 
 setenv INITIAL_STEP_SIZE          1.00    # Size of initial displacement, in A
 setenv BASIN_FACTOR               3.00
-setenv MIN_NUMBER_KSTEPS          3       # Min. number of ksteps before calling lanczos
+setenv MIN_NUMBER_KSTEPS          10 #3       # Min. number of ksteps before calling lanczos
 setenv MAX_PERP_MOVES_BASIN       6       # Maximum number of perpendicular steps leaving basin
 setenv MAX_PERP_MOVES_ACTIV       20       # Maximum number of perpendicular steps during activation
 setenv MAX_ITER_BASIN             40      # Maximum number of iteraction for leaving the basin (kter)
