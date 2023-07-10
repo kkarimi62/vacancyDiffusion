@@ -86,7 +86,7 @@ if __name__ == '__main__':
                     'p7':'getTopoDefectFree.py',
                      1.0:'kmc.sh', #--- bash script
                      2.0:'kmcUniqueCRYST.sh', 
-                     3.0:'kmcUniqueCRYST.sh',
+                     3.0:'kmcUniqueCRYST2nd.sh',
 				} 
 	#
 	def SetVariables():
