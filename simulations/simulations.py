@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
 	nruns	 = [0] #np.arange(0,8)
 	#
-	nThreads = 12 #16 #8
+	nThreads = 16 #8
 	nNode	 = 1
 	#
 	jobname  = {
@@ -135,9 +135,9 @@ if __name__ == '__main__':
 #        print('EXEC=',EXEC)
 	#
 	EXEC_lmp = ['lmp_mpi','lmp_serial'][0]
-	durtn = ['95:59:59','00:09:59','167:59:59'][ 1 ]
+	durtn = ['95:59:59','00:59:59','167:59:59'][ 1 ]
 	mem = '22gb'
-	partition = ['gpu-v100','parallel','cpu2019','single'][1]
+	partition = ['gpu-v100','parallel','cpu2019','single'][2]
 	#--
 	DeleteExistingFolder = True
 	if DeleteExistingFolder:
