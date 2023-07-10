@@ -52,7 +52,7 @@ if __name__ == '__main__':
 					5:['data_init.txt','ScriptGroup.0.txt'], #--- only one partition! for multiple ones, use 'submit.py'
 					6:['FeNi_2000.dat'], 
                     7:['sortieproc.0'], 
-				 }[7] #--- to be copied from the above directory. set it to '0' if no file
+				 }[0] #--- to be copied from the above directory. set it to '0' if no file
 	#
 	EXEC_DIR = '/home/kamran.karimi1/Project/git/lammps2nd/lammps/src' #--- path for executable file
 	#
@@ -84,7 +84,8 @@ if __name__ == '__main__':
                     'p4':'takeOneOut.py',
                     'p7':'getTopoDefectFree.py',
                      1.0:'kmc.sh', #--- bash script
-                     2.0:'kmcUniqueCRYST.sh', #--- bash script
+                     2.0:'kmcUniqueCRYST.sh', 
+                     3.0:'kmcUniqueCRYST.sh',
 				} 
 	#
 	def SetVariables():
@@ -107,6 +108,7 @@ if __name__ == '__main__':
                 'p7':' sortieproc.0 0 Topo_ignore',
                  1.0:' -x DataFile=data_minimized.txt',
                  2.0:' -x DataFile=data_minimized.txt',
+                 3.0:' -x DataFile=data_minimized.txt',
 				} 
 		return Variable
 	#--- different scripts in a pipeline
@@ -122,10 +124,10 @@ if __name__ == '__main__':
 				6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 				7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
 				9:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-				91:[5,'p3',1.0], #--- minimize, kart input, invoke kart
                 92:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, minimize, kart input ,invoke kart
                 93:[5,'p4','p7','p3',1.0], #--- minimize, add vacancy, create Topo_ignore, kart input ,invoke kart
-			  }[92]
+				91:[5,'p3',3.0], #--- minimize, kart input, invoke kart
+			  }[91]
 	Pipeline = list(map(lambda x:LmpScript[x],indices))
 #	Variables = list(map(lambda x:Variable[x], indices))
 	EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
