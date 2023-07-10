@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
 	nruns	 = [0] #np.arange(0,8)
 	#
-	nThreads = 16 #8
+	nThreads = 12 #16 #8
 	nNode	 = 1
 	#
 	jobname  = {
