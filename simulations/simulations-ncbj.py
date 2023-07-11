@@ -8,7 +8,7 @@ def makeOAR( EXEC_DIR, node, core, time ):
 		print >> someFile, 'export LD_LIBRARY_PATH=/mnt/opt/tools/cc7/lapack/3.5.0-x86_64-gcc46/lib:${LD_LIBRARY_PATH}\n'
 		#--- run python script 
 		for script,var,indx, execc in zip(Pipeline,Variables,range(100),EXEC):
-			if execc == 'lmp_g++_openmpi': #_mpi' or EXEC == 'lmp_serial':
+			if execc[:4] == 'lmp_': #_mpi' or EXEC == 'lmp_serial':
 				print >> someFile, "srun $EXEC_DIR/%s < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(execc,script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
 			elif execc == 'py':
 				print >> someFile, "python3 --version\npython3 %s %s\n"%(script, var)
@@ -24,9 +24,9 @@ if __name__ == '__main__':
 		import os
 		import numpy as np
 
-		nruns	 = 1#8
+		nruns	 = 1 #8
 		#
-		nThreads = 8
+		nThreads = 32
 		nNode	 = 1
 		#
 		jobname  = {
@@ -34,7 +34,8 @@ if __name__ == '__main__':
 					1:'NiNatom16KTemp1400K', 
 					2:'NiCoCrNatom1KTemp1400K', 
 					3:'Ni2ndMultTemp/Temp600K',#'NicoCrMultTemp/Temp600K',#'CantorNatom128KTemp1400K', 
-				   }[3]
+                    4:'cantorNatom16KTemp1400K2nd', 
+				   }[4]
 		sourcePath = os.getcwd() +\
 					{	
 						0:'/junk',
@@ -79,11 +80,11 @@ if __name__ == '__main__':
 						'p0':'partition.py', #--- python file
 						'p1':'WriteDump.py',
 						'p2':'DislocateEdge.py',
-											'p3':'kartInput.py',
-											'p4':'takeOneOut.py',
-											'p5':'bash-to-csh.py',
-											1.0:'kmc.sh', #--- bash script
-											2.0:'kmcUniqueCRYST.sh', #--- bash script
+                        'p3':'kartInput.py',
+                        'p4':'takeOneOut.py',
+                        'p5':'bash-to-csh.py',
+                        1.0:'kmc.sh', #--- bash script
+                        2.0:'kmcUniqueCRYST.sh', #--- bash script
 					} 
 		#
 		def SetVariables():
@@ -121,18 +122,19 @@ if __name__ == '__main__':
 					5:[5,7], #--- minimize, thermalize
 					6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
 					7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-				  }[5] #[9]
+				  }[9]
 		Pipeline = list(map(lambda x:LmpScript[x],indices))
 	#	Variables = list(map(lambda x:Variable[x], indices))
-		EXEC = list(map(lambda x:np.array(['lmp_g++_openmpi','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
 	#        print('EXEC=',EXEC)
 		#
 		EXEC_lmp = ['lmp_g++_openmpi'][0]
-		durtn = ['95:59:59','23:59:59','167:59:59'][ 1 ]
+		durtn = ['95:59:59','00:59:59','167:59:59'][ 1 ]
 		mem = '16gb' #'22gb'
-		partition = ['INTEL_PHI'][0]
+        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
 		#--
 		DeleteExistingFolder = True
+
+        EXEC = list(map(lambda x:np.array([EXEC_lmp,'py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
 		if DeleteExistingFolder:
 			os.system( 'rm -rf %s' % jobname ) #--- rm existing
 		os.system( 'rm jobID.txt' )
