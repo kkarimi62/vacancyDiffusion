@@ -25,9 +25,9 @@ if __name__ == '__main__':
 	import os
 	import numpy as np
 
-	nruns	 = [0] #np.arange(0,8)
+	nruns	 = [0,1,2] #np.arange(0,8)
 	#
-	nThreads = 16 #8
+	nThreads = 32 #16 #8
 	nNode	 = 1
 	#
 	jobname  = {
@@ -35,7 +35,7 @@ if __name__ == '__main__':
 				1:'CantorNatom16KTemp1400KTrajectories', 
 				2:'NiCoCrNatom10KTemp1300K', 
 				3:'topoIgnore',
-                4:'cantorNatom16KTemp1400K', 
+                4:'cantorNatom16KTemp1400K2nd', 
 			   }[4]
 	sourcePath = os.getcwd() +\
 				{	
