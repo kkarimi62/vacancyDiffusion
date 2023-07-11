@@ -158,6 +158,7 @@ setenv OUTPUT_SPECIFIC   	     .true.
  
 
 ############### Run the simulation ######################################################################
-unlimit stacksize
-ln -s ../../lmpScripts/${INPUT_LAMMPS_FILE} . #--- lmp script 
+unlimit stacksize 
+#ln -s ../../lmpScripts/${INPUT_LAMMPS_FILE} . #--- lmp script 
+ln -s ${INCLUDE}/${INPUT_LAMMPS_FILE} . #--- lmp script 
 /home/kamran.karimi1/Project/git/kart/src/KMCART_exec
