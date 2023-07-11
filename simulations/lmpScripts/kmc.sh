@@ -16,8 +16,8 @@ setenv INI_FILE_NAME             'init_xyz.conf'   # The file name containing th
  
 ###################################### Simulation Details ##################################################
 
-setenv NBRE_KMC_STEPS                1000       # The max number of KMC steps to be executed
-#setenv TOTAL_TIME                    100.0        # Maximum simulation time in seconds (def: 20 s)
+setenv NBRE_KMC_STEPS                10000       # The max number of KMC steps to be executed
+setenv TOTAL_TIME                    1000.0        # Maximum simulation time in seconds (def: 20 s)
 
 setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperature in kelvin
 
@@ -146,13 +146,13 @@ setenv CHECK_INI_SAD_CONNECTIVITY .true. # When GENERIC saddle is found, pushes 
 
 ############### Printing details ######################################################################
 
-setenv ALLCONF_WITH_SADDLE           .true.
-setenv PRINT_DETAILS                 .true.  # Prints the details of activation and minimization 
-setenv MINSAD_DETAILS                .true.  # Prints the details of activation and minimization 
-setenv USE_TXT_EVENTFILE             .true.
-setenv STATISTICS                    .true.   # Write statistics about force and event calculation  
-setenv OUTPUT_CONFIG_EVENTS          .true.   # IF true, will create a txt file with the list of all the topologies and events after each KMC step
-setenv OUTPUT_SPECIFIC   	     .true.
+setenv ALLCONF_WITH_SADDLE           .false.
+setenv PRINT_DETAILS                 .false.  # Prints the details of activation and minimization 
+setenv MINSAD_DETAILS                .false.  # Prints the details of activation and minimization 
+setenv USE_TXT_EVENTFILE             .false.
+setenv STATISTICS                    .false.   # Write statistics about force and event calculation  
+setenv OUTPUT_CONFIG_EVENTS          .false.   # IF true, will create a txt file with the list of all the topologies and events after each KMC step
+setenv OUTPUT_SPECIFIC   	     .false.
 #setenv OUTPUT_NEB_GEN_EVENT        .true.    # Can be useful
 
  
