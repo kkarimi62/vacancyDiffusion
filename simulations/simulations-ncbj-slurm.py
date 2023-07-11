@@ -8,8 +8,8 @@ def makeOAR( EXEC_DIR, node, core, time ):
     print >> someFile, 'export LD_LIBRARY_PATH=/mnt/opt/tools/cc7/lapack/3.5.0-x86_64-gcc46/lib:${LD_LIBRARY_PATH}\n'
         #--- run python script 
     for script,var,indx, execc in zip(Pipeline,Variables,range(100),EXEC):
-        if execc == 'lmp': #_mpi' or EXEC == 'lmp_serial':
-            print >> someFile, "mpirun --oversubscribe -np %s $EXEC_DIR/lmp_mpi < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(nThreads*nNode, script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
+        if execc[:4] == 'lmp_': #_mpi' or EXEC == 'lmp_serial':
+            print >> someFile, "time srun $EXEC_DIR/%s < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(execc,script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
         elif execc == 'py':
             print >> someFile, "python3 %s %s\n"%(script, var)
         elif execc == 'kmc':
@@ -129,7 +129,6 @@ if __name__ == '__main__':
               }[92]
     Pipeline = list(map(lambda x:LmpScript[x],indices))
 #	Variables = list(map(lambda x:Variable[x], indices))
-    EXEC = list(map(lambda x:np.array(['lmp','py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
 #        print('EXEC=',EXEC)
     #
     EXEC_lmp = ['lmp_g++_openmpi'][0]
@@ -138,6 +137,9 @@ if __name__ == '__main__':
     partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
     #--
     DeleteExistingFolder = True
+    #---
+    
+    EXEC = list(map(lambda x:np.array([EXEC_lmp,'py','kmc'])[[ type(x) == type(0), type(x) == type(''), type(x) == type(1.0) ]][0], indices))	
     if DeleteExistingFolder:
         os.system( 'rm -rf %s' % jobname ) #--- rm existing
     os.system( 'rm jobID.txt' )
