@@ -24,7 +24,7 @@ if __name__ == '__main__':
         import os
         import numpy as np
 
-        nruns	 = 1 #8
+        nruns	 = 3
         #
         nThreads = 32
         nNode	 = 1
@@ -34,7 +34,7 @@ if __name__ == '__main__':
                     1:'NiNatom16KTemp1400K', 
                     2:'NiCoCrNatom1KTemp1400K', 
                     3:'Ni2ndMultTemp/Temp600K',#'NicoCrMultTemp/Temp600K',#'CantorNatom128KTemp1400K', 
-                    4:'cantorNatom16KTemp1400K2nd', 
+                    4:'cantorNatom16KTemp1400K', 
                    }[4]
         sourcePath = os.getcwd() +\
                     {	
