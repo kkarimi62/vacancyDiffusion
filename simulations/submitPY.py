@@ -26,7 +26,7 @@ if __name__ == '__main__':
 			#---	
 			#---	densities
 				inums = lnums[ 0 ] - 1
-				string[ inums ] = "\t3:\'cantorNatom1KmultiTemp/temp%s\',\n"%(iphi) #--- change job name
+				string[ inums ] = "\t4:\'cantorNatom1KmultiTemp/temp%s\',\n"%(iphi) #--- change job name
 			#---
 				inums = lnums[ 1 ] - 1
 				string[ inums ] = "\t\'p3\':\' data_minimized.txt init_xyz.conf"+" %"+"s"+" %s\'%%(os.getcwd()+\'/lmpScripts\'),\n"%(temp)
