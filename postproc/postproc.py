@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	runs	 = range(8)
 	jobname  = {
 				'3':'NiNatom16KTemp1400K', 
-				'4':'CantorNatom16KTemp1400KEnsemble8', 
+				'4':'CantorNatom16KTemp1000KEnsemble8', 
 				}['4']
 	DeleteExistingFolder = True
 	readPath = os.getcwd() + {
@@ -33,8 +33,8 @@ if __name__ == '__main__':
  							}['4'] #--- source
 	EXEC_DIR = '.'     #--- path for executable file
 	durtn = '23:59:59'
-	mem = '8gb'
-	partition = ['parallel','cpu2019','bigmem','single'][3] 
+	mem = '256gb'
+	partition = ['parallel','cpu2019','bigmem','single'][2] 
 	argv = "%s"%(readPath) #--- don't change! 
 	PYFILdic = { 
 		0:'postproc.ipynb',
