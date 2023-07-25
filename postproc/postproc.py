@@ -25,15 +25,15 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
 if __name__ == '__main__':
     import os
 #
-    runs	 = range(8)
+    runs	 = range(3) #8)
     jobname  = {
                 '3':'NiNatom16KTemp1400K', 
-                '4':'CantorNatom16KTemp1000KEnsemble8', 
+                '4':'nicocrNatom1K/md/temp5', 
                 }['4']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiNatom16KTemp1400K',
-                                '4':'/../simulations/CantorNatom16KTemp1000KEnsemble8',
+                                '4':'/../simulations/nicocrNatom1K/md/temp5',
                             }['4'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
@@ -42,8 +42,9 @@ if __name__ == '__main__':
     argv = "%s"%(readPath) #--- don't change! 
     PYFILdic = { 
         0:'postproc.ipynb',
+        1:'test.ipynb',
         }
-    keyno = 0
+    keyno = 1 #change!!!!!!!!!
     convert_to_py = True
 #---
 #---
@@ -63,9 +64,10 @@ if __name__ == '__main__':
         os.system( 'cp configuration.ini %s' % ( writPath ) ) #--- cp python module
         makeOAR( writPath, 1, 1, durtn, PYFIL, argv+"/Run%s"%counter) # --- make oar script
         os.system( 'chmod +x oarScript.sh; cp oarScript.sh configuration.ini %s; cp %s/%s %s' % ( writPath, EXEC_DIR, PYFIL, writPath ) ) # --- create folder & mv oar scrip & cp executable
+        jobname0 = jobname.split('/')[0] #--- remove slash
         os.system( 'sbatch --partition=%s --mem=%s --time=%s --job-name %s.%s --output %s.%s.out --error %s.%s.err \
                             --chdir %s -c %s -n %s %s/oarScript.sh'\
-                           % ( partition, mem, durtn, jobname[:4], counter, jobname[:4], counter, jobname[:4], counter \
+                           % ( partition, mem, durtn, jobname0, counter, jobname0, counter, jobname0, counter \
                                , writPath, 1, 1, writPath ) ) # --- runs oarScript.sh!
 
 
