@@ -42,7 +42,6 @@ dump_modify 1 flush yes format line "%d %d %4.3e %4.3e %4.3e" # %4.3e %4.3e %4.3
 include ${INC}/thermo.mod
 
 
-#dump                      mydump all custom ${nevery} equilibrium.dump id type x y z
 run                       ${Nstep}
 
 unfix                     f1
