@@ -5,7 +5,7 @@ if __name__ == '__main__':
     #---
     lnums = [ 37, 105   ]
 #    lnums = [ 38, 99   ]
-	string=open('simulations-ncbj.py').readlines() #--- python script
+    string=open('simulations-ncbj.py').readlines() #--- python script
 #    string=open('simulations.py').readlines() #--- python script
     #---
     PHI = dict(zip(range(6),np.linspace(1000,2000,6)))
