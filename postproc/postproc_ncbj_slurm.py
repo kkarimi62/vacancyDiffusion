@@ -42,7 +42,7 @@ if __name__ == '__main__':
         0:'postproc.ipynb',
         1:'test.ipynb',
         }
-    keyno = 1
+    keyno = 0
     convert_to_py = True
 #---
 #---
