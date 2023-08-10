@@ -14,7 +14,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
     print('#!/bin/bash\n',file=someFile)
     print('EXEC_DIR=%s\n source /mnt/opt/spack-0.17/share/spack/setup-env.sh\n\nspack load python@3.8.12%%gcc@8.3.0\n\n'%( EXEC_DIR ),file=someFile)
     if convert_to_py:
-        print('ipython3 py_script.py\n',file=someFile)
+        print('time ipython3 py_script.py\n',file=someFile)
 
     else:
         print('jupyter nbconvert --execute $EXEC_DIR/%s --to html --ExecutePreprocessor.timeout=-1 --ExecutePreprocessor.allow_errors=True;ls output.html'%(PYFIL), file=someFile)
@@ -34,7 +34,7 @@ if __name__ == '__main__':
                                 '4':'/../simulations/nicocrTemp1000K/n0',
                             }['4'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
-    durtn = '23:59:59'
+    durtn = '47:59:59'
     mem = '32gb'
     partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
     argv = "%s"%(readPath) #--- don't change! 
