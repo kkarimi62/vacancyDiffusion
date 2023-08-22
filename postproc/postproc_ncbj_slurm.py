@@ -36,7 +36,7 @@ if __name__ == '__main__':
                                 '5':'/../simulations/NiNatom1KTemp1000K',
                             }['5'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
-    durtn = '23:59:59'
+    durtn = '47:59:59'
     mem = '32gb'
     partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
     argv = "%s"%(readPath) #--- don't change! 
