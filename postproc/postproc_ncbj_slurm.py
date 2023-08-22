@@ -27,14 +27,16 @@ if __name__ == '__main__':
     nNode    = 1
     nThreads = 1
     jobname  = {
-                '4':'nicocrTemp1000K/n0', 
-                }['4']
+                '4':'nicocrTemp1000K/n0',
+                '5':'NiNatom1KTemp1000K'
+                }['5']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '4':'/../simulations/nicocrTemp1000K/n0',
-                            }['4'] #--- source
+                                '5':'/../simulations/NiNatom1KTemp1000K',
+                            }['5'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
-    durtn = '47:59:59'
+    durtn = '23:59:59'
     mem = '32gb'
     partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
     argv = "%s"%(readPath) #--- don't change! 
