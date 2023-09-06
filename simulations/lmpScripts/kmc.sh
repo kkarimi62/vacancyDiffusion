@@ -28,9 +28,9 @@ setenv ATOMIC_SYMBOLS					"Ni Co Cr Fe Mn" #"Ni Co Cr"
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
-setenv RESTART_KMC                   .true.  # IF true, restart from previous run
+setenv RESTART_KMC                   .false.  # IF true, restart from previous run
 setenv RESTART_FILE               "this_conf" # The file name used to continue a simulation from where it was last stopped
-setenv RESTART_IMPORT                .true.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
+setenv RESTART_IMPORT                .false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
 setenv NEW_CATALOGUE                 .false.  #don't change! IF true, will continue simulation but will rebuild event catalogue from scratch
 
 
@@ -146,13 +146,13 @@ setenv CHECK_INI_SAD_CONNECTIVITY .true. # When GENERIC saddle is found, pushes 
 
 ############### Printing details ######################################################################
 
-setenv ALLCONF_WITH_SADDLE           .false.
-setenv PRINT_DETAILS                 .false.  # Prints the details of activation and minimization 
-setenv MINSAD_DETAILS                .false.  # Prints the details of activation and minimization 
-setenv USE_TXT_EVENTFILE             .false.
-setenv STATISTICS                    .false.   # Write statistics about force and event calculation  
-setenv OUTPUT_CONFIG_EVENTS          .false.   # IF true, will create a txt file with the list of all the topologies and events after each KMC step
-setenv OUTPUT_SPECIFIC   	     .false.
+setenv ALLCONF_WITH_SADDLE           .true.
+setenv PRINT_DETAILS                 .true.  # Prints the details of activation and minimization 
+setenv MINSAD_DETAILS                .true.  # Prints the details of activation and minimization 
+setenv USE_TXT_EVENTFILE             .true.
+setenv STATISTICS                    .true.   # Write statistics about force and event calculation  
+setenv OUTPUT_CONFIG_EVENTS          .true.   # IF true, will create a txt file with the list of all the topologies and events after each KMC step
+setenv OUTPUT_SPECIFIC   	     .true.
 #setenv OUTPUT_NEB_GEN_EVENT        .true.    # Can be useful
 
  
