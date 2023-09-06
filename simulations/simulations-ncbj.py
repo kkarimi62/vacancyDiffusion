@@ -35,7 +35,7 @@ if __name__ == '__main__':
                     2:'NiCoCrNatom1KTemp1400K', 
                     3:'Ni2ndMultTemp/Temp600K',#'NicoCrMultTemp/Temp600K',#'CantorNatom128KTemp1400K', 
                     4:'nicocrTemp1000K/n1', 
-                    5:'cantorNatom1K/multipleTemp/temp0'
+                    5:'cantorNatom1K2nd/multipleTemp/temp0'
                    }[5]
         sourcePath = os.getcwd() +\
                     {	
@@ -131,7 +131,7 @@ if __name__ == '__main__':
         EXEC_lmp = ['lmp_g++_openmpi'][0]
         durtn = ['95:59:59','00:59:59','167:59:59'][ 2 ]
         mem = '16gb' #'22gb'
-        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
+        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
         #--
         DeleteExistingFolder = True
 
