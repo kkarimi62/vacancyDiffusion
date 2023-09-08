@@ -16,7 +16,7 @@ setenv INI_FILE_NAME             'init_xyz.conf'   # The file name containing th
  
 ###################################### Simulation Details ##################################################
 
-setenv NBRE_KMC_STEPS                10 #000       # The max number of KMC steps to be executed
+setenv NBRE_KMC_STEPS                20 #000       # The max number of KMC steps to be executed
 setenv TOTAL_TIME                    1.0e-05        # Maximum simulation time in seconds (def: 20 s)
 
 setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperature in kelvin
@@ -28,9 +28,9 @@ setenv ATOMIC_SYMBOLS					"Ni Co Cr Fe Mn" #"Ni Co Cr"
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
-setenv RESTART_KMC                   .false.  # IF true, restart from previous run
+setenv RESTART_KMC                   .true.  # IF true, restart from previous run
 setenv RESTART_FILE               "this_conf" # The file name used to continue a simulation from where it was last stopped
-setenv RESTART_IMPORT                .false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
+setenv RESTART_IMPORT                .true.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
 setenv NEW_CATALOGUE                 .false.  #don't change! IF true, will continue simulation but will rebuild event catalogue from scratch
 
 
