@@ -3,10 +3,10 @@ if __name__ == '__main__':
     import os
     import numpy as np
     #---
-#    lnums = [ 30, 34 ]
-    lnums = [ 31, 36 ]
-    string=open('postproc_ncbj_slurm.py').readlines() #--- python script
-#    string=open('postproc.py').readlines() #--- python script
+    lnums = [ 30, 34 ]
+#    lnums = [ 31, 36 ]
+#    string=open('postproc_ncbj_slurm.py').readlines() #--- python script
+    string=open('postproc.py').readlines() #--- python script
     #---
     PHI  = dict(zip(range(6),np.linspace(1000,2000,6,dtype=int)))
 #	PHI  = dict(zip(range(11),np.arange(1000,1440,40)))
