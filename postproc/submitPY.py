@@ -30,7 +30,7 @@ if __name__ == '__main__':
                 string[ inums ] = "\t\'3\':\'msdLinScale/NiNatom1KTemp%sK\',\n" % (temp) #--- change job name
         #---	densities
                 inums = lnums[ 1 ] - 1
-                string[ inums ] = "\t\'3\':\'/../simulations/NiNatom1KTemp%sK\',\n"%(temp)
+                string[ inums ] = "\t\'3\':\'/../simulations/CantorNatom16KTemp%sKEnsemble8\',\n"%(temp)
         #
                 sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
                 os.system( 'python3 junk%s.py'%count )
