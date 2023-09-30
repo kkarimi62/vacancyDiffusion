@@ -3,7 +3,7 @@ if __name__ == '__main__':
     import os
     import numpy as np
     #---
-    lnums = [ 30, 34 ]
+    lnums = [ 30, 35 ]
 #    lnums = [ 31, 36 ]
 #    string=open('postproc_ncbj_slurm.py').readlines() #--- python script
     string=open('postproc.py').readlines() #--- python script
