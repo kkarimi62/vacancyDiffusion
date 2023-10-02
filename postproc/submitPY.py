@@ -4,11 +4,11 @@ if __name__ == '__main__':
     import numpy as np
     #---
     lnums = [ 30, 35 ]
-#    lnums = [ 31, 36 ]
-#    string=open('postproc_ncbj_slurm.py').readlines() #--- python script
-    string=open('postproc.py').readlines() #--- python script
-    #---
+    script = 'postproc.py postproc_ncbj_slurm.py'.split()[1]
     PHI  = dict(zip(range(6),np.linspace(1000,2000,6,dtype=int)))
+
+    string=open(script).readlines() #--- python script
+    #---
 #	PHI  = dict(zip(range(11),np.arange(1000,1440,40)))
 #		{ 
 #             '0':'FeNi',
@@ -27,10 +27,10 @@ if __name__ == '__main__':
                 temp = PHI[key]
             #---	
                 inums = lnums[ 0 ] - 1
-                string[ inums ] = "\t\'3\':\'msdLinScale/CantorNatom16KTemp%sKEnsemble8\',\n" % (temp) #--- change job name
+                string[ inums ] = "\t\'3\':\'msdLinScale/NiNatom1KTemp%sK\',\n" % (temp) #--- change job name
         #---	densities
                 inums = lnums[ 1 ] - 1
-                string[ inums ] = "\t\'3\':\'/../simulations/CantorNatom16KTemp%sKEnsemble8\',\n"%(temp)
+                string[ inums ] = "\t\'3\':\'/../simulations/NiNatom1KTemp%sK\',\n"%(temp)
         #
                 sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
                 os.system( 'python3 junk%s.py'%count )

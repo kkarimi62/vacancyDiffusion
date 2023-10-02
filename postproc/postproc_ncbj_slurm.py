@@ -27,18 +27,17 @@ if __name__ == '__main__':
     nNode    = 1
     nThreads = 1
     jobname  = {
-                '4':'nicocrTemp1000K/n0',
-                '5':'NiNatom1KTemp1000K'
-                }['5']
+                '3':'NiNatom1KTemp1000K'
+                }['3']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '4':'/../simulations/nicocrTemp1000K/n0',
-                                '5':'/../simulations/NiNatom1KTemp1000K',
-                            }['5'] #--- source
+                                '3':'/../simulations/NiNatom1KTemp1000K',
+                            }['3'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
-    durtn = '47:59:59'
+    durtn = '23:59:59'
     mem = '32gb'
-    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
+    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][-1]
     argv = "%s"%(readPath) #--- don't change! 
     PYFILdic = { 
         0:'postproc.ipynb',
