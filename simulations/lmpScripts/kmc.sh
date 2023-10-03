@@ -37,7 +37,7 @@ setenv NEW_CATALOGUE                 .false.  #don't change! IF true, will conti
 #################################### Basin parameters #################################
 setenv OSCILL_TREAT            BMRM       # choose between BMRM, TABU or NON
 setenv BASIN_LOCAL		.false.	
-setenv MIN_SIG_BARRIER                 0.1    # Max height of barrier and inv. barrier for an event to be considered inside a basin
+setenv MIN_SIG_BARRIER                 0.01    # Max height of barrier and inv. barrier for an event to be considered inside a basin
 
 #################################### Topology Params ##################################
 
