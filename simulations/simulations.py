@@ -25,18 +25,18 @@ if __name__ == '__main__':
     import os
     import numpy as np
 
-    nruns	 = np.arange(0,3)
+    nruns	 = np.arange(8)
     #
-    nThreads = 2 #32 #16 #8
+    nThreads = 16
     nNode	 = 1
     #
     jobname  = {
                 0:'NiCoCrNatom1KTemp0K', 
                 1:'CantorNatom16KTemp1400KTrajectories', 
                 2:'NiCoCrNatom10KTemp1300K', 
-                3:'topoIgnore',
-                4:'nicocrNatom1K/md/temp0', 
-               }[4]
+                3:'flickers/nicocr/temp0',
+                4:'nicocrNatom1K/md/temp0/thresh0', 
+               }[3]
     sourcePath = os.getcwd() +\
                 {	
                     0:'/junk',
@@ -104,7 +104,7 @@ if __name__ == '__main__':
                 'p0':' swapped_600.dat 10.0 %s'%(os.getcwd()+'/../postprocess'),
                 'p1':' swapped_600.dat ElasticConst.txt DumpFileModu.xyz %s'%(os.getcwd()+'/../postprocess'),
                 'p2':' %s 3.52 135.0 67.0 135.0 data.txt 5'%(os.getcwd()+'/../postprocess'),
-                'p3':' data_minimized.txt init_xyz.conf %s 1400.0'%(os.getcwd()+'/lmpScripts'),
+                'p3':' data_minimized.txt init_xyz.conf %s 1000.0'%(os.getcwd()+'/lmpScripts'),
                 'p4':' data_minimized.txt data_minimized.txt %s 1'%(os.getcwd()+'/lmpScripts'),
                 'p7':' sortieproc.0 0 Topo_ignore',
                  1.0:' -x DataFile=data_minimized.txt',
@@ -127,9 +127,9 @@ if __name__ == '__main__':
                 9:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
                 93:[5,'p4','p7','p3',1.0], #--- minimize, add vacancy, create Topo_ignore, kart input ,invoke kart
                 91:[5,'p3',3.0], #--- minimize, kart input, invoke kart
-                92:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, minimize, kart input ,invoke kart
                 93:[5,'p4',7], #--- minimize, add vacancy, thermalize
-              }[93]
+                92:[5,'p4',51,'p3',1.0], #--- minimize, add vacancy, minimize, kart input ,invoke kart
+              }[92]
     Pipeline = list(map(lambda x:LmpScript[x],indices))
 #	Variables = list(map(lambda x:Variable[x], indices))
 #        print('EXEC=',EXEC)
