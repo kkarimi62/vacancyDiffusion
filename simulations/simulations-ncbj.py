@@ -118,12 +118,12 @@ if __name__ == '__main__':
                     3:[5,7,4,'p0',10,'p1'],	   #--- local elastic constants (annealed)
                     4:['p2',5,7,4,71,8], #--- put disc. by atomsk, minimize, thermalize, anneal, thermalize, and shear
                     8:[5,7,4,51,'p4','p3',1.0], #--- minimize, thermalize, anneal, minimize, add vacancy, kart input, invoke kart
-                    10:['p3','p5',1.0], #--- restart from 9: change Restart options in kmc.sh
                     5:[5,7], #--- minimize, thermalize
                     6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
                     7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
                     9:[5,'p4',51,'p3','p5',1.0], #--- minimize, add vacancy, minimize, kart input, kart.sh to bash shell ,invoke kart
-                  }[9]
+                    10:['p3','p5',1.0], #--- restart from 9: change Restart options in kmc.sh
+                  }[10]
         Pipeline = list(map(lambda x:LmpScript[x],indices))
     #	Variables = list(map(lambda x:Variable[x], indices))
     #        print('EXEC=',EXEC)
@@ -131,7 +131,7 @@ if __name__ == '__main__':
         EXEC_lmp = ['lmp_g++_openmpi'][0]
         durtn = ['95:59:59','00:59:59','167:59:59'][ 2 ]
         mem = '16gb' #'22gb'
-        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
+        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
         #--
         DeleteExistingFolder = False
 
