@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     'p3':' data_minimized.dat init_xyz.conf %s 1000.0'%(os.getcwd()+'/lmpScripts'),
                     'p4':' data_perfect_crystal.dat data_defect_crystal.dat %s 1'%(os.getcwd()+'/lmpScripts'),
                     'p5':' ',
-                     1.0:'DataFile=data_minimized.dat',
+                     1.0:'DataFile=data_minimized.txt',
                      2.0:'DataFile=data_minimized.dat',
                     } 
             return Variable
@@ -122,7 +122,7 @@ if __name__ == '__main__':
                     6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
                     7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
                     9:[5,'p4',51,'p3','p5',1.0], #--- minimize, add vacancy, minimize, kart input, kart.sh to bash shell ,invoke kart
-                    10:['p3','p5',1.0], #--- restart from 9: change Restart options in kmc.sh
+                    10:['p5',1.0], #--- restart from 9: change Restart options in kmc.sh
                   }[10]
         Pipeline = list(map(lambda x:LmpScript[x],indices))
     #	Variables = list(map(lambda x:Variable[x], indices))
