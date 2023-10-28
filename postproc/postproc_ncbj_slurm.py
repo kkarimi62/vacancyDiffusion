@@ -27,10 +27,10 @@ if __name__ == '__main__':
     nNode    = 1
     nThreads = 1
     jobname  = {
-                '3':'sro/NiCoCrNatom1KTemp1000K',
+                '3':'sro/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '4':'flickers/cantorNatom1K/multipleTemp/temp0',
                 '5':'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                }['5']
+                }['3']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
