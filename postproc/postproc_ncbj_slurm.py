@@ -29,7 +29,7 @@ if __name__ == '__main__':
     jobname  = {
                 '4':'flickers/cantorNatom1K/multipleTemp/temp0',
                 '5':'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                '3':'test', #'sro/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                '3':'sro/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '6':'sro/cantor/kmc/cantorNatom1KTemp1000K',
                 }['3']
     DeleteExistingFolder = True
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
-    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][-1]
+    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
     argv = "%s"%(readPath) #--- don't change! 
     PYFILdic = { 
         0:'postproc.ipynb',
