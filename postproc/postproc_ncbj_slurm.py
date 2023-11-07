@@ -29,7 +29,7 @@ if __name__ == '__main__':
     jobname  = {
                 '4':'flickers/cantorNatom1K/multipleTemp/temp0',
                 '5':'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                '6':'sro/nicocr/kmc/cantorNatom1KTemp1000K',
+                '6':'sro/nicocr/kmc/nicocrNatom1KTemp1000K',
                 '3':'msd/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 }['6']
     DeleteExistingFolder = True
