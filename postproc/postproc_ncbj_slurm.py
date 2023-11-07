@@ -31,7 +31,7 @@ if __name__ == '__main__':
                 '5':'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '6':'sro/cantor/kmc/cantorNatom1KTemp1000K',
                 '3':'msd/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                }['3']
+                }['5']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
