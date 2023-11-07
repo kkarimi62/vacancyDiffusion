@@ -29,16 +29,16 @@ if __name__ == '__main__':
     jobname  = {
                 '4':'flickers/cantorNatom1K/multipleTemp/temp0',
                 '5':'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                '6':'sro/nicocr/kmc/nicocrNatom1KTemp1000K',
                 '3':'msd/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                '6':'sro/cantor/kmc/cantorNatom1KTemp1000K',
                 }['6']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
                                 '4':'/../simulations/nicocrTemp1000K/n0',
-                                '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
                                 '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                            }['5'] #--- source
+                                '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
+                            }['6'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
