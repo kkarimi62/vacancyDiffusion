@@ -31,18 +31,19 @@ if __name__ == '__main__':
                 '5':'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '6':'sro/cantor/kmc/cantorNatom1KTemp1000K',
                 '3':'msd/cantor/kmc/cantorNatom1KTemp1000K',
-                }['3']
+                '7':'msdPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                }['7']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
                                 '4':'/../simulations/nicocrTemp1000K/n0',
-                                '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                                 '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
-                            }['6'] #--- source
+                                '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                            }['5'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
-    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][-1]
+    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][3]
     argv = "%s"%(readPath) #--- don't change! 
     PYFILdic = { 
         0:'postproc.ipynb',
