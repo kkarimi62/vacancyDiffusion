@@ -9,13 +9,13 @@ def makeOAR( EXEC_DIR, node, core, time, qos ):
         #--- run python script 
         for script,var,indx, execc in zip(Pipeline,Variables,range(100),EXEC):
             if execc[:4] == 'lmp_': #_mpi' or EXEC == 'lmp_serial':
-                print >> someFile, "time srun --qos=%s $EXEC_DIR/%s < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(qos,execc,script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
+                print >> someFile, "time srun $EXEC_DIR/%s < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(execc,script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
             elif execc == 'py':
                 print >> someFile, "python3 %s %s\n"%(script, var)
             elif execc == 'kmc':
                 print >> someFile, "export PathEam=${MEAM_library_DIR}\nexport INC=%s\nexport %s\n"%(SCRPT_DIR,var)
                 print >> someFile, "source %s \n"%('kmc_bash.sh')
-                print >> someFile, "time srun --qos=%s %s\n"%(qos,kmc_exec)
+                print >> someFile, "time srun  %s\n"%(kmc_exec)
 
         someFile.close()										  
 
