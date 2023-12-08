@@ -1,4 +1,4 @@
-def makeOAR( EXEC_DIR, node, core, time ):
+def makeOAR( EXEC_DIR, node, core, time, qos ):
         someFile = open( 'oarScript.sh', 'w' )
         print >> someFile, '#!/bin/bash\n'
         print >> someFile, 'EXEC_DIR=%s\n' %( EXEC_DIR )
@@ -9,13 +9,13 @@ def makeOAR( EXEC_DIR, node, core, time ):
         #--- run python script 
         for script,var,indx, execc in zip(Pipeline,Variables,range(100),EXEC):
             if execc[:4] == 'lmp_': #_mpi' or EXEC == 'lmp_serial':
-                print >> someFile, "time srun $EXEC_DIR/%s < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(execc,script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
+                print >> someFile, "time srun --qos=%s $EXEC_DIR/%s < %s -echo screen -var OUT_PATH \'%s\' -var PathEam %s -var INC \'%s\' %s\n"%(qos,execc,script, OUT_PATH, '${MEAM_library_DIR}', SCRPT_DIR, var)
             elif execc == 'py':
                 print >> someFile, "python3 %s %s\n"%(script, var)
             elif execc == 'kmc':
                 print >> someFile, "export PathEam=${MEAM_library_DIR}\nexport INC=%s\nexport %s\n"%(SCRPT_DIR,var)
                 print >> someFile, "source %s \n"%('kmc_bash.sh')
-                print >> someFile, "time srun %s\n"%(kmc_exec)
+                print >> someFile, "time srun --qos=%s %s\n"%(qos,kmc_exec)
 
         someFile.close()										  
 
@@ -30,12 +30,12 @@ if __name__ == '__main__':
         nNode	 = 1
         #
         jobname  = {
-                    0:'NiMultTemp/Temp600K', 
                     1:'NiNatom16KTemp1400K', 
                     2:'NiCoCrNatom1KTemp1400K', 
                     3:'Ni2ndMultTemp/Temp600K',#'NicoCrMultTemp/Temp600K',#'CantorNatom128KTemp1400K', 
-                    4:'nicocrTemp1000K/n1', 
-                    5:'nicocr/kmc/NiCoCrNatom1KTemp1000K'
+                    4:'nicocrTemp1000K/n1',
+                    6:'nicocr/kmc/NiCoCrNatom1KTemp1000K'
+                    5:'cantorNatom1K/multipleTemp/temp0',
                    }[5]
         sourcePath = os.getcwd() +\
                     {	
@@ -129,9 +129,10 @@ if __name__ == '__main__':
     #        print('EXEC=',EXEC)
         #
         EXEC_lmp = ['lmp_g++_openmpi'][0]
-        durtn = ['95:59:59','00:59:59','167:59:59'][ 2 ]
+        durtn = ['00:59:59','95:59:59',,'167:59:59','335:59:50','671:59:59'][ -1 ]
+        qos='interq short normal long'.split()[3]
         mem = '16gb' #'22gb'
-        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][3]
+        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
         #--
         DeleteExistingFolder = False
 
@@ -158,7 +159,7 @@ if __name__ == '__main__':
                 for sf in sourceFiles:
                     os.system( 'ln -s %s/Run%s/%s %s' %(sourcePath, irun, sf, writPath) ) #--- lammps script: periodic x, pxx, vy, load
             #---
-            makeOAR( path, 1, nThreads, durtn) # --- make oar script
+            makeOAR( path, 1, nThreads, durtn, qos) # --- make oar script
             os.system( 'chmod +x oarScript.sh; mv oarScript.sh %s' % ( writPath) ) # --- create folder & mv oar scrip & cp executable
             jobname0 = jobname.split('/')[0] #--- remove slash
             os.system( 'sbatch --partition=%s --mem=%s --time=%s --job-name %s.%s --output %s.%s.out --error %s.%s.err \
