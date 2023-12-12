@@ -33,9 +33,9 @@ if __name__ == '__main__':
                 '3':'msd/cantor/kmc/cantorNatom1KTemp1000K',
                 '7':'msdPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '8':'energyBarrierPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                '9':'nicocr/md/nicocrNatom1K/md/temp5',
+                '9':'nicocr/md/nicocrNatom1K/md/temp5/short',
                 }['9']
-    DeleteExistingFolder = True
+    DeleteExistingFolder = False
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
                                 '4':'/../simulations/nicocrTemp1000K/n0',
