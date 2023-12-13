@@ -23,7 +23,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(3)
+    runs     = range(32)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -34,15 +34,17 @@ if __name__ == '__main__':
                 '7':'msdPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '8':'energyBarrierPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
-                }['9']
-    DeleteExistingFolder = False
+                '10':'ni/void',
+                }['10']
+    DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
                                 '4':'/../simulations/nicocrTemp1000K/n0',
                                 '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
                                 '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                                 '9':'/../simulations/nicocr/md/nicocrNatom1K/md/temp0',
-                            }['9'] #--- source
+                                '10':'/mnt/home/kkarimi/Project/git/crystalDefect/simulations/ni/kmc/inactive',
+                            }['10'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -52,7 +54,7 @@ if __name__ == '__main__':
         0:'postproc.ipynb',
         1:'test.ipynb',
         }
-    keyno = 1
+    keyno = 0
     convert_to_py = True
 #---
 #---
