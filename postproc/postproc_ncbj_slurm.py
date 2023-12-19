@@ -23,7 +23,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(32)
+    runs     = range(8)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -34,9 +34,9 @@ if __name__ == '__main__':
                 '7':'msdPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '8':'energyBarrierPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
-                '10':'ni/kmc/void5th',
+                '10':'ni/kmc/void_2d',
                 '11':'ni/mlmc/latest_void5th',
-                }['11']
+                }['10']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -44,9 +44,9 @@ if __name__ == '__main__':
                                 '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
                                 '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                                 '9':'/../simulations/nicocr/md/nicocrNatom1K/md/temp0',
-                                '10':'/../../crystalDefect/simulations/ni/void5th',
+                                '10':'/../../crystalDefect/simulations/ni/void_2d',
                                 '11':'/../../crystalDefect/test/mlmc/ni/latest_void5th', 
-                            }['11'] #--- source
+                            }['10'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
