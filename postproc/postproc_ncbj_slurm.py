@@ -36,7 +36,8 @@ if __name__ == '__main__':
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
                 '10':'barrier/ni/kmc/void_2d',
                 '11':'ni/mlmc/latest_void5th',
-                }['10']
+                '12':'msd_definition/ni/temp0',
+                }['12']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -46,7 +47,8 @@ if __name__ == '__main__':
                                 '9':'/../simulations/nicocr/md/nicocrNatom1K/md/temp0',
                                 '10':'/../../crystalDefect/simulations/ni/void_2d',
                                 '11':'/../../crystalDefect/test/mlmc/ni/latest_void5th', 
-                            }['10'] #--- source
+                                '12':'/../simulations/ni/koreanPotential/NiNatom1KTemp1000K',
+                            }['12'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
