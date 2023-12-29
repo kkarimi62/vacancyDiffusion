@@ -36,7 +36,7 @@ if __name__ == '__main__':
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
                 '10':'barrier/ni/kmc/void_2d',
                 '11':'ni/mlmc/latest_void5th',
-                '12':'msd_definition/ni/temp0',
+                '12':'msd_definition/ni/temp0_2nd',
                 }['12']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
