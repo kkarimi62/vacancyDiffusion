@@ -16,21 +16,21 @@ setenv INI_FILE_NAME             'init_xyz.conf'   # The file name containing th
  
 ###################################### Simulation Details ##################################################
 
-setenv NBRE_KMC_STEPS                10000       # The max number of KMC steps to be executed
-setenv TOTAL_TIME                    1.0e-05        # Maximum simulation time in seconds (def: 20 s)
+setenv NBRE_KMC_STEPS                1000000       # The max number of KMC steps to be executed
+setenv TOTAL_TIME                    1.0e-06        # Maximum simulation time in seconds (def: 20 s)
 
-setenv TEMPERATURE                   ${temp} #500.0    # The simulated temperature in kelvin
+setenv TEMPERATURE                   ${temp}     # The simulated temperature in kelvin
 
-setenv NUMBER_ATOMS                   ${natom} #864     # The total number of atoms 
-setenv SIMULATION_BOX                ${lx} #21.47   # The size of the simulation box (x, y and z)
+setenv NUMBER_ATOMS                   ${natom}     # The total number of atoms 
+setenv SIMULATION_BOX                ${lx}    # The size of the simulation box (x, y and z)
 setenv NSPECIES                       5 #3 #5     # The number of different atom types (default: 2)
 setenv ATOMIC_SYMBOLS					 "Ni Co Cr Fe Mn" # "Ni Co Cr" #
 #setenv NTRAVAILLEUR                     3     # The number of cores associated with forces calculations per ARTnouveau search (default:1)
 ###################################### Restart options #####################################################
 
-setenv RESTART_KMC                   .true.  # IF true, restart from previous run
+setenv RESTART_KMC                   .false.  # IF true, restart from previous run
 setenv RESTART_FILE               "this_conf" # The file name used to continue a simulation from where it was last stopped
-setenv RESTART_IMPORT                .true.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
+setenv RESTART_IMPORT                .false.  # Start a NEW simulation but with the current KMC event catalogue (events.uft and topos.list)
 setenv NEW_CATALOGUE                 .false.  #don't change! IF true, will continue simulation but will rebuild event catalogue from scratch
 
 

@@ -35,7 +35,7 @@ if __name__ == '__main__':
                     3:'Ni2ndMultTemp/Temp600K',#'NicoCrMultTemp/Temp600K',#'CantorNatom128KTemp1400K', 
                     4:'nicocrTemp1000K/n1',
                     5:'cantorNatom1K/multipleTemp/temp5',
-                    6:'nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                    6:'ni/koreanPotential/size0',
                    }[6]
         sourcePath = os.getcwd() +\
                     {	
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                     0:' -var natoms 100000 -var cutoff 3.52 -var ParseData 0 -var ntype 3 -var DumpFile dumpInit.xyz -var WriteData data_init.txt',
                     6:' -var T 300 -var DataFile Equilibrated_300.dat',
                     4:' -var T 600.0 -var t_sw 20.0 -var DataFile Equilibrated_600.dat -var nevery 100 -var ParseData 1 -var WriteData swapped_600.dat', 
-                    5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 2000 -var ntype 3 -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_perfect_crystal.dat -var seed0 %s -var seed1 %s -var seed2 %s -var seed3 %s'%tuple(np.random.randint(1001,9999,size=4)), 
+                    5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 2000 -var ntype 5 -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_perfect_crystal.dat -var seed0 %s -var seed1 %s -var seed2 %s -var seed3 %s'%tuple(np.random.randint(1001,9999,size=4)), 
                     51:' -var buff 0.0 -var nevery 1000 -var ParseData 1 -var DataFile data_defect_crystal.dat -var DumpFile dumpMin.xyz -var WriteData data_minimized.dat', 
                     7:' -var buff 0.0 -var T 600.0 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_600.dat',
                     71:' -var buff 0.0 -var T 0.1 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile swapped_600.dat -var DumpFile dumpThermalized2.xyz -var WriteData Equilibrated_0.dat',
@@ -121,10 +121,9 @@ if __name__ == '__main__':
                     5:[5,7], #--- minimize, thermalize
                     6:[5,'p3',2.0], #--- minimize, kart input, invoke kart
                     7:[5,'p4','p3',1.0], #--- minimize, add vacancy, kart input, invoke kart
-                    9:[5,'p4',51,'p3','p5',1.0], #--- minimize, add vacancy, minimize, kart input, kart.sh to bash shell ,invoke kart
                     10:['p5',1.0], #--- restart from 9: change Restart options in kmc.sh
-                    11:[5], #--- minimize
-                  }[11]
+                    9:[5,'p4',51,'p3','p5',1.0], #--- minimize, add vacancy, minimize, kart input, kart.sh to bash shell ,invoke kart
+                  }[9]
         Pipeline = list(map(lambda x:LmpScript[x],indices))
     #	Variables = list(map(lambda x:Variable[x], indices))
     #        print('EXEC=',EXEC)
