@@ -106,7 +106,7 @@ if __name__ == '__main__':
                     'p3':' data_minimized.dat init_xyz.conf %s 1000.0'%(os.getcwd()+'/lmpScripts'),
                     'p4':' data_perfect_crystal.dat data_defect_crystal.dat %s 1'%(os.getcwd()+'/lmpScripts'),
                     'p5':' ',
-                     1.0:'DataFile=data_minimized.txt',
+                     1.0:'DataFile=data_minimized.dat',
                      2.0:'DataFile=data_minimized.dat',
                     } 
             return Variable
