@@ -17,7 +17,7 @@ setenv INI_FILE_NAME             'init_xyz.conf'   # The file name containing th
 ###################################### Simulation Details ##################################################
 
 setenv NBRE_KMC_STEPS                1000000       # The max number of KMC steps to be executed
-setenv TOTAL_TIME                    1.0e-06        # Maximum simulation time in seconds (def: 20 s)
+setenv TOTAL_TIME                    1.0e-01        # Maximum simulation time in seconds (def: 20 s)
 
 setenv TEMPERATURE                   ${temp}     # The simulated temperature in kelvin
 
