@@ -34,10 +34,11 @@ if __name__ == '__main__':
                 '7':'msdPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '8':'energyBarrierPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
-                '10':'barrier/ni/kmc/void_2d',
                 '11':'ni/mlmc/latest_void5th',
                 '12':'msd_definition/ni/temp0_6th',
-                }['12']
+                '13':'msd_definition/ni/temp0_sheng',
+                '10':'ni/pure',
+                }['10']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -45,10 +46,11 @@ if __name__ == '__main__':
                                 '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
                                 '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                                 '9':'/../simulations/nicocr/md/nicocrNatom1K/md/temp0',
-                                '10':'/../../crystalDefect/simulations/ni/void_2d',
                                 '11':'/../../crystalDefect/test/mlmc/ni/latest_void5th', 
-                                '12':'/../simulations/ni/koreanPotential/NiNatom1KTemp1000K',
-                            }['12'] #--- source
+                                '12':'/../simulations/ni/koreanPotential/NiNatom1KTemp1000K', 
+                                '13':'/../simulations/ni/shengPotential/NiNatom16KTemp1000K',
+                                '10':'/../../crystalDefect/simulations/ni/pure',
+                            }['10'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
