@@ -129,7 +129,7 @@ if __name__ == '__main__':
     #        print('EXEC=',EXEC)
         #
         EXEC_lmp = ['lmp_g++_openmpi'][0]
-        durtn = ['00:59:59','95:59:59','167:59:59','335:59:50','671:59:59'][ 0 ]
+        durtn = ['23:59:59','95:59:59','167:59:59','335:59:50','671:59:59'][ 0 ]
         qos='interq short normal long'.split()[1]
         mem = '16gb' #'22gb'
         partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
