@@ -38,7 +38,7 @@ if __name__ == '__main__':
                 '12':'msd_definition/ni/temp0_6th',
                 '13':'ni/koreanPotential/size0',
                 '14':'ni/shengPotential/temp0',
-                }['13']
+                }['14']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -50,7 +50,7 @@ if __name__ == '__main__':
                                 '12':'/../simulations/ni/koreanPotential/NiNatom1KTemp1000K', 
                                 '13':'/../simulations/ni/koreanPotential/size0',
                                 '14':'/../simulations/ni/shengPotential/temp0',
-                            }['13'] #--- source
+                            }['14'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
