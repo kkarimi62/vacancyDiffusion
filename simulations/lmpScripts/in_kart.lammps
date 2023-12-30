@@ -2,7 +2,7 @@
 variable	INC	getenv	INCLUDE
 variable	PathEam	getenv PathEAM
 variable	DataFile getenv	DATAFILE
-#log             log_kart.lammps # if you want to see output of lammps (becareful huge file)
+log             log_kart.lammps # if you want to see output of lammps (becareful huge file)
 
 
 #--- include files
