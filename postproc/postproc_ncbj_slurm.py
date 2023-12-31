@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(1)
+    runs     = range(8)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -40,7 +40,7 @@ if __name__ == '__main__':
                 '13':'ni/koreanPotential/size0',
                 '14':'ni/shengPotential/temp0',
                 '15':'vacancy/shengPotential/temp0',
-                }['15']
+                }['14']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -53,18 +53,18 @@ if __name__ == '__main__':
                                 '13':'/../simulations/ni/koreanPotential/size0',
                                 '14':'/../simulations/ni/shengPotential/temp0',
                                 '15':'/ni/shengPotential/temp0',
-                            }['15'] #--- source
+                            }['14'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
-    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][-1]
+    partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
     argv = "%s"%(readPath) #--- don't change! 
     PYFILdic = { 
         0:'postproc.ipynb',
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 1
+    keyno = 0
     convert_to_py = True
 #---
 #---
