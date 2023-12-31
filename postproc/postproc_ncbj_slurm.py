@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(8)
+    runs     = range(1)#8)
     nNode    = 1
     nThreads = 1
     jobname  = {
