@@ -1,11 +1,12 @@
 import configparser
-def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv):
+def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
     #--- parse conf. file
     confParser = configparser.ConfigParser()
     confParser.read('configuration.ini')
     #--- set parameters
     confParser.set('input files','lib_path',os.getcwd()+'/../../HeaDef/postprocess')
     confParser.set('input files','input_path',argv)
+    confParser.set('Vacancy Dynamics','input_path',argvv)
     #--- write
     confParser.write(open('configuration.ini','w'))	
     #--- set environment variables
@@ -38,7 +39,8 @@ if __name__ == '__main__':
                 '12':'msd_definition/ni/temp0_6th',
                 '13':'ni/koreanPotential/size0',
                 '14':'ni/shengPotential/temp0',
-                }['14']
+                '15':'vacancy/shengPotential/temp0',
+                }['15']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -50,7 +52,8 @@ if __name__ == '__main__':
                                 '12':'/../simulations/ni/koreanPotential/NiNatom1KTemp1000K', 
                                 '13':'/../simulations/ni/koreanPotential/size0',
                                 '14':'/../simulations/ni/shengPotential/temp0',
-                            }['14'] #--- source
+                                '15':'/ni/shengPotential/temp0',
+                            }['15'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -58,9 +61,10 @@ if __name__ == '__main__':
     argv = "%s"%(readPath) #--- don't change! 
     PYFILdic = { 
         0:'postproc.ipynb',
-        1:'test.ipynb',
+        1:'vacancyDynamics.ipynb',
+        2:'test.ipynb',
         }
-    keyno = 0
+    keyno = 1
     convert_to_py = True
 #---
 #---
@@ -79,7 +83,7 @@ if __name__ == '__main__':
         writPath = os.getcwd() + '/%s/Run%s' % ( jobname, counter ) # --- curr. dir
         os.system( 'mkdir -p %s' % ( writPath ) ) # --- create folder
 #		os.system( 'cp utility.py LammpsPostProcess2nd.py OvitosCna.py %s' % ( writPath ) ) #--- cp python module
-        makeOAR( writPath, 1, 1, durtn, PYFIL, argv+"/Run%s"%counter) # --- make oar script
+        makeOAR( writPath, 1, 1, durtn, PYFIL, argv+"/Run%s"%counter, argv) # --- make oar script
         os.system( 'chmod +x oarScript.sh; mv oarScript.sh %s; cp configuration.ini %s;cp %s/%s %s' % ( writPath, writPath, EXEC_DIR, PYFIL, writPath ) ) # --- create folder & mv oar scrip & cp executable
         jobname0 = jobname.replace('/','_')
         os.system( 'sbatch --partition=%s --mem=%s --time=%s --job-name %s.%s --output %s.%s.out --error %s.%s.err \
