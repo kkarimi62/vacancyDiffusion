@@ -58,6 +58,8 @@ from scipy.optimize import curve_fit
 
 #
 warnings.filterwarnings('ignore')
+from IPython.display import display, HTML
+display(HTML("<style>.container { width:100% !important; }</style>"))
 
 #--- user modules
 import LammpsPostProcess as lp
@@ -187,7 +189,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 # 
 # # Dump File
 
-# In[8]:
+# In[5]:
 
 
 class ParseConfiguration:
@@ -198,70 +200,57 @@ class ParseConfiguration:
     def __init__(self,confParser,verbose=False):
 
         #--- fetch parameters defect_file
-        self.datFile = '%s/%s'%(confParser['input files']['input_path'],confParser['input files']['diffusion_file'])
+        self.confParser = confParser
+        self.datFile  = '%s/%s'%(confParser['input files']['input_path'],confParser['input files']['diffusion_file'])
         self.lib_path = confParser['input files']['lib_path']
-        
-        self.verbose = verbose
+        self.nsteps   = eval(confParser['parameters']['kmc_steps'])
+        self.verbose  = verbose
 
-    def Parse(self,fp,outpt):
-        #--- parse dump: call ovito
-        t0=time.time()
-        outpt_headers = 'dumpFile/calcResults.txt'
-        get_ipython().system('ovitos $self.lib_path/OvitosCna.py $fp $outpt 1 7 $outpt_headers')
-        if self.verbose:
-            print('output dump file=%s s'%(time.time()-t0))
+    def Parse(self):
 
-        #--- parse dump files
-        if self.verbose:
-            print('parsing %s'%(outpt))
-        t0=time.time()
-        self.lmpData = lp.ReadDumpFile( '%s'%(outpt) ) 
-        self.lmpData.GetCords( ncount = sys.maxsize)
-        if self.verbose:
-            print('elapsed time=%s s'%(time.time()-t0))
-            print('time steps:',self.lmpData.coord_atoms_broken.keys())
-            display(self.lmpData.coord_atoms_broken[0].head())
+        path = self.confParser['input files']['input_path']
+        fp = '%s/%s'%(path,self.confParser['input files']['dump_file'])
+        RefFileDisp = '%s/%s'%(path,self.confParser['input files']['RefFileDisp'])
+        RefFileDefect = '%s/%s'%(path,self.confParser['input files']['pure_crystal'])
+		
+        outpt = 'output.xyz'
+        outpt_headers = 'calcResults.txt'
 
+        nframes = 2*self.nsteps+1 #--- allconf includes halfsteps!
+        nevery = 2
+        t0            = time.time()
+        assert 'ovitoPyScripts2nd.py' in os.listdir( self.lib_path ), 'ovitoPyScripts2nd.py not found!'
+        get_ipython().system('ovitos $self.lib_path/ovitoPyScripts2nd.py -var InputFile $fp -var RefFileDisp $RefFileDisp -var use_frame_offset False -var nevery $nevery -var verbose True -var OutputFile $outpt  -var RefFileDefect $RefFileDefect -var nframes $nframes -var OutputFile_headers $outpt_headers')
+
+        if self.verbose:
+            print('diplacement and defect analysis: elapsed time =%s s'%(time.time()-t0))
+
+        self.lmpDisp = lp.ReadDumpFile( 'disp/%s'%outpt )
+        self.lmpDisp.GetCords( ncount = self.nsteps )
         #--- add timescales
-        self.lmpData.times = np.loadtxt(self.datFile)[:,0]
+
+        self.lmpDisp.times = np.loadtxt(self.datFile)[:self.nsteps+1,0] 
 
         #--- parse headers
-        data = np.loadtxt(outpt_headers)
+        data = np.loadtxt('disp/%s'%outpt_headers) #--- includes halfsteps
         if data.shape[1] == 4:
-            self.lmpData.headers = pd.DataFrame(data,columns=["Barrier", "Energy", "Step", "Time"])
+            self.lmpDisp.headers = pd.DataFrame(data[:2*self.nsteps+1],columns=["Barrier", "Energy", "Step", "Time"])
         elif data.shape[1] == 2:
-            self.lmpData.headers = pd.DataFrame(data,columns=["Step", "Time"])
+            self.lmpDisp.headers = pd.DataFrame(data[:2*self.nsteps+1],columns=["Step", "Time"])
 
 
-    def WignerSeitz(self,fp,reference_file):
-        '''
-        perform Wigner-Seitz algorithm
-        '''
-        outpt = 'dumpFile/dump_defect.xyz'
-
-        #--- parse dump: call ovito
-        if self.verbose:
-            print('input=',fp)
-        t0=time.time()
-        get_ipython().system('ovitos $self.lib_path/OvitosCna.py $fp $outpt 1 11 $reference_file')
-        if self.verbose:
-            print('output dump file=%s s'%(time.time()-t0))
 
         #--- parse dump files
-        if self.verbose:
-            print('parsing %s'%(outpt))
-        t0=time.time()
-        self.lmpData_defect = lp.ReadDumpFile( '%s'%(outpt) ) 
-        self.lmpData_defect.GetCords( ncount = sys.maxsize)
-        if self.verbose:
-            print('elapsed time=%s s'%(time.time()-t0))
-
-        if self.verbose:
-            print('time steps:',self.lmpData_defect.coord_atoms_broken.keys())
-            display(self.lmpData_defect.coord_atoms_broken[0].head())
+#        if self.verbose:
+#            print('parsing occupancy/%s'%(outpt))
+#        t0                  = time.time()
+#        self.lmpData_defect = lp.ReadDumpFile( 'occupancy/%s'%(outpt) ) 
+#        self.lmpData_defect.GetCords( ncount = self.nsteps)
+#        if self.verbose:
+#            print('elapsed time=%s s'%(time.time()-t0))
 
         #--- add timescales
-        self.lmpData_defect.times = np.loadtxt(self.datFile)[:,0]
+#        self.lmpData_defect.times = np.loadtxt(self.datFile)[:self.nsteps+1,0]
 
 
     def Print(self,fout):
@@ -269,19 +258,22 @@ class ParseConfiguration:
         dump vacant sites
         '''
         
-        times = list( self.lmpData_defect.coord_atoms_broken.keys() )
+        lmpData_defect = lp.ReadDumpFile( 'occupancy/output.xyz' ) 
+        lmpData_defect.GetCords( ncount = self.nsteps )
+
+        times = list( lmpData_defect.coord_atoms_broken.keys() )
         times.sort()
 
         #--- print dump
         get_ipython().system('rm $fout')
         for ii in times:
-            filtr = self.lmpData_defect.coord_atoms_broken[ii].Occupancy == 0.0
-            df = self.lmpData_defect.coord_atoms_broken[ii][filtr]
-            assert df.shape[0] == 1
+            filtr = lmpData_defect.coord_atoms_broken[ii].Occupancy == 0.0
+            df = lmpData_defect.coord_atoms_broken[ii][filtr]
+            assert df.shape[0] == 1, 'istep %s has more than one defect'%ii
             df.id=1;df.type=1
         #    print(df)
             atom_current = lp.Atoms(**df)
-            box  = lp.Box( BoxBounds = self.lmpData_defect.BoxBounds[ii],  AddMissing = np.array([0.0,0.0,0.0] ))
+            box  = lp.Box( BoxBounds = lmpData_defect.BoxBounds[ii],  AddMissing = np.array([0.0,0.0,0.0] ))
             with open(fout,'a') as fp:
                 lp.WriteDumpFile(atom_current, box).Write(fp, itime = ii,
                      attrs=['id', 'type','x', 'y', 'z'],
@@ -292,15 +284,15 @@ class ParseConfiguration:
         '''
         Return total displacements 
         '''
-        get_ipython().system('rm $fout')
+#        get_ipython().system('rm $fout')
 
-        #--- fetch parameters
+        #--- fetch  parameters
         fileCurr = fileRef = fp
 
         #--- call ovito
         t0 = time.time()
-#        pdb.set_trace()
-        get_ipython().system('ovitos $self.lib_path/OvitosCna.py $fileCurr $fout 1 8 $fileRef $use_frame_offset')
+        tmp = 1*self.nsteps+1
+        get_ipython().system('ovitos $self.lib_path/ovitoPyScripts.py -var InputFile $fileCurr -var OutputFile $fout -var nevery 1          -var AnalysisType 8 -var verbose True -var nframes $tmp -var RefFile $fileRef -var use_frame_offset $use_frame_offset')
         if self.verbose:
             print('output disp:%s s'%(time.time()-t0))
 
@@ -308,8 +300,9 @@ class ParseConfiguration:
         if self.verbose:
             print('parsing %s'%fout)
         t0 = time.time()
-        self.lmpDisp = lp.ReadDumpFile( fout )
-        self.lmpDisp.GetCords( ncount = sys.maxsize )
+        self.lmpDisp_defect = lp.ReadDumpFile( fout )
+        self.lmpDisp_defect.GetCords( ncount = 1*self.nsteps )
+		
 #         if self.verbose:
 #             print('elapsed time %s s'%(time.time()-t0))
 #             display(self.lmpDisp.coord_atoms_broken[0].head())
@@ -331,61 +324,76 @@ class ParseConfiguration:
     def Integrate(self):
         times = list(self.lmpDisp.coord_atoms_broken.keys())
         times.sort()
-        x=list(map(lambda x:np.c_[self.lmpDisp.coord_atoms_broken[x].DisplacementX].flatten()[0],times))
-        y=list(map(lambda x:np.c_[self.lmpDisp.coord_atoms_broken[x].DisplacementY].flatten()[0],times))
-        z=list(map(lambda x:np.c_[self.lmpDisp.coord_atoms_broken[x].DisplacementZ].flatten()[0],times))
+        x=list(map(lambda x:np.c_[self.lmpDisp_defect.coord_atoms_broken[x].DisplacementX].flatten()[0],times))
+        y=list(map(lambda x:np.c_[self.lmpDisp_defect.coord_atoms_broken[x].DisplacementY].flatten()[0],times))
+        z=list(map(lambda x:np.c_[self.lmpDisp_defect.coord_atoms_broken[x].DisplacementZ].flatten()[0],times))
         X=np.cumsum(x)
         Y=np.cumsum(y)
         Z=np.cumsum(z)
 
         for itime, indx in zip(times,range(len(times))):
-            self.lmpDisp.coord_atoms_broken[itime].DisplacementX=X[indx]            
-            self.lmpDisp.coord_atoms_broken[itime].DisplacementY=Y[indx]
-            self.lmpDisp.coord_atoms_broken[itime].DisplacementZ=Z[indx]
+            self.lmpDisp_defect.coord_atoms_broken[itime].DisplacementX=X[indx]            
+            self.lmpDisp_defect.coord_atoms_broken[itime].DisplacementY=Y[indx]
+            self.lmpDisp_defect.coord_atoms_broken[itime].DisplacementZ=Z[indx]
             
-    def AddZero(self):
-        self.lmpDisp.coord_atoms_broken[0] = self.lmpDisp.coord_atoms_broken[1]
-        self.lmpDisp.coord_atoms_broken[0].DisplacementX=0.0
-        self.lmpDisp.coord_atoms_broken[0].DisplacementY=0.0
-        self.lmpDisp.coord_atoms_broken[0].DisplacementZ=0.0
+    def AddZero(self):     
+        times = list(self.lmpDisp_defect.coord_atoms_broken.keys())
+        times.sort()
+        itime = times[ 0 ]
+        df = self.lmpDisp_defect.coord_atoms_broken[itime]
+        self.lmpDisp_defect.coord_atoms_broken[0] = pd.DataFrame(np.c_[df],columns=df.keys())
+        self.lmpDisp_defect.coord_atoms_broken[0].DisplacementX=0.0
+        self.lmpDisp_defect.coord_atoms_broken[0].DisplacementY=0.0
+        self.lmpDisp_defect.coord_atoms_broken[0].DisplacementZ=0.0
+        
+    def PrintOvito( self, title ):
+        #--- save
+        try:
+            os.system('rm %s'%title)
+        except:
+            pass
+        times = list( self.lmpDisp_defect.coord_atoms_broken.keys() )
+        times.sort()
+        itime0 = times[ 0 ]
+        rc = np.c_[ self.lmpDisp_defect.coord_atoms_broken[ itime0 ]['x y z'.split()] ]
+        for itime in times:
+            sfile        = open(title,'a')
+            dx           = np.c_[self.lmpDisp_defect.coord_atoms_broken[ itime ]['DisplacementX  DisplacementY  DisplacementZ'.split()]]
+            utl.PrintOvito(pd.DataFrame(np.c_[dx+rc].reshape(1,3),columns=['x','y','z']), 
+                       sfile, 'itime=%s'%itime, attr_list=['x', 'y', 'z'])
+            sfile.close()
 
 
 # ## main()
 
-# In[9]:
+# In[ ]:
 
 
 def main():
-    get_ipython().system('rm -r dumpFile; mkdir dumpFile; mkdir disp')
+#    get_ipython().system('rm -r dumpFile; mkdir dumpFile; mkdir disp')
     
     #--- parse allconf
     pc = ParseConfiguration(confParser,verbose=True)
     #
-    pc.Parse('%s/%s'%(confParser['input files']['input_path'],confParser['input files']['dump_file']),
-            'dumpFile/dump.xyz',
-            )
+    pc.Parse()
     
     #--- vacancy dynamics based on ws analysis
-    if eval(confParser['Defect Analysis']['WignerSeitz']):
-        pc.WignerSeitz('%s/%s'%(confParser['input files']['input_path'],confParser['input files']['dump_file']),
-                       '%s/%s'%(confParser['input files']['input_path'],confParser['Defect Analysis']['pure_crystal'])
-                      )
         #--- output vacant sites
-        pc.Print('dumpFile/dump_vacant.xyz')
-    
+    pc.Print('occupancy/dump_vacant.xyz')
     
         #--- vacancy disp
-        pc.Displacement('dumpFile/dump_vacant.xyz',
-                        'disp_vacant.xyz',
-                       use_frame_offset = True, #--- velocity
-                       )
-        pc.AddZero() #--- add first timestep
-        pc.Integrate() #--- get displacements
-        pc.lmpDisp_defect = pc.lmpDisp
+    pc.Displacement('occupancy/dump_vacant.xyz',
+                    'disp_vacant.xyz',
+                   use_frame_offset = True, #--- velocity
+                   )
+    pc.AddZero() #--- add first timestep
+    pc.Integrate() #--- get displacements
+#         pc.PrintOvito('dumpFile/vacancy_trajectories.xyz')
+        
     
     #--- total displacements
-    pc.Displacement('dumpFile/dump.xyz',
-                     'disp/disp.xyz')
+#    pc.Displacement('dumpFile/dump.xyz',
+ #                    'disp/disp.xyz')
 
     #--- vacant site based on cna analysis
 #     pc.CommonNeighborAnalysis( 'dumpFile/dump.xyz',
@@ -393,29 +401,30 @@ def main():
 
     #--- parse allconf_defect
     #--- vacant site based on defects
-    pc_defect = ParseConfiguration(confParser,verbose=True)
-    pc_defect.Parse('%s/%s'%(confParser['input files']['input_path'],confParser['input files']['defect_file']),
-                    'dumpFile/dump_defects.xyz',
+  #  pc_defect = ParseConfiguration(confParser,verbose=True)
+   # pc_defect.Parse('%s/%s'%(confParser['input files']['input_path'],confParser['input files']['defect_file']),
+    #                'dumpFile/dump_defects.xyz',
 
-                   )
+     #              )
 
     #--- output timeseries
     get_ipython().system('mkdir msd')
     with open('msd/event_times.txt','w') as fp:
-        np.savetxt(fp,pc.lmpData.times,header='t')
+        np.savetxt(fp,pc.lmpDisp.times,header='t')
     #
     with open('msd/timeseries.txt','w') as fp:
-        np.savetxt(fp,np.c_[pc.lmpData.headers],header='Barrier Energy Step Time')
+        np.savetxt(fp,np.c_[pc.lmpDisp.headers],header='Barrier Energy Step Time')
 
 
-    return pc, pc_defect
+    return pc#, pc_defect
 
-data, data_defect = main()
+data = main()
+
 
 
 # ## pbc
 
-# In[231]:
+# In[ ]:
 
 
 # times = list(data.lmpDisp_defect.coord_atoms_broken.keys())
@@ -436,7 +445,7 @@ data, data_defect = main()
 
 # ## msd vs. time
 
-# In[232]:
+# In[9]:
 
 
 class MsDisp:
@@ -464,10 +473,14 @@ class MsDisp:
         returns msd (no temporal window)
         '''
         if not LOG: #---  mean
-            msd = list(map(lambda x:(self.disp[x]['DisplacementX']**2+                         self.disp[x]['DisplacementY']**2+                         self.disp[x]['DisplacementZ']**2).mean(),
+            msd = list(map(lambda x:(self.disp[x]['DisplacementX']**2+\
+                         self.disp[x]['DisplacementY']**2+\
+                         self.disp[x]['DisplacementZ']**2).mean(),
                     self.times))
         else: #--- geometric mean
-            msd = list(map(lambda x:10**((np.log10(self.disp[x]['DisplacementX']**2+                         self.disp[x]['DisplacementY']**2+                         self.disp[x]['DisplacementZ']**2)).mean()),
+            msd = list(map(lambda x:10**((np.log10(self.disp[x]['DisplacementX']**2+\
+                         self.disp[x]['DisplacementY']**2+\
+                         self.disp[x]['DisplacementZ']**2)).mean()),
                     self.times))
         return np.array(msd)
         
@@ -475,8 +488,9 @@ class MsDisp:
         '''
         pdf's of jumps
         '''
+        time_keys = self.times #.arange(0,len(self.times),1) #--- ignore half step
         cols = ['DisplacementX','DisplacementY','DisplacementZ']
-        for itime, itime0, count in zip(self.times[1:],self.times[:-1],range(len(self.times))):
+        for itime, itime0, count in zip(time_keys[1:],time_keys[:-1],range(len(time_keys))):
             df=self.disp[itime][self.filtr]
             df0=self.disp[itime0][self.filtr]
             veloc = df[cols]-df0[cols]
@@ -484,56 +498,51 @@ class MsDisp:
                 df_concat = np.c_[veloc]
             else:
                 df_concat = np.concatenate([df_concat,veloc],axis=0) 
-        df_abs = np.abs(df_concat.flatten())
-        filtr = df_abs > 0.0
+#        df_abs = np.abs(df_concat.flatten())
+#        filtr = df_abs > 0.0
         
-        hist, bin_edges, err = utl.GetPDF(df_abs[filtr],n_per_decade=4)
-        utl.PltErr(bin_edges,hist, yerr=err,
-                  yscale='log',
-                   xscale='log',
-        #           ylim=(1e-6,1e4)
-                  )
+#        hist, bin_edges, err = utl.GetPDF(df_abs[filtr],n_per_decade=4)
+#        utl.PltErr(bin_edges,hist, yerr=err,
+#                  yscale='log',
+#                   xscale='log',
+#        #           ylim=(1e-6,1e4)
+#                  )
         #
         with open('msd/event_jumps.txt','w') as fp:
-            np.savetxt(fp,np.c_[bin_edges,hist,err],header='bin_edges hist err')
+#            np.savetxt(fp,np.c_[bin_edges,hist,err],header='bin_edges hist err')
+            np.savetxt(fp,df_concat,header='dx dy dz')
 
         
-    def WindowAverage(self,ttime,bins_per_decade=4,LOG=False):
-        '''
-        returnd msd (include temporal windows)
-        '''
-        time_keys = np.arange(0,len(self.times),2) #--- ignore half step
-        assert len(ttime) == len(time_keys), 'must be of the same size!'
+#     def WindowAverage(self,ttime,bins_per_decade=4,LOG=False,nmin=1):
+#         '''
+#         returnd msd (include temporal windows)
+#         '''
+#         time_keys = self.times #np.arange(0,len(self.times),1) #--- ignore half step
+#         assert len(ttime) == len(time_keys), 'must be of the same size!'
 
-        t0=time.time()
-        for shift in range(1,len(time_keys)): #-1):
-    #        shift = 1 #--- time index  shift
-            dt = zip(time_keys,time_keys[shift:]) #--- time tuples
-#            print(shift,list(dt))
-            dt_real = list(map(lambda x: x[1]-x[0], zip(ttime,ttime[shift:]))) #--- real time difference
-            if not LOG: #---  mean
-                disp = list(map(lambda x: ((self.disp[x[1]]['DisplacementX'][self.filtr]-self.disp[x[0]]['DisplacementX'][self.filtr])**2+                              (self.disp[x[1]]['DisplacementY'][self.filtr]-self.disp[x[0]]['DisplacementY'][self.filtr])**2+                              (self.disp[x[1]]['DisplacementZ'][self.filtr]-self.disp[x[0]]['DisplacementZ'][self.filtr])**2).mean(),
-                    zip(time_keys,time_keys[shift:])))
-            else:
-                disp = list(map(lambda x: 10**((np.log10((self.disp[x[1]]['DisplacementX'][self.filtr]-self.disp[x[0]]['DisplacementX'][self.filtr])**2+                              (self.disp[x[1]]['DisplacementY'][self.filtr]-self.disp[x[0]]['DisplacementY'][self.filtr])**2+                              (self.disp[x[1]]['DisplacementZ'][self.filtr]-self.disp[x[0]]['DisplacementZ'][self.filtr])**2)).mean()),
-                    zip(time_keys,time_keys[shift:])))
-            
-#            print(np.array(disp).shape)
-            if shift == 1:
-                tr_mat=np.c_[dt_real,disp]
-            else:    
-                tr_mat = np.concatenate([tr_mat,np.c_[dt_real,disp]],axis=0)
+#         t0=time.time()
+#         cols = 'DisplacementX DisplacementY DisplacementZ'.split()
+#         for shift in range(1,len(time_keys)): #-1):
+#             dt = zip(time_keys,time_keys[shift:]) #--- time tuples
+#             dt_real = list(map(lambda x: x[1]-x[0], zip(ttime,ttime[shift:]))) #--- real time difference
+#             disp    = list(map(lambda x: np.c_[self.disp[x[1]][cols]-self.disp[x[0]][cols]].flatten(),zip(time_keys,time_keys[shift:])))
+#             if shift == 1:
+#                 tr_mat=np.c_[dt_real,disp]
+#             else:    
+#                 tr_mat = np.concatenate([tr_mat,np.c_[dt_real,disp]],axis=0)
 
-        print('1st: t=%s'%(time.time()-t0))
+#         print('1st: t=%s'%(time.time()-t0))
 
-        #--- remove dt == 0
-        filtr = tr_mat[:,0] > 0
-        tr_mat = tr_mat[filtr]
-#        print('dt_min=',tr_mat[:,0].min())
-#        pdb.set_trace()
-#        print('tr_mat=',tr_mat)
-
-        return self.Binning(tr_mat,bins_per_decade)
+#         #--- remove dt == 0
+#         filtr1 = tr_mat[:,0] > 0
+#         #--- remove dr=0
+# #        filtr2 = ~np.all([tr_mat[:,1]==0.0,tr_mat[:,2]==0.0,tr_mat[:,3]==0.0],axis=0)
+#         #---
+#         filtr = filtr1 #np.all([filtr1,filtr2],axis = 0 )
+#         self.tr_mat = tr_mat[filtr]
+        
+        
+#         return self.Binning(self.tr_mat,bins_per_decade,nmin=nmin)
 
 
     def WindowAverage2ndMethod(self,ttime,bins_per_decade=4,LOG=False):
@@ -541,15 +550,14 @@ class MsDisp:
         returnd msd (include temporal windows)
         '''
 
-        time_keys = np.arange(0,len(self.times),2) #--- ignore half step
+        time_keys = self.times #np.arange(0,len(self.times),1) #--- ignore half step
         assert len(ttime) == len(time_keys), 'must be of the same size!'
         
         tij = MsDisp.GetTijMatrix(ttime)
         t0 = time.time()
-        xsq = self.GetXsqMatrix(time_keys,0)
-        ysq = self.GetXsqMatrix(time_keys,1)
-        zsq = self.GetXsqMatrix(time_keys,2)
-#        print(xsq)
+        xsq, xij = self.GetXsqMatrix(time_keys,0)
+        ysq, yij = self.GetXsqMatrix(time_keys,1)
+        zsq, zij = self.GetXsqMatrix(time_keys,2)
         print('2nd: t=%s'%(time.time()-t0))
 
                 
@@ -557,23 +565,26 @@ class MsDisp:
         tij_flat = tij.flatten()
         filtr = tij_flat > 0.0
         usq = (xsq + ysq + zsq).flatten()
-#         tr_mat = tr_mat[filtr]
-# #        print('dt_min=',tr_mat[:,0].min())
-# #        pdb.set_trace()
-#        print('t,u=',tij_flat[filtr],usq[filtr])
+        #
+        tr_mat = np.c_[tij_flat, xij.flatten(),yij.flatten(),zij.flatten()]
+        self.tr_mat = tr_mat[ filtr ] #--- for the last index only!
 
-        return MsDisp.Binning2nd(tij_flat[filtr],usq[filtr],bins_per_decade),               MsDisp.Binning2nd(tij_flat[filtr],usq[filtr],bins_per_decade, LogScale = False)
+        return MsDisp.Binning2nd(tij_flat[filtr],usq[filtr],bins_per_decade),\
+               MsDisp.Binning2nd(tij_flat[filtr],usq[filtr],bins_per_decade, LogScale = False)
 
     def GetXsqMatrix(self,tlist, dim):
         n = len(tlist)
         xijsqMatrix = np.zeros(n*n).reshape((n,n))
+        xijMatrix   = np.zeros(n*n).reshape((n,n))
         atom_indices = self.FiltrdAtoms(tlist) #--- rows corresponding to filtered frame
         key = ['DisplacementX','DisplacementY','DisplacementZ'][dim]
+        X_peratom_timeseries = np.concatenate([list(map(lambda x:self.GetTimeSeriesPerAtom(x, tlist, key ), atom_indices ) )],axis=0)
         for irow in range(n):
-            for iatom in atom_indices: 
-                x_peratom_timeseries = self.GetTimeSeriesPerAtom(iatom, tlist, key ) 
-                xijsqMatrix[ irow ] +=  (x_peratom_timeseries - x_peratom_timeseries[ irow ])**2
-        return xijsqMatrix / len(atom_indices)
+            for iatom, indx in zip( atom_indices, range(len(atom_indices))): 
+                x_peratom_timeseries = X_peratom_timeseries[ indx ] #self.GetTimeSeriesPerAtom(iatom, tlist, key )
+                xijMatrix[ irow ]    = x_peratom_timeseries - x_peratom_timeseries[ irow ]
+                xijsqMatrix[ irow ] +=  xijMatrix[ irow ] * xijMatrix[ irow ]
+        return xijsqMatrix / len(atom_indices), xijMatrix #--- return xij for the last index only!
 
     def GetTimeSeriesPerAtom(self, atomIndx, tlist, key, vacancy = False ):
         return list(map(lambda x:self.disp[x][key].iloc[atomIndx], tlist))
@@ -625,112 +636,156 @@ class MsDisp:
         
         return np.c_[xsum,ysum,(ysum_sq/count)**0.5]
     
-    def VacancyDynamics(self, title='void.xyz'):
-        '''
-        return xyz coordinates associated with vacancy 
-        '''
-        #--- unwrapped coordinates
-        times = self.times[1:]
-        times_ref = self.times[:-1]
-        cols = ['DisplacementX','DisplacementY','DisplacementZ']
-        xsum_concat=np.array([0,0,0])
-        for itime, itime_ref in zip(times,times_ref):
-            df=self.disp[itime]
-            df0=self.disp[itime_ref]
-            veloc = pd.DataFrame(np.c_[df0['id'],df[cols]-df0[cols]],columns=['id']+cols)
-            #
-#            filtr = self.cna[itime_ref]['StructureType'] == 0.0 #--- neighboring atoms
-            defect_atoms = self.cna[itime_ref]['id']
-            veloc = utl.FilterDataFrame(veloc,key='id',val=defect_atoms)
-            #
-            xsum = -np.array(veloc[cols].sum()) #---disp
-            xsum_concat = np.c_[xsum_concat,xsum]
-        xsum_concat = xsum_concat.T
-        xv = xsum_concat.cumsum(axis=0) #--- integrate
-#        utl.PltErr(xv[:,0],xv[:,1])
-        #--- add initial position
-        itime=times_ref[0]
-#        filtr = self.cna[itime]['StructureType'] == 0.0
-        defect_atoms = self.cna[itime]['id']
-        disps = utl.FilterDataFrame(self.disp[itime],key='id',val=defect_atoms)
-#        print(disps)
-#         rc = np.array(self.disp[itime][filtr]
-#                         [['x','y','z']].mean())
-        rc = np.array(disps[['x','y','z']].iloc[0]) #mean())
-        #--- print
-        try:
-            os.system('rm msd/%s'%title)
-        except:
-            pass
-        for itime in range(xv.shape[0]):
-            sfile=open('msd/%s'%title,'a')
-            utl.PrintOvito(pd.DataFrame(np.c_[xv[itime,:]+rc].reshape(1,3),columns=['x','y','z']), 
-                       sfile, 'itime=%s'%itime, attr_list=['x', 'y', 'z'])
-            
-        self.xv = xv
-        self.dxv = xsum_concat
+#     def VacancyDynamics(self, title='void.xyz',
+#                        **kwargs):
+#         '''
+#         return xyz coordinates associated with vacancy 
+#         '''
         
-    def msdVacancy(self,ttime,bins_per_decade=4,LOG=False):
-        '''
-        returnd msd(t) associated with motion of the vacancy
-        '''
-        time_keys = np.arange(0,len(self.times),2) #--- ignore half step
-        assert len(ttime) == len(time_keys), 'must be of the same size!'
-        time_indices = np.arange(len(time_keys))
-        for shift in range(1,len(time_keys)):
-    #        shift = 1 #--- time index  shift
-            dt = zip(time_keys,time_keys[shift:]) #--- time tuples
-            dt_real = list(map(lambda x: x[1]-x[0], zip(ttime,ttime[shift:]))) #--- real time difference
-            disp = list(map(lambda x: np.mean((self.xv[x[1]]-self.xv[x[0]])*(self.xv[x[1]]-self.xv[x[0]])),
-                    zip(time_indices,time_indices[shift:])))
+#         #--- unwrapped coordinates
+#         times            = self.times[1:]
+#         times_ref        = self.times[:-1]
             
-#            print(np.array(disp).shape)
-            if shift == 1:
-                tr_mat=np.c_[dt_real,disp]
-            else:    
-                tr_mat = np.concatenate([tr_mat,np.c_[dt_real,disp]],axis=0)
+
+#         cols             = ['DisplacementX','DisplacementY','DisplacementZ']
+#         xsum_concat=np.array([0,0,0])
+#         for itime, itime_ref in zip(times,times_ref):
+#             df           = self.disp[itime]
+#             df0          = self.disp[itime_ref]
+#             veloc        = pd.DataFrame(np.c_[df0['id'],df[cols]-df0[cols]],columns=['id']+cols)
+#             #
+# #            filtr = self.cna[itime_ref]['StructureType'] == 0.0 #--- neighboring atoms
+#         #--- filter atom type
+#             if 'filtr_type' in kwargs:
+#                 filtr = self.cna[itime_ref].type == eval(kwargs['filtr_type'])
+#                 defect_atoms = self.cna[itime_ref][filtr].id
+#             else:
+# #                defect_atoms = self.cna[itime_ref].id
+#                 defect_atoms_ref = self.cna[itime_ref].id
+#                 defect_atoms_current = self.cna[itime].id
+#                 defect_atoms = list(set(list(defect_atoms_ref)+list(defect_atoms_current)))
+
+#             veloc        = utl.FilterDataFrame(veloc,key='id',val=defect_atoms)
+#             #
+#             #indx_max     = np.argmax(list(map(lambda x:np.sum(x*x),np.c_[veloc[cols]])))
+
+#             xsum         = -np.array(veloc[cols].sum()) #---disp
+#             xsum_concat  = np.c_[xsum_concat,xsum]
+#         xsum_concat      = xsum_concat.T
+#         xv               = xsum_concat.cumsum(axis=0) #--- integrate
+#         #--- add initial position
+#         itime            = times_ref[0]
+#         if 'filtr_type' in kwargs:
+#             filtr = self.cna[itime].type == eval(kwargs['filtr_type'])
+#             defect_atoms = self.cna[itime][filtr].id
+#         else:
+#             defect_atoms     = self.cna[itime].id
+#         disps            = utl.FilterDataFrame(self.disp[itime],key='id',val=defect_atoms)
+#         rc               = np.array(disps[['x','y','z']].iloc[0]) #mean())
+#         #--- print
+#         try:
+#             os.system('rm msd/%s'%title)
+#         except:
+#             pass
+#         for itime in range(xv.shape[0]):
+#             sfile        = open('msd/%s'%title,'a')
+#             utl.PrintOvito(pd.DataFrame(np.c_[xv[itime,:]+rc].reshape(1,3),columns=['x','y','z']), 
+#                        sfile, 'itime=%s'%itime, attr_list=['x', 'y', 'z'])
+#             sfile.close()
+#         self.xv          = xv
+#         self.dxv         = xsum_concat
+        
+#     def msdVacancy(self,ttime,bins_per_decade=4,LOG=False,nmin=1):
+#         '''
+#         returnd msd(t) associated with motion of the vacancy
+#         '''
+#         time_keys        =  np.arange(0,len(self.times),2) #--- ignore half step
+#         assert len(ttime)== len(time_keys), 'must be of the same size!'
+#         time_indices     = np.arange(len(time_keys))
+#         for shift in range(1,len(time_keys)):
+#             dt      = zip(time_keys,time_keys[shift:]) #--- time tuples
+#             dt_real = list(map(lambda x: x[1]-x[0], zip(ttime,ttime[shift:]))) #--- real time difference
+#             disp    = list(map(lambda x: self.xv[x[1]]-self.xv[x[0]],zip(time_indices,time_indices[shift:])))
+#             if shift== 1:
+#                 tr_mat=np.c_[dt_real,disp]
+#             else:    
+#                 tr_mat = np.concatenate([tr_mat,np.c_[dt_real,disp]],axis=0)
                 
-        #--- remove dt == 0
-        filtr = tr_mat[:,0] > 0
-        tr_mat = tr_mat[filtr]
-        return self.Binning(tr_mat,bins_per_decade)
-#        print('dt_min=',tr_mat[:,0].min())
-#        pdb.set_trace()
+#         #--- remove dt == 0
+#         filtr = tr_mat[:,0] > 0
+#         tr_mat = tr_mat[filtr]
+#         return self.Binning(tr_mat,bins_per_decade,nmin=nmin)
 
 
-    def Binning(self,tr_mat,bins_per_decade):
+    def Binning(self,tr_mat,bins_per_decade, nmin=1):
         #--- binning
-        xmin = 0.99*tr_mat[:,0].min()
-        xmax = 1.01*tr_mat[:,0].max()
-        n_decades = int(np.ceil(np.log10(xmax/xmin)))
-        bins = np.logspace(np.log10(xmin),np.log10(xmax),n_decades*bins_per_decade)
+        xmin       = 0.99*tr_mat[:,0].min()
+        xmax       = 1.01*tr_mat[:,0].max()
+        n_decades  = int(np.ceil(np.log10(xmax/xmin)))
+        bins       = np.logspace(np.log10(xmin),np.log10(xmax),n_decades*bins_per_decade)
+        
         #
-        ysum, edges = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1])
-        ysum_sq, edges = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1]*tr_mat[:,1])
-        xsum, edges = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,0])
-        count, edges = np.histogram(tr_mat[:,0],bins=bins)
+        count, _   = np.histogram(tr_mat[:,0],bins=bins)
+        tsum,  _   = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,0])
+        filtr      = count >= nmin
+        #  
+        xsum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1])
+        ysum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,2])
+        zsum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,3])
+
+        xsum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1]*tr_mat[:,1])
+        ysum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,2]*tr_mat[:,2])
+        zsum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,3]*tr_mat[:,3])
         #
-#        filtr = count > 1
-        filtr = count > 0
-        ysum = ysum[filtr]
-        ysum_sq = ysum_sq[filtr]
-        xsum = xsum[filtr]
-        count = count[filtr]
-        assert not np.any(count == 0), 'incerease bin size!'
+        xsum       = xsum[filtr]
+        ysum       = ysum[filtr]
+        zsum       = zsum[filtr]
         #
-        ysum_sq /= count
-        ysum /= count
-        xsum /= count
-        ysum_sq -= (ysum * ysum)
+        xsum_sq    = xsum_sq[filtr]
+        ysum_sq    = ysum_sq[filtr]
+        zsum_sq    = zsum_sq[filtr]
+        #
+        tsum       = tsum[filtr]
+        count      = count[filtr]
+        assert not np.any(count < nmin), 'incerease bin size!'
+        #
+        xsum_sq   /= count
+        ysum_sq   /= count
+        zsum_sq   /= count
+        #
+        xsum      /= count
+        ysum      /= count
+        zsum      /= count
+        #     
+        tsum      /= count
+        #
+        xsum_sq   -= (xsum * xsum)
+        ysum_sq   -= (ysum * ysum)
+        zsum_sq   -= (zsum * zsum)
+        assert np.all(xsum_sq >= 0) and np.all(ysum_sq >= 0) and np.all(zsum_sq >= 0)
+        #
+        var        = xsum_sq + ysum_sq + zsum_sq
 #        assert not np.any(ysum_sq < 0.0), 'print %s'%ysum_sq
         
-        return np.c_[xsum,ysum,(ysum_sq/count)**0.5]
+        return np.c_[tsum,var,  np.sqrt(2.0/count) * var ] 
 
 
 # ### main()
 
-# In[233]:
+# In[10]:
 
+
+def RandomChoice(lmpDisp):
+    natom = lmpDisp.coord_atoms_broken[0].shape[0]
+    size=np.min([natom,eval(confParser['MsdAnalysis']['natom'])])
+    indices = np.random.choice(range(natom),replace=False,
+                               size=size)
+    assert indices.shape[ 0 ] == size
+    filtr = np.zeros(natom,dtype=bool)
+    filtr[ indices ] = True
+    assert np.sum(filtr) == indices.shape[0], '%s %s' %(np.sum(filtr), indices.shape[0])
+    
+    return filtr
 
 def main(data):
     
@@ -744,46 +799,51 @@ def main(data):
     #--- msd: dynamics of vacant site 
     #--- based on the cna analysis
     #----------------------------------
-    msd = MsDisp( data.lmpDisp, 
-                  np.ones(data.lmpDisp.coord_atoms_broken[0].shape[0],dtype=bool), #--- filter 
-                  data_defect.lmpData,
-                )
+    msd          = MsDisp(data.lmpDisp, 
+                         RandomChoice(data.lmpDisp), #--- filter 
+                        )
     #---  vacancy
-    msd.VacancyDynamics(title='void2.xyz')
-    vac_data = msd.msdVacancy(data.lmpData.headers['Time'][::2],bins_per_decade=4,LOG=False)
-    #
-    with open('msd/msd_vac_cna.txt','w') as fp:
-         np.savetxt(fp,vac_data,header='t\tmsd\terr')
+    if eval(confParser['MsdAnalysis']['vacancy']):
+        msd.VacancyDynamics(title='void2.xyz', 
+                            **confParser['MsdAnalysis'])
+        vac_data     = msd.msdVacancy(data.lmpData.headers['Time'][::2],
+                                      bins_per_decade=4,LOG=False,nmin=10)
+        #
+        with open('msd/msd_vac_cna.txt','w') as fp:
+#             np.savetxt(fp,vac_data,header='t\tmsd\terr')
+             np.savetxt(fp,vac_data,header='t dx dy dz')
 
 #    msd.GetPdfJumps() #--- jump distributions
 
      #--- msd
-    ans, ans_lin = msd.WindowAverage2ndMethod(data.lmpData.headers['Time'][::2],bins_per_decade=4,LOG=False) #---msd
+    if eval(confParser['MsdAnalysis']['total']):
+        ans, ans_lin = msd.WindowAverage2ndMethod(data.lmpData.headers['Time'][::2],
+                                                  bins_per_decade=4,LOG=False) #---msd
     
-    with open('msd/msd.txt','w') as fp:
-        np.savetxt(fp,ans,header='t\tmsd\terr')
-    with open('msd/msd_lin.txt','w') as fp:
-        np.savetxt(fp,ans_lin,header='t\tmsd\terr')
+        with open('msd/msd.txt','w') as fp:
+            np.savetxt(fp,ans,header='t\tmsd\terr')
+        with open('msd/msd_lin.txt','w') as fp:
+            np.savetxt(fp,ans_lin,header='t\tmsd\terr')
     #
 
-    #--- correlated noise
-#     xvv = np.c_[list(map(lambda x:msd.dxv[x]+msd.dxv[x+1],range(1,msd.dxv.shape[0],2)))] #--- include half steps
-#     with open('msd/noise.txt','w') as fp:
-#         np.savetxt(fp,np.c_[lmpData.headers['Time'][1:-1:2],xvv],header='time dx dy dz')
+        #--- correlated noise
+    #     xvv = np.c_[list(map(lambda x:msd.dxv[x]+msd.dxv[x+1],range(1,msd.dxv.shape[0],2)))] #--- include half steps
+    #     with open('msd/noise.txt','w') as fp:
+    #         np.savetxt(fp,np.c_[lmpData.headers['Time'][1:-1:2],xvv],header='time dx dy dz')
 
-    #---  filter based on atom types
-    # types = list(set(lmpDisp.coord_atoms_broken[0]['type']))
-    # for itype in types:
-    #     filtr = lmpDisp.coord_atoms_broken[0]['type'] == itype
-    #     msd = MsDisp( lmpDisp, lmpVel,
-    #               filtr #--- filter 
-    #             )
-    #     ans = msd.WindowAverage(lmpData.times,bins_per_decade=4)
-    #     #--- print
-    #     with open('msd/msd_type%s.txt'%itype,'w') as fp:
-    #         np.savetxt(fp,ans,header='t\tmsd\terr')
-    #     with open('msd/event_times_type%s.txt'%itype,'w') as fp:
-    #         np.savetxt(fp,lmpData.times,header='t')
+        #---  filter based on atom types
+        types      = list(set(data.lmpDisp.coord_atoms_broken[0]['type']))
+        for itype in types:
+            filtr  = data.lmpDisp.coord_atoms_broken[0]['type'] == itype
+            msd    = MsDisp( data.lmpDisp,
+                             filtr, #--- filter 
+                             data_defect.lmpData
+                           )
+            ans, _ = msd.WindowAverage2ndMethod(data.lmpData.headers['Time'][::2],
+                                               bins_per_decade=4,LOG=False)
+            #--- print
+            with open('msd/msd_type%s.txt'%itype,'w') as fp:
+                np.savetxt(fp,ans,header='t\tmsd\terr')
 
 
     #--- correlated noise
@@ -800,16 +860,24 @@ def main(data):
     #--- msd: dynamics of vacant site 
     #--- based on the ws analysis
     #----------------------------------
-    if eval(confParser['Defect Analysis']['WignerSeitz']):
-        start_frame = 0
-        msd = MsDisp( data.lmpDisp_defect, 
-                      np.ones(data.lmpDisp_defect.coord_atoms_broken[start_frame].shape[0],dtype=bool) #--- filter 
-                    )
-        ans, ans_lin = msd.WindowAverage2ndMethod(data.lmpData.headers['Time'][start_frame::2],bins_per_decade=4,LOG=False) #---msd
-
-
+    if eval(confParser['MsdAnalysis']['WignerSeitz']):
+        start_frame  = 0
+        msd          = MsDisp( data.lmpDisp_defect, 
+                              np.ones(data.lmpDisp_defect.coord_atoms_broken[start_frame].shape[0],dtype=bool) #--- filter 
+                            )
+        ans, _       = msd.WindowAverage2ndMethod(data.lmpDisp.headers['Time'][start_frame::2],
+                                         bins_per_decade= 4,
+                                         LOG            = False,
+                                         #nmin           = 10,
+                                                 ) #---msd     
+        get_ipython().system('mkdir msd')
+#        msd.GetPdfJumps()
+        #--- save msd 
         with open('msd/msd_vac_ws.txt','w') as fp:
              np.savetxt(fp,ans,header='t\tmsd\terr')
+        #--- save dt, dx
+        with open('msd/dt_dx.txt','w') as fp:
+             np.savetxt(fp,msd.tr_mat,header='dt dx dy dz')
 
 
 
@@ -818,7 +886,7 @@ main(data)
 
 # ## Energy barriers
 
-# In[234]:
+# In[ ]:
 
 
 class EnergyBarrier:
@@ -852,7 +920,8 @@ class EnergyBarrier:
                     shape_cluster_atoms =  int(xstrs[16].split()[-1])
                     atom_id = int(xstrs[17+ncluster].split()[0])
                     #print(atom_id)
-                    d = np.c_[event_id,atom_id,barrier] if len(d) == 0 else                    np.concatenate([d,np.c_[event_id,atom_id,barrier]])
+                    d = np.c_[event_id,atom_id,barrier] if len(d) == 0 else\
+                    np.concatenate([d,np.c_[event_id,atom_id,barrier]])
 #                    d.setdefault(event_id,[]).append(barrier) #--- store
                 except:
         #            traceback.print_exc()
@@ -901,16 +970,18 @@ class EnergyBarrier:
             for itype in sdict:
                 indices = sdict[itype] #--- row index: atoms with  '#TypeId' == itype
                 cond = len(df_concat[itype]) == 0 #--- empty key?
-                df_concat[itype] = np.c_[df.loc[indices]] if cond else                np.concatenate([df_concat[itype],np.c_[df.loc[indices]]],axis=0)
+                df_concat[itype] = np.c_[df.loc[indices]] if cond else\
+                np.concatenate([df_concat[itype],np.c_[df.loc[indices]]],axis=0)
 
         self.energyByType = {}
         for itype in df_concat:
              self.energyByType[ itype ] = pd.DataFrame(df_concat[itype],columns=list(df.keys()))        
 
 
+
 # ### main()
 
-# In[235]:
+# In[ ]:
 
 
 def main(data):
@@ -949,7 +1020,7 @@ main(data)
 
 # ## arrhenius law
 
-# In[5]:
+# In[242]:
 
 
 class Temperature:
@@ -1031,8 +1102,141 @@ class Temperature:
 #                 legend=legends.Get(),
                    **kwargs
                   )
+
+
+
+    def Binning(self,tr_mat,bins_per_decade, nmin=1):
+        #--- binning
+        xmin       = 0.99*tr_mat[:,0].min()
+        xmax       = 1.01*tr_mat[:,0].max()
+        n_decades  = int(np.ceil(np.log10(xmax/xmin)))
+        bins       = np.logspace(np.log10(xmin),np.log10(xmax),n_decades*bins_per_decade)
         
-    def EnsAverage(self,log_scale_x=False,log_scale_y=False,n_bins_per_decade=6):
+        #
+        count, _   = np.histogram(tr_mat[:,0],bins=bins)
+        tsum,  _   = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,0])
+        filtr      = count >= nmin
+        #  
+        xsum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1])
+        ysum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,2])
+        zsum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,3])
+
+        xsum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1]*tr_mat[:,1])
+        ysum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,2]*tr_mat[:,2])
+        zsum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,3]*tr_mat[:,3])
+        #
+        xsum       = xsum[filtr]
+        ysum       = ysum[filtr]
+        zsum       = zsum[filtr]
+        #
+        xsum_sq    = xsum_sq[filtr]
+        ysum_sq    = ysum_sq[filtr]
+        zsum_sq    = zsum_sq[filtr]
+        #
+        tsum       = tsum[filtr]
+        count      = count[filtr]
+        print('count=',count)
+        assert not np.any(count < nmin), 'incerease bin size!'
+        #
+        xsum_sq   /= count
+        ysum_sq   /= count
+        zsum_sq   /= count
+        #
+        xsum      /= count
+        ysum      /= count
+        zsum      /= count
+        #     
+        tsum      /= count
+        #
+        xsum_sq   -= (xsum * xsum)
+        ysum_sq   -= (ysum * ysum)
+        zsum_sq   -= (zsum * zsum)
+        assert np.all(xsum_sq >= 0) and np.all(ysum_sq >= 0) and np.all(zsum_sq >= 0)
+        #
+        var        = ( xsum_sq + ysum_sq + zsum_sq ) / 3.0
+#        assert not np.any(ysum_sq < 0.0), 'print %s'%ysum_sq
+        
+        return np.c_[tsum,var, var*np.sqrt(2.0/count) ] 
+
+    def Binning3rd(self,tr_mat,bins_per_decade, nmin=1):
+        #--- binning
+        xmin       = 0.99*tr_mat[:,0].min()
+        xmax       = 1.01*tr_mat[:,0].max()
+        n_decades  = int(np.ceil(np.log10(xmax/xmin)))
+        bins       = np.logspace(np.log10(xmin),np.log10(xmax),n_decades*bins_per_decade)
+        
+        tdata = tr_mat[:,0]
+        xdata = tr_mat[:,1]
+        ydata = tr_mat[:,2]
+        zdata = tr_mat[:,3]
+        tdata_concat = np.concatenate([tdata,tdata,tdata])
+        rdata_concat = np.concatenate([xdata,ydata,zdata])
+        #
+        count, _   = np.histogram(tdata_concat,bins=bins)
+        tsum,  _   = np.histogram(tdata_concat,bins=bins,weights=tdata_concat)
+        filtr      = count >= nmin
+        #  
+        rsum, _    = np.histogram(tdata_concat,bins=bins,weights=rdata_concat)
+
+        rsum_sq, _ = np.histogram(tdata_concat,bins=bins,weights=rdata_concat*rdata_concat)
+        #
+        rsum       = rsum[filtr]
+        #
+        rsum_sq    = rsum_sq[filtr]
+        #
+        tsum       = tsum[filtr]
+        count      = count[filtr]
+        assert not np.any(count < nmin), 'incerease bin size!'
+        #
+        rsum_sq   /= count
+        #
+        rsum      /= count
+        #     
+        tsum      /= count
+        #
+        rsum_sq   -= (rsum * rsum)
+#         assert np.all(xsum_sq >= 0) and np.all(ysum_sq >= 0) and np.all(zsum_sq >= 0)
+        #
+        var        = rsum_sq / 3.0
+#        assert not np.any(ysum_sq < 0.0), 'print %s'%ysum_sq
+        
+        return np.c_[tsum,var,  np.sqrt(2.0/count) * var ] 
+
+    def EnsAverage2nd(self,
+                   log_scale_x=False,log_scale_y=False,
+                   col_x=0,col_y=1,
+                   n_bins_per_decade=6,
+                  n_thresh=0,
+                   ymin=-sys.maxsize,ymax=sys.maxsize,
+                      tmax=sys.maxsize
+                  ):
+        kount = 0
+        self.data_averaged = {} 
+        for temp, indx in zip(self.temps,range(len(self.temps))):
+            #--- concat. data for each temp
+            nruns = len(self.nrun[indx])
+            data = self.data[kount:kount+nruns]
+#             if self.verbose:
+#                 print('data.shape:',np.array(data).shape)
+    
+            filtr = list(map(lambda x:x.shape[0] > 0,data)) #--- filter empty arrays
+    
+            data = np.concatenate(np.array(data)[filtr]) #,axis=0)
+            if self.verbose:
+                print('data.shape:',np.array(data).shape)
+#             pdb.set_trace()
+            filtr = data[:,0] <= tmax
+            self.data_averaged[ temp ] = self.Binning3rd(data[filtr],n_bins_per_decade,nmin=n_thresh)
+
+            kount += nruns #self.nrun
+            
+    def EnsAverage(self,
+                   log_scale_x=False,log_scale_y=False,
+                   col_x=0,col_y=1,
+                   n_bins_per_decade=6,
+                  n_thresh=0,
+                   ymin=-sys.maxsize,ymax=sys.maxsize
+                  ):
         kount = 0
         self.data_averaged = {} #np.zeros(len(self.temps))
         for temp, indx in zip(self.temps,range(len(self.temps))):
@@ -1042,19 +1246,35 @@ class Temperature:
             if self.verbose:
                 print('data.shape:',np.array(data).shape)
 #             print('np.array(data):',np.array(data))
-#            pdb.set_trace()
+#             pdb.set_trace()
     
             filtr = list(map(lambda x:x.shape[0] > 0,data)) #--- filter empty arrays
     
             data = np.concatenate(np.array(data)[filtr]) #,axis=0)
-            self.data_averaged[ temp ] = self.hist(data,log_scale_x,log_scale_y,n_bins_per_decade=n_bins_per_decade)
+            self.data_averaged[ temp ] = self.hist(data,
+                                                   log_scale_x,log_scale_y,
+                                                   n_bins_per_decade=n_bins_per_decade,
+                                                   col_x = col_x, col_y = col_y,
+                                                   n_thresh=n_thresh,
+                                                   ymin=ymin,ymax=ymax
+                                                  )
             kount += nruns #self.nrun
 
-    def hist(self,data,log_scale_x,log_scale_y,n_bins_per_decade=6):
-        n_thresh = 3 #1 #2
+    def hist(self,data,
+             log_scale_x,log_scale_y,
+             n_bins_per_decade=6,
+             col_x = 0, col_y = 1,
+             n_thresh=0,
+                   ymin=-sys.maxsize,ymax=sys.maxsize
+            ):
+        n_thresh = n_thresh
+#         pdb.set_trace()
             #--- average
-        xdata = data[:,0]
-        ydata = data[:,1]
+        xdata = data[:,col_x]
+        ydata = data[:,col_y]
+        filtr = np.all([ydata>=ymin,ydata<ymax],axis=0)
+        xdata = xdata[filtr]
+        ydata = ydata[filtr]
         if log_scale_x:
             xmin = np.floor(np.log10(xdata).min())
             xmax = np.ceil(np.log10(xdata).max())
@@ -1063,13 +1283,16 @@ class Temperature:
         else:
             xmin = xdata.min()*0.999
             xmax = xdata.max()*1.001
-            bins = np.linspace(xmin,xmax,32)
+            bins = np.linspace(xmin,xmax,n_bins_per_decade)
             
         #
-        count, _ = np.histogram(xdata,bins=bins)
-        xsum, _  = np.histogram(xdata,bins=bins,weights=xdata)
-        weights = ydata if not log_scale_y else np.log10(ydata)
-        ysum, _  = np.histogram(xdata,bins=bins,weights=weights)
+        count, _    = np.histogram(xdata,bins=bins)
+        xsum, _     = np.histogram(xdata,bins=bins,weights=xdata)
+        weights     = ydata if not log_scale_y else np.log10(ydata)
+        if log_scale_y and np.any(ydata == 0.0):
+            print('data has a zero component!')
+            return
+        ysum, _     = np.histogram(xdata,bins=bins,weights=weights)
         ysum_sq, _  = np.histogram(xdata,bins=bins,weights=weights*weights)
         #
         xsum = xsum[count>n_thresh]
@@ -1080,6 +1303,7 @@ class Temperature:
         xsum /= count
         ysum /= count
         ysum_sq /= count
+        assert np.all(ysum_sq - ysum * ysum >= 0.0), 'variance < 0.0!'
         std = np.sqrt((ysum_sq - ysum * ysum)/count)
         if log_scale_y:
             ysum = 10 ** ysum
@@ -1104,7 +1328,7 @@ class Temperature:
             data = self.data_averaged[ temp ]
             xdata = data[:,0]
             ydata = data[:,1]
-            yerr = 2*data[:,2]
+            yerr = data[:,2]
             if rescale:
                 ydata /= xdata
                 yerr /= xdata
@@ -1127,7 +1351,7 @@ class Temperature:
         
     def func2nd(self,x,y0,c0,alpha):
 #        return y0+c0*(x/x0)**alpha
-        return y0*y0+c0*x**alpha
+        return y0+c0*x**alpha
 
     def func3rd(self,x,c0,alpha):
          return c0*x**alpha
@@ -1192,7 +1416,7 @@ class Temperature:
             if self.verbose:
                 print('Temp=%s,y0,c0,alpha'%temp,list(popt),pcov)
                 print('alpha=%s'%popt[2])
-            y0=popt[0]
+            y0=popt[0] ** 0.5
             alpha=popt[2]
             err_alpha = pcov[2,2]**0.5
             c0=popt[1]
@@ -1213,15 +1437,16 @@ class Temperature:
                 xdata_shift = xdata*20**count if shift else xdata
                 utl.PltErr(xdata_shift,
                                 (self.func2nd(xdata,*popt)-y0),#-y0)/xdata_shift,
-                                attrs={'fmt':'-.','color':symbols.colors[count%7]},#'label':r'$\alpha=%3.2f$'%popt[2]},
+                                attrs={'fmt':'-.','color':symbols.colors[count%7],\
+                                       'label':r'$\alpha=%3.2f$'%popt[2]},
                            Plot=False,ax=ax)
                 #--- points
 #                temp= [1000,1200,1400,1600,1800,2000][count]
                 utl.PltErr(xdata_shift,
                            (ydata-y0),#-y0)/xdata_shift,
                            yerr=(yerr),#-y0),#/xdata_shift,
-                           attrs=symbols.GetAttrs(count=count%7,label=r'$%s$'%temp,fmt='.'),
-#                           attrs=symbols.GetAttrs(count=count%7,fmt='.'),
+#                           attrs=symbols.GetAttrs(count=count%7,label=r'$%s$'%temp,fmt='.'),
+                           attrs=symbols.GetAttrs(count=count%7,fmt='.'),
                            ax=ax,
                            Plot=False,
                           )
@@ -1230,7 +1455,7 @@ class Temperature:
                        None, 
                        ax=ax,
                        Plot=False,
-                        legend=legends.Get(),
+                         legend=legends.Get(),
                        DrawFrame=DRAW_FRAME,
                        **plotAttrs
                       )
@@ -1358,9 +1583,10 @@ class Temperature:
     
 
 
+
 # ### main()
 
-# In[237]:
+# In[7]:
 
 
 def main():
@@ -1369,104 +1595,101 @@ def main():
     get_ipython().system('mkdir png')
     #--- temp object
     temp = Temperature(
-#        [1000,1200,1400,1600,1800,2000],[list(range(8))]*10,
-#        [1000],[[1,2,4,5,6,7]]*10,
-#        [1200],[[0,2,4,6,7]]*10,
-#        [1400],[[0,1,2,3,4,5,6,7]]*10,
-#        [1600],[[0,1,2,3,4,5,6,7]]*10,
-        [1800],[[0,2,3,4,5,6,7]]*10,
-#        [2000],[[0,1,2,3,4,5,6,7]]*10,
-#         verbose = True,
+        [1000],[list(range(8))]*10,
+#          verbose = True,
                      )
     #
     #--- parse data
-#    temp.Parse(['./msd/msd.txt'])
-#    temp.Parse( list(map(lambda x:'nicocrTemp1000K/n1/Run%s/msd/msd.txt'%(x[1]),
-#    temp.Parse( list(map(lambda x:'CantorNatom16KTemp%sKEnsemble8/Run%s/msd/msd.txt'%(x[0],x[1]),
-#    temp.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/msd.txt'%(x[0],x[1]),
-#    temp.Parse( list(map(lambda x:'msdLinScale/NiNatom16KTemp%sK/Run%s/msd/msd_lin.txt'%(x[0],x[1]),
-    temp.Parse( list(map(lambda x:'msdLinScale/NiNatom1KTemp%sK/Run%s/msd/msd_lin.txt'%(x[0],x[1]),
-                        temp.temps_runs ))
-#     temp.Parse( list(map(lambda x:'msdLinScale/%sNatom1KTemp1000K/Run%s/msd/msd.txt'%(x[0],x[1]),
-#                         temp.temps_runs ))
+#    temp.Parse(['./msd/msd.txt']) 
+#    temp.Parse( list(map(lambda x:'ni/void5th/Run%s/msd/msd.txt'%(x[1]),
+    temp.Parse( list(map(lambda x:'ni/kmc/void_2d/Run%s/msd/msd_vac_cna.txt'%(x[1]),
+#    temp.Parse( list(map(lambda x:'ni/pure/Run%s/msd/msd_vac_cna.txt'%(x[1]),
+#    temp.Parse( list(map(lambda x:'ni/mlmc/latest_void5th/Run%s/msd/msd_vac_cna.txt'%(x[1]),
+                         temp.temps_runs ))
              )
     #
     #--- plot
-    xlim = (1e-12,1e-6)
-    ylim = (1e-4,1e1)
+    xlim = (1e0,1e6)
+#     xlim = (1e-10,1e-6)
+    ylim = (1e-1,1e3)
     print('single realizations')
     temp.Plot(**{
-                  'xscale':'linear',
-                  'yscale':'linear',
+                  'xscale':'log',
+                  'yscale':'log',
                    'attrs':{'fmt':'-'},
-#                   'xlim':xlim,
-#                    'ylim':ylim,
-#                   'title':'png/msd_temp_ni.png',
+                  'xlim':xlim,
+                     'ylim':ylim,
+                   'title':'png/msd_temp_ni.png',
+                    'xstr':r'$t(\mathrm{s})$','ystr':r'$\mathrm{msd}(\r{A}^2)$',
         'bbox_to_anchor':(0.01,0.3,0.5,0.5)
     })
+    
     #
     #--- plot average
     #
     print('ensemble average')
-    temp.EnsAverage(log_scale_x=False,log_scale_y=False,n_bins_per_decade=4)
+    temp.EnsAverage(log_scale_x=True,log_scale_y=True,
+                   n_thresh=2,
+                    n_bins_per_decade=4,#32,
+#                     ymin=1e-3,
+                   )
     temp.PlotAverage(**{
-                  'yscale':'linear',
-                  'xscale':'linear',
-                  'count':4,
-#                   'xlim':xlim,
-#                    'ylim':ylim,
+                  'yscale':'log',
+                  'xscale':'log',
+#                   'count':0,
+                   'xlim':xlim,
+                     'ylim':ylim,
+                    'xstr':r'$t(\mathrm{s})$','ystr':r'$\mathrm{msd}(\r{A}^2)$',
                     'title':'png/msd_temp_ni_T%sK.png'%temp.temps[0],
          })
 
     #
     #--- fit
     #
-#     temp.Fit(Plot=True,
+    temp.Fit(Plot=True,
 #              shift=True,
-# #             bounds=([4e-3, 1e5,0.5], [1e-2, 1e7,2.0]),
-#             p0=[[1e-4, 1e6, 1.0]],
-# #            p0=[[1e-2, 1e6, 1.0]],
-#              sigma=True, #--- comment for ni
-# #             xlo=1e-12,
-#              plotAttrs={'yscale':'linear',
-#                   'xscale':'linear',
-# #                   'xlim':xlim,
-# #                    'ylim':ylim,
-#                         'ndecade_x':1,
-#                     'bbox_to_anchor':(-0.05,0.33,0.5,0.5),
-#                    'title':'png/msd_temp_cantor_fit.png'},
-#             )
+#             bounds=([4e-3, 1e5,0.5], [1e-2, 1e7,2.0]),
+#            p0=[[1e-4, 1e6, 1.0]],
+            p0=[[1e-1, 1e6, 1.5]],
+               sigma=True, #--- comment for ni
+              xlo=xlim[0],
+             plotAttrs={'yscale':'log',
+                  'xscale':'log',
+                   'xlim':xlim,
+                      'ylim':ylim,
+                        'ndecade_x':1,
+                    'bbox_to_anchor':(-0.05,0.33,0.5,0.5),
+                   'title':'png/msd_temp_ni_fit_inset.png',
+                    'xstr':r'$t(\mathrm{s})$','ystr':r'$\mathrm{msd}(\r{A}^2)$',
+#                         'fontsize':24,
+#              'halfopen':True
+                       }
+            )
 
 
 
-#     temp.PlotExponent(**{
-# #                    'title':'png/alpha_temp_ni.png',
-#                     }
-#                 )
+    temp.PlotExponent(**{
+                    'title':'png/alpha_temp_ni.png',
+                    'ylim':(0.5,1.5),
+                    }
+                )
     
     return temp
 temp = main()
 
 
-# In[238]:
-
-
-#temp.temps
-#np.savetxt('msd/msd_original.txt',np.c_[temp.data_averaged[1000]])
-
-
 # ### vacancy dynamics
 
-# In[17]:
+# In[441]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
     get_ipython().system('mkdir png')
     #--- temp object
     temp_vac = Temperature(
-        [1000,1200,1400,1600,1800,2000],[[8,7,6,5,4,1,0],list(range(8)),list(range(8)),list(range(8)),list(range(8)),list(range(8))],
-#        [1000],[list([8,7,6,5,4,1,0])]*100,
-#         verbose = True,
+#        [1000,1200,1400,1600,1800,2000],[[8,7,6,5,4,1,0],list(range(8)),list(range(8)),list(range(8)),list(range(8)),list(range(8))],
+        [1000],[list(range(8))]*100,
+         verbose = True,
                      )
     #
     #--- parse data
@@ -1474,7 +1697,9 @@ if not eval(confParser['flags']['RemoteMachine']):
 #    temp_vac.Parse( list(map(lambda x:'CantorNatom16KTemp%sKEnsemble8/Run%s/msd/msd_vac.txt'%(x[0],x[1]),
 #    temp_vac.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/msd_vac.txt'%(x[0],x[1]),
 #    temp_vac.Parse( list(map(lambda x:'NiNatom16KTemp%sK/Run%s/msd/msd_vac.txt'%(x[0],x[1]),
-    temp_vac.Parse( list(map(lambda x:'NiNatom1KTemp%sK/Run%s/msd/msd_vac_cna.txt'%(x[0],x[1]),
+#    temp_vac.Parse( list(map(lambda x:'NiNatom1KTemp%sK/Run%s/msd/msd_vac_cna.txt'%(x[0],x[1]),
+#    temp_vac.Parse( list(map(lambda x:'ni/koreanPotential/size0/Run%s/msd/msd_vac_ws.txt'%(x[1]),
+    temp_vac.Parse( list(map(lambda x:'ni/shengPotential/temp0/Run%s/msd/msd_vac_ws.txt'%(x[1]),
                           temp_vac.temps_runs ))
               )
     #
@@ -1496,38 +1721,22 @@ if not eval(confParser['flags']['RemoteMachine']):
     #
     if len(temp_vac.nrun[0]) > 1:
         print('ensemble average')
-        temp_vac.EnsAverage(log_scale=True,n_bins_per_decade=4)
-#         temp_vac.PlotAverage(**{
-#                   'yscale':'log',
-#                   'xscale':'log',
-# #                   'xlim':(1e-10,1e-3),
-# #                    'ylim':(1e-4,1e-1),
-# #                     'xstr':r'$t\mathrm{(s)}$',
-# #                   'ystr':r'msd(A$^2$)',
-#                    'title':'png/msd_temp_cantor.png',
-#         })
-
+        temp_vac.EnsAverage2nd(log_scale_x=True,log_scale_y=True,n_bins_per_decade=6,n_thresh=1,tmax=tmax)
     #
     #--- fit
-    #
-    temp_vac.Fit(Plot=True,
-             shift=False,
-#             bounds=(np.array([-np.inf, -np.inf,0]), np.array([np.inf, np.inf,np.inf])),
-            p0=[[1e-1, 1e6, 1.0]],
-#            p0=[[0.4058429798422189, 87091.79927150169, 0.9788537305407521]],
-#             p0=[[-1, 1e6, 1.0]],
-             sigma=True, #--- comment for ni
-#              xlo=8e-11,
-             plotAttrs={'yscale':'log',
-                  'xscale':'log',
-#                   'xlim':(4e-13,8e-4),
-#                    'ylim':(1e-1,1e4),
-#                     'xstr':r'$t\mathrm{(s)}$',
-#                   'ystr':r'msd(A$^2$)',
-                        'ndecade_x':2,
-                    'bbox_to_anchor':(-0.05,0.4,0.5,0.5),
-                   'title':'png/msd_temp_ni_fit_vac_cna.png'},
-            )
+#     temp_vac.Fit(Plot=True,
+#              shift=False,
+#              p0=[[0.4, 1e4, 1.1]],
+#              sigma=True, #--- comment for ni
+#                 xlo=1e-11, xhi=1e-7,
+#                         ftol=1e-10, xtol=1e-10, gtol=1e-10,
+#                         maxfev=10000,
+#              plotAttrs={'yscale':'log',
+#                   'xscale':'log',
+#                         'ndecade_x':1,
+#                     'bbox_to_anchor':(-0.05,0.4,0.5,0.5),
+#                    'title':'png/msd_temp_ni_fit_vac_cna.png'},
+#             )
     
 #     temp_vac.FitLinear(Plot=True,
 #              shift=True,
@@ -1558,19 +1767,371 @@ if not eval(confParser['flags']['RemoteMachine']):
 #                     }
 #                 )
 
-    temp_vac.PlotExponent(**{
-#                  'yscale':'log',
-#                   'xlim':(1e-10,1e-3),
-                   'ylim':(.9,1.6),
-#                   xstr=r'$1/T(K^{-1})$',
-#                   ystr=r'$D(m^2/s)$',
-                    'title':'png/alpha_temp_ni_vac_cna.png',
-                    }
-                )
+#     temp_vac.PlotExponent(**{
+# #                  'yscale':'log',
+# #                   'xlim':(1e-10,1e-3),
+# #                   'ylim':(.9,1.6),
+# #                   xstr=r'$1/T(K^{-1})$',
+# #                   ystr=r'$D(m^2/s)$',
+#                     'title':'png/alpha_temp_ni_vac_cna.png',
+#                     }
+#                 )
     
 
 
-# In[240]:
+# In[442]:
+
+
+# if not eval(confParser['flags']['RemoteMachine']):
+#     temp_vac.Fit(Plot=True,
+#                  shift=False,
+#                  p0=[[1.0, 1e12, 1.1]],
+#                  sigma=True, #--- comment for ni
+#                         xlo=1e-13, xhi=tmax,
+#                             ftol=1e-10, xtol=1e-10, gtol=1e-10,
+#                             maxfev=10000,
+#                  plotAttrs={'yscale':'log',
+#                       'xscale':'log',
+#                             'ndecade_x':1,
+#                         'bbox_to_anchor':(-0.05,0.4,0.5,0.5),
+#                        'title':'png/msd_temp_ni_fit_vac_cna.png'},
+#                 )
+
+
+# In[438]:
+
+
+if not eval(confParser['flags']['RemoteMachine']):
+    tmins=[]
+    ax=utl.PltErr(None,None,Plot=False)
+    for irun in range(8):
+        tdata = temp_vac.data[irun][:,0]
+
+        tmins.append(tdata.max())
+        for idime in range(3):
+            xdata = temp_vac.data[irun][:,idime+1]
+        #
+            utl.PltErr(tdata,xdata,
+                      attrs={'fmt':'x','alpha':.01},
+                       ax=ax,
+                       Plot=False,
+    #                    xscale='log',
+    #                    yscale='log',
+    #                    ylim=(1e0,1e2),
+                      )
+    tmax = np.min(tmins)
+    yminmax=50
+    utl.PltErr([tmax,tmax],[-yminmax,yminmax],
+               attrs={'fmt':'-.','color':'yellow'},
+               ax=ax)
+    print('tmax=',tmax)
+
+
+# In[443]:
+
+
+# xdata = temp_vac.data_averaged[1000][:,0]
+# ydata = temp_vac.data_averaged[1000][:,1]
+# yerr  = temp_vac.data_averaged[1000][:,2]
+# # filtr = xdata < 1e-1
+# # xdata = xdata[filtr]
+# # ydata = ydata[filtr]
+# # yerr = yerr[filtr]
+# print(len(xdata))
+# alpha=1.0
+# prefac=1e-9
+# ax = utl.PltErr(None,None,Plot=False)
+# utl.PltErr(xdata,prefac*ydata/xdata**alpha, yerr=prefac*yerr/xdata**alpha,
+#            attrs={'fmt':'o','color':'black'},
+#           xscale='log',yscale='log',
+#            ax=ax,
+#            Plot=False
+#           )
+# utl.PltErr(xdata,ydata, yerr=yerr,
+#            attrs={'fmt':'o','color':'C0'},
+#           xscale='log',yscale='log',
+#            ax=ax,
+#            Plot=False
+#           )
+
+# # popt, pcov = curve_fit(temp_vac.func2nd, xdata, ydata,
+# #              p0=[[0.4, 1e5, 1.1]],
+# #                        ftol=1e-10, xtol=1e-10, gtol=1e-10,
+# #                        maxfev=10000,
+# #                         )
+
+# # utl.PltErr(xdata,temp_vac.func2nd(xdata,*popt),
+# #            attrs={'fmt':'-.','color':'red'},
+# #           xscale='log',yscale='log',
+# #            ax=ax
+# #           )
+
+# #print(popt)
+
+
+# In[444]:
+
+
+# def WindowAverage(ttime,bins_per_decade=4,LOG=False,nmin=1):
+#     '''
+#     returnd msd (include temporal windows)
+#     '''
+#     time_keys = np.arange(0,len(t),1) #--- ignore half step
+#     assert len(ttime) == len(time_keys), 'must be of the same size!'
+
+#     t0=time.time()
+#     cols = 'DisplacementX DisplacementY DisplacementZ'.split()
+#     for shift in range(1,len(time_keys)): #-1):
+#         dt = zip(time_keys,time_keys[shift:]) #--- time tuples
+#         dt_real = list(map(lambda x: x[1]-x[0], zip(ttime,ttime[shift:]))) #--- real time difference
+#         disps    = list(map(lambda x: disp[x[1]]-disp[x[0]].flatten(),zip(time_keys,time_keys[shift:])))
+#         if shift == 1:
+#             tr_mat=np.c_[dt_real,disps]
+#         else:    
+#             tr_mat = np.concatenate([tr_mat,np.c_[dt_real,disps]],axis=0)
+
+#     print('1st: t=%s'%(time.time()-t0))
+
+#     #--- remove dt == 0
+#     filtr1 = tr_mat[:,0] > 0
+#     #--- remove dr=0
+#     filtr2 = ~np.all([tr_mat[:,1]==0.0,tr_mat[:,2]==0.0,tr_mat[:,3]==0.0],axis=0)
+#     #---
+#     filtr = np.all([filtr1,filtr2],axis = 0 )
+#     tr_mat = tr_mat[filtr]
+
+
+#     return tr_mat #self.Binning(tr_mat,bins_per_decade,nmin=nmin)
+    
+# def Binning(tr_mat,bins_per_decade=6, nmin=10):
+#     #--- binning
+#     xmin       = 0.99*tr_mat[:,0].min()
+#     xmax       = 1.01*tr_mat[:,0].max()
+#     n_decades  = int(np.ceil(np.log10(xmax/xmin)))
+#     bins       = np.logspace(np.log10(xmin),np.log10(xmax),n_decades*bins_per_decade)
+
+#     #
+#     count, _   = np.histogram(tr_mat[:,0],bins=bins)
+#     tsum,  _   = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,0])
+#     filtr      = count >= nmin
+#     #  
+#     xsum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1])
+#     ysum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,2])
+#     zsum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,3])
+
+#     xsum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1]*tr_mat[:,1])
+#     ysum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,2]*tr_mat[:,2])
+#     zsum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,3]*tr_mat[:,3])
+#     #
+#     xsum       = xsum[filtr]
+#     ysum       = ysum[filtr]
+#     zsum       = zsum[filtr]
+#     #
+#     xsum_sq    = xsum_sq[filtr]
+#     ysum_sq    = ysum_sq[filtr]
+#     zsum_sq    = zsum_sq[filtr]
+#     #
+#     tsum       = tsum[filtr]
+#     count      = count[filtr]
+#     assert not np.any(count < nmin), 'incerease bin size!'
+#     #
+#     xsum_sq   /= count
+#     ysum_sq   /= count
+#     zsum_sq   /= count
+#     #
+#     xsum      /= count
+#     ysum      /= count
+#     zsum      /= count
+#     #     
+#     tsum      /= count
+#     #
+#     xsum_sq   -= (xsum * xsum)
+#     ysum_sq   -= (ysum * ysum)
+#     zsum_sq   -= (zsum * zsum)
+#     assert np.all(xsum_sq >= 0) and np.all(ysum_sq >= 0) and np.all(zsum_sq >= 0)
+#     #
+#     var        = zsum_sq #( xsum_sq + ysum_sq + zsum_sq ) / 3.0
+# #        assert not np.any(ysum_sq < 0.0), 'print %s'%ysum_sq
+
+#     return np.c_[tsum,var,  np.sqrt(2.0/count) * var ] 
+
+# def Binning2nd(tr_mat,bins_per_decade=6, nmin=10):
+#     #--- binning
+#     xmin       = 0.99*tr_mat[:,0].min()
+#     xmax       = 1.01*tr_mat[:,0].max()
+#     n_decades  = int(np.ceil(np.log10(xmax/xmin)))
+#     bins       = np.logspace(np.log10(xmin),np.log10(xmax),n_decades*bins_per_decade)
+
+#     #
+#     count, _   = np.histogram(tr_mat[:,0],bins=bins)
+#     tsum,  _   = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,0])
+#     filtr      = count >= nmin
+#     #  
+#     xsum, _    = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1])
+
+#     xsum_sq, _ = np.histogram(tr_mat[:,0],bins=bins,weights=tr_mat[:,1]*tr_mat[:,1])
+#     #
+#     xsum       = xsum[filtr]
+#     #
+#     xsum_sq    = xsum_sq[filtr]
+#     #
+#     tsum       = tsum[filtr]
+#     count      = count[filtr]
+#     assert not np.any(count < nmin), 'incerease bin size!'
+#     #
+#     xsum_sq   /= count
+#     #
+#     xsum      /= count
+#     #     
+#     tsum      /= count
+#     #
+#     xsum_sq   -= (xsum * xsum)
+#     assert np.all(xsum_sq >= 0)
+#     #
+#     var        = xsum_sq #( xsum_sq + ysum_sq + zsum_sq ) / 3.0
+# #        assert not np.any(ysum_sq < 0.0), 'print %s'%ysum_sq
+
+#     return np.c_[tsum,var,  np.sqrt(2.0/count) * var ] 
+    
+
+
+# ### test
+
+# In[523]:
+
+
+# ax=utl.PltErr(None,None,Plot=False)
+# dts=[]
+# for irun in range(8):
+#     path = 'ni/koreanPotential/size0/Run%s/msd'%irun
+# #     data = np.loadtxt('%s/event_jumps.txt'%path)
+#     t    = np.loadtxt('%s/event_times.txt'%path)
+#     dt   = np.diff(t)
+#     t = t[1:]
+#     dts += list(dt)
+# #     dx = data[:,0]
+# #     dy = data[:,1]
+# #     dz = data[:,2]
+# # #    t = np.cumsum(dt)
+# #     x = np.cumsum(dx)
+# #     y = np.cumsum(dy)
+# #     z = np.cumsum(dz)
+# #     utl.PltErr( t,x,
+# # #               attrs={'fmt':'o','color':'red'},
+# #                   Plot=False,
+# #                   ax=ax
+# #               )
+# #     utl.PltErr( t,y,
+# # #               attrs={'fmt':'s','color':'green'},
+# #                ax=ax,
+# #                   Plot=False,
+# #               )
+# #     utl.PltErr( t,z,
+# # #                attrs={'fmt':'*','color':'black'},
+# #                ax=ax,
+# #                   Plot=False,
+# #               )
+# #     disp=np.c_[x,y,z]
+# # #     t=range(len(x))
+# #     tr_mat = WindowAverage(t)
+
+# # #     tr_mat = np.c_[t,x,y,z]
+    
+# #     if irun == 0:
+# #         TR_mat=tr_mat.copy()
+# #     else:
+# #         TR_mat = np.concatenate([TR_mat,tr_mat],axis=0)        
+
+
+# In[516]:
+
+
+# dx = TR_mat[:,1]
+# dy = TR_mat[:,2]
+# dz = TR_mat[:,3]#np.concatenate([TR_mat[:,1],TR_mat[:,2],TR_mat[:,3]])
+# dt = TR_mat[:,0]#np.concatenate([TR_mat[:,0],TR_mat[:,0],TR_mat[:,0]])
+
+
+# In[524]:
+
+
+# hist, edges,err=utl.GetPDF(dts, n_per_decade=16, ACCUM=None, linscale=None, density=True)
+# utl.PltErr(edges,hist,yerr=err,yscale='log',xscale='log')
+
+
+# In[525]:
+
+
+# '%e'%(1/np.mean(dts)), len(dts)
+
+
+# In[517]:
+
+
+# #msd = Binning(TR_mat,bins_per_decade=4,nmin=8)
+# msd_x = Binning2nd(np.c_[dt,dx],bins_per_decade=8,nmin=8)
+# msd_y = Binning2nd(np.c_[dt,dy],bins_per_decade=8,nmin=8)
+# msd_z = Binning2nd(np.c_[dt,dz],bins_per_decade=8,nmin=8)
+
+
+
+# In[521]:
+
+
+# ax = utl.PltErr(None,None,Plot=False)
+# xdata = msd_x[:,0]
+# ydata = msd_x[:,1]
+# yerr  = msd_x[:,2]
+# alpha=1.0
+# prefac=1e-10
+# utl.PltErr(xdata,prefac*ydata/xdata**alpha, yerr=prefac*yerr/xdata**alpha,
+#            attrs={'fmt':'o','color':'black'},
+#           xscale='log',yscale='log',
+#            ax=ax,
+#            Plot=False
+#           )
+# utl.PltErr(xdata,ydata, yerr=yerr,
+#            attrs={'fmt':'-o','color':'C0'},
+#           xscale='log',yscale='log',
+#            ax=ax,
+#            Plot=False
+#           )
+
+# xdata = msd_y[:,0]
+# ydata = msd_y[:,1]
+# yerr  = msd_y[:,2]
+# utl.PltErr(xdata,ydata, yerr=yerr,
+#            attrs={'fmt':'-o','color':'red'},
+#           xscale='log',yscale='log',
+#            ax=ax,
+#            Plot=False
+#           )
+
+# xdata = msd_z[:,0]
+# ydata = msd_z[:,1]
+# yerr  = msd_z[:,2]
+# utl.PltErr(xdata,ydata, yerr=yerr,
+#            attrs={'fmt':'-o','color':'green'},
+#           xscale='log',yscale='log',
+#            ax=ax,
+#            Plot=False
+#           )
+# # popt, pcov = curve_fit(temp_vac.func2nd, xdata, ydata,
+# #              p0=[[0.4, 1e5, 1.1]],
+# #                        ftol=1e-10, xtol=1e-10, gtol=1e-10,
+# #                        maxfev=10000,
+# #                         )
+
+# # utl.PltErr(xdata,temp_vac.func2nd(xdata,*popt),
+# #            attrs={'fmt':'-.','color':'red'},
+# #           xscale='log',yscale='log',
+# #            ax=ax
+# #           )
+
+# #print(popt)
+
+
+# In[ ]:
 
 
 # np.savetxt('msd/msd_cna.txt',np.c_[temp_vac.data_averaged[1000]])
@@ -1578,7 +2139,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 # np.savetxt('msd/msd_cna_cov.txt',np.c_[temp_vac.pcov])
 
 
-# In[241]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -1611,7 +2172,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### robustness
 
-# In[242]:
+# In[ ]:
 
 
 class Robustness(Temperature):
@@ -1738,7 +2299,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### per type
 
-# In[243]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -1786,7 +2347,7 @@ if not eval(confParser['flags']['RemoteMachine']):
               )
 
 
-# In[244]:
+# In[ ]:
 
 
 #tauu = temp.time_scale
@@ -1794,7 +2355,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ## correlated noise
 
-# In[245]:
+# In[ ]:
 
 
 class Noise(Temperature):
@@ -2012,9 +2573,10 @@ if not eval(confParser['flags']['RemoteMachine']):
         })
 
 
+
 # ## wait times
 
-# In[246]:
+# In[ ]:
 
 
 class Stats(Temperature):
@@ -2158,9 +2720,10 @@ class Stats(Temperature):
         return popt[0]
 
 
+
 # ### main()
 
-# In[247]:
+# In[ ]:
 
 
 def main():
@@ -2171,17 +2734,17 @@ def main():
 
     stats = Stats(
 #         [1000,1200,1400,1600,1800,2000],8,
-#        [1000,1200,1400,1600,1800,2000],1,
-        [0,1],[list(range(8))]*10,
+        [1000], [list(range(8))]*10,
+#        [0,1],[list(range(8))]*10,
 #        np.arange(1000,1440,80),1,
 #        verbose=True
                      )
 #    stats.Parse(['msd/event_times.txt'])
-#    stats.Parse( list(map(lambda x:'CantorNatom16KTemp%sKEnsemble8/Run%s/msd/event_times.txt'%(x[0],x[1]),
+    stats.Parse( list(map(lambda x:'CantorNatom16KTemp%sKEnsemble8/Run%s/msd/event_times.txt'%(x[0],x[1]),
 #    stats.Parse( list(map(lambda x:'NiNatom16KTemp%sK/Run%s/msd/event_times.txt'%(x[0],x[1]),
 #    stats.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/event_times.txt'%(x[0],x[1]),
 #    stats.Parse( list(map(lambda x:'NiNatom1KTemp%sK/Run%s/msd/event_times.txt'%(x[0],x[1]),
-    stats.Parse( list(map(lambda x:'flickers/nicocr/temp0/thresh%s/Run%s/msd/event_times.txt'%(x[0],x[1]),
+#    stats.Parse( list(map(lambda x:'flickers/nicocr/temp0/thresh%s/Run%s/msd/event_times.txt'%(x[0],x[1]),
                         stats.temps_runs ))
               )
     stats.PlotWaitTimes(scale=True,shift=False,scalePowerLaw=False,
@@ -2191,8 +2754,8 @@ def main():
 #                     'xlim':(1e-3,100),
                       'ylim':(1e-5,1e2),#(1e-8,1e6), #,
 #                    'ndecade_y':2,
-                           'xstr':r'$t_w$',
-                           'ystr':r'$P(\lambda t_w)$',
+#                            'xstr':r'$t_w$',
+#                            'ystr':r'$P(\lambda t_w)$',
                    'title':'png/waitTimes_unscaled_ni.png'},
 
                        )
@@ -2226,7 +2789,7 @@ main()
 
 # ### effective E
 
-# In[248]:
+# In[ ]:
 
 
 def func(x,a,b):
@@ -2261,7 +2824,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### reduced temperature scale
 
-# In[249]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -2335,7 +2898,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### Tm
 
-# In[250]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -2355,7 +2918,7 @@ if not eval(confParser['flags']['RemoteMachine']):
     err_vol = data.vol[filtr].std()/n**0.5
 
 
-# In[251]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -2393,7 +2956,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ## jumps
 
-# In[252]:
+# In[ ]:
 
 
 class JumpStats(Temperature):
@@ -2528,7 +3091,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### fit
 
-# In[253]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -2560,13 +3123,13 @@ if not eval(confParser['flags']['RemoteMachine']):
     
 
 
-# In[254]:
+# In[ ]:
 
 
 #Energy = lmpData.headers['Energy']
 
 
-# In[255]:
+# In[ ]:
 
 
 # if not eval(confParser['flags']['RemoteMachine']):
@@ -2587,7 +3150,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### sampled energies
 
-# In[256]:
+# In[ ]:
 
 
 class EnergyStats(Temperature):
@@ -2603,6 +3166,7 @@ class EnergyStats(Temperature):
         return dtt#[filtr]
     #
     def PlotPdf(self,shift=False,column_energy = 0,n_per_decade=8,
+                linscale = False,
                 **kwargs):
         #
         self.ax = utl.PltErr(None,#ans[:,0],
@@ -2617,8 +3181,10 @@ class EnergyStats(Temperature):
         #
         kount = 0
         for temp, indx in zip(self.temps,range(len(self.temps))):
+            nruns = len(self.nrun[indx])
+
             #--- concat. data for each temp            
-            data = np.concatenate(list(map(lambda x: self.data[x][:,column_energy],range(kount,kount+self.nrun))))
+            data = np.concatenate(list(map(lambda x: self.data[x][:,column_energy],range(kount,kount+nruns))))
             #--- remove zeros
             data = data[data > 0.0]
             if self.verbose:
@@ -2628,7 +3194,7 @@ class EnergyStats(Temperature):
             #--- histogram
 #            data = np.array(data).flatten()
             #--- histogram
-            hist, bin_edges, err = utl.GetPDF(data,n_per_decade=n_per_decade)
+            hist, bin_edges, err = utl.GetPDF(data,n_per_decade=n_per_decade,linscale=linscale)
         
             #--- filtr
             filtr = hist == err
@@ -2641,12 +3207,16 @@ class EnergyStats(Temperature):
                 err *= 100**indx if shift else 1
 
             utl.PltErr(bin_edges,hist,
-                          yerr=err,
-                   attrs=symbols.GetAttrs(count=indx%7,label=r'$%s$'%temp), #,fmt='.'),
+#                           yerr=err,
+                    attrs=symbols.GetAttrs(count=indx%7,label=r'$%s$'%temp), #,fmt='.'),
+#                   attrs={'fmt':'-','color':'C0'},
                    ax = self.ax,
                    Plot=False,
                           )
-            kount += self.nrun
+            
+#            self.ax.fill_between(bin_edges, hist)
+            
+            kount += nruns #self.nrun
         #
         utl.PltErr(None,
                    None,
@@ -2881,7 +3451,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 )
 
 
-# In[257]:
+# In[ ]:
 
 
 # class EnergyStats(Temperature):
@@ -3177,30 +3747,31 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### Events dir
 
-# In[258]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
     get_ipython().system('mkdir png')
     
     stats = EnergyStats(
-        [1000,1200,1400,1600,1800,2000],8,
-#        [2000],8,
+#        [1000,1200,1400,1600,1800,2000],[list(range(8))]*10,
+        [1000],[list(range(8))]*10,
 #        verbose=True
                      )
 #    stats.Parse( list(map(lambda x:'CantorNatom16KTemp%sKEnsemble8/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
-    stats.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
-#    stats.Parse( list(map(lambda x:'NiNatom1KTemp%sK/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
+#    stats.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
+    stats.Parse( list(map(lambda x:'NiNatom1KTemp%sK/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
                          stats.temps_runs ))
                )
-    stats.PlotPdf(shift=True,column_energy=3,
-                        **{'xscale':'log',
+    stats.PlotPdf(shift=False,column_energy=3,
+                  linscale=True, n_per_decade = 32,
+                        **{'xscale':'linear',
                   'yscale':'log',
-#                   'xlim':(1e-3,1e-1),
-#                    'ylim':(1e-2,1e0), #(1e-5,1e2),
+                   'xlim':(0,4.8),
+                    'ylim':(1e-4,1e1), #(1e-5,1e2),
 #                           'xstr':r'$\Delta t$',
 #                           'ystr':r'$P(\Delta t)$',
-                        'ndecade_x':1,'ndecade_y':2,
+#                         'ndecade_x':1,'ndecade_y':2,
                     'bbox_to_anchor':(0.4,0.13,0.5,0.5),
                    'title':'png/BarrierPdf_nicocr.png'},
 
@@ -3223,7 +3794,14 @@ if not eval(confParser['flags']['RemoteMachine']):
 #                        )
 
 
-# In[259]:
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -3270,7 +3848,8 @@ if not eval(confParser['flags']['RemoteMachine']):
 #                        )
 
 
-# In[260]:
+
+# In[ ]:
 
 
 # kb=8.61732814974056e-05
@@ -3278,7 +3857,7 @@ if not eval(confParser['flags']['RemoteMachine']):
 # 0.9/1650/kb,1.0/2100/kb
 
 
-# In[261]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
@@ -3328,7 +3907,7 @@ if not eval(confParser['flags']['RemoteMachine']):
     plt.show()
 
 
-# In[262]:
+# In[ ]:
 
 
 def func(x,beta,k,x0,x1):
@@ -3357,7 +3936,7 @@ def fit(edge,hist,err):
     return popt[0]
 
 
-# In[263]:
+# In[ ]:
 
 
 # kbt=1000*8.61732814974056e-05
@@ -3367,35 +3946,37 @@ def fit(edge,hist,err):
 
 # ### catalogs
 
-# In[264]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
     get_ipython().system('mkdir png')
     
     stats = EnergyStats(
-#        [1000,1200,1400,1600,1800,2000],8,
-        [2000],8
+#         [1000,1200,1400,1600,1800,2000],[list(range(8))]*10,
+        [0],[list(range(8))]
 #        verbose=True
                      )
-#    stats.Parse( list(map(lambda x:'CantorNatom16KTemp%sKEnsemble8/Run%s/msd/eventID_barrier_catalog_type5.txt'%(x[0],x[1]),
-    stats.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/eventID_barrier_catalog_type3.txt'%(x[0],x[1]),
+#    stats.Parse( list(map(lambda x:'CantorNatom16KTemp%sKEnsemble8/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
+#    stats.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
 #    stats.Parse( list(map(lambda x:'NiNatom16KTemp%sK/Run%s/msd/timeseries.txt'%(x[0],x[1]),
+#    stats.Parse( list(map(lambda x:'NiCoCrNatom1KTemp%sK/Run%s/msd/eventID_barrier.txt'%(x[0],x[1]),
+    stats.Parse( list(map(lambda x:'barrier/ni/kmc/void_2d/Run%s/msd/eventID_barrier_catalog_type1.txt'%(x[1]),
                          stats.temps_runs ))
                )
 
     stats.PlotPdf( 
                         column_energy=2,
                         splitByType = False,
-                        n_per_decade = 8,
+                        n_per_decade = 16,
                         **{'xscale':'log',
                   'yscale':'log',
-#                   'xlim':(1e-3,1e0),
+                   'xlim':(1e-1,1e1),
 #                   'ylim':(1e-3,1e2), #(1e-5,1e2),
-#                           'xstr':r'$\Delta t$',
-#                           'ystr':r'$P(\Delta t)$',
+                           'xstr':r'$\Delta E$',
+                           'ystr':r'$P(\Delta E)$',
 #                        'ndecade_x':2,'ndecade_y':2,
-#                   'title':'png/BarrierPdf_cantor.png'
+                   'title':'png/BarrierPdf_cantor.png'
                           },
 
                        )
@@ -3417,59 +3998,87 @@ if not eval(confParser['flags']['RemoteMachine']):
 
 # ### time series
 
-# In[14]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
     get_ipython().system('mkdir png')
+    pref = 1e6
     
     temp = Temperature(
-        [1000],[[0,2,3,4,5,6,7]],
+        [1000],[[7]],
 #        verbose=True
                      )
     #--- parse data
 #    temp.Parse(['./msd/msd.txt'])
-    temp.Parse( list(map(lambda x:'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp%sK/Run%s/msd/timeseries.txt'%(x[0],x[1]),
-#    temp.Parse( list(map(lambda x:'NiNatom1KTemp%sK/Run%s/msd/timeseries.txt'%(x[0],x[1]),
+    temp.Parse( list(map(lambda x:'sro/cantor/kmc/cantorNatom1KTemp%sK/Run%s/msd/timeseries.txt'%(x[0],x[1]),
                         temp.temps_runs ))
               )
 
+#     temp.EnsAverage(n_bins_per_decade=100000,
+#                     col_x = 3, col_y = 1,
+#                     n_thresh=0,
+#                    )
+    
+    symbols = Symbols()
+    legend=Legends()
+    legend.Set(bbox_to_anchor=(0.92,0.48,0.5,0.5),labelspacing=.4)
+
     count = 0
-    ax = utl.PltErr(None,None,Plot=False)
+#     ax = utl.PltErr(None,None,Plot=False)
     for irun in temp.nrun[0]:
-        xdata=temp.data[count][::2,2]
+        xdata=temp.data[count][::2,3]
         ydata=temp.data[count][::2,1]
 
-        utl.PltErr(xdata, ydata,
-                  attrs={'fmt':'-'},
-                   ax=ax,
-                   Plot=False,
-    #                xscale='log' ,
-                     ylim=(-6000,-5900),
-                  )
+#         utl.PltErr(xdata, ydata,
+#                   attrs={'fmt':'-'},
+#                    ax=ax,
+#                    Plot=False,
+#     #                xscale='log' ,
+# #                      ylim=(-6000,-5900),
+#                   )
         count += 1
+        
+    
+#     timesteps = temp.data_averaged[1000][:,0]
+#     wc = temp.data_averaged[1000][:,1]
+#     yerr = temp.data_averaged[1000][:,2]
+
+    ax = utl.PltErr(None,None,Plot=False)
+    utl.PltErr(pref*xdata,ydata,#yerr=yerr,
+                 ylim=[(-5538,-5530),(-6000,-5920)][0],
+#                xlim=(0,0.1),
+                Plot=False,
+                ax=ax,
+                attrs={'fmt':'-','color':'C0'},#symbols.GetAttrs(count=0,nevery=8),
+               title='png/energy_timeseries_cantor.png',
+                 DrawFrame=DRAW_FRAME,
+               fontsize=16,
+             )
 
 
 # ## sro
 
-# In[13]:
+# In[ ]:
 
 
 class SroAnalysis:
     
-    def __init__(self, lmpData, verbose = False ):
+    def __init__(self, lmpData, nevery=1, verbose = False ):
         get_ipython().system('mkdir sroAnalysis')
         self.lmpData = lmpData
         self.verbose = verbose
-        self.timesteps = list(lmpData.coord_atoms_broken.keys())
+        self.timesteps = list(lmpData.coord_atoms_broken.keys())[::nevery]
         self.timesteps.sort()
-        self.times = lmpData.headers['Time']
+        self.times = list(lmpData.headers['Time'])[::nevery]
+        self.times.sort()
 
 
     
     def GetNeighList(self):
         itime0 = self.timesteps[0]
-        natoms = min(self.lmpData.coord_atoms_broken[itime0].shape[0],                     eval(confParser['SroAnalysis']['natom'])) #--- subset of atoms
+        natoms = min(self.lmpData.coord_atoms_broken[itime0].shape[0],\
+                     eval(confParser['SroAnalysis']['natom'])) #--- subset of atoms
         atom_indices = range(natoms)
         np.savetxt('atom_indices.txt',atom_indices,fmt='%d')
         #
@@ -3480,6 +4089,8 @@ class SroAnalysis:
         py_path=confParser['input files']['lib_path']
         fileName = 'dumpFile/dump.xyz'
         nevery = int(confParser['SroAnalysis']['nevery'])
+        if self.verbose:
+            print('get neighbor list ...')     
         t0=time.time()
         get_ipython().system('ovitos $py_path/OvitosCna.py $fileName neighList.xyz $nevery 4 $cutoff atom_indices.txt')
         if self.verbose:
@@ -3616,161 +4227,203 @@ class SroAnalysis:
     
 
 
+
 # ### main()
 
-# In[14]:
+# In[ ]:
 
 
 if eval(confParser['SroAnalysis']['SroAnalysis']):
     sro = SroAnalysis( data.lmpData,
-                        verbose = False,
+                       nevery=eval(confParser['SroAnalysis']['nevery']),
+                        verbose = True,
                      )
     sro.GetNeighList()
 #    sro.WarrenCowleyOrderParameter(sro.timesteps[0])
     sro.MultiTimes(
-                    bins=[0.0,eval(confParser['SroAnalysis']['cutoff'])]
+                    bins=np.array(confParser['SroAnalysis']['sroBins'].split()).astype(float)
                   )
     sro.Print('sroAnalysis/sro.json')
 
 
 # ### Plot
 
-# In[7]:
+# In[ ]:
 
 
-if not eval(confParser['flags']['RemoteMachine']):
+# if not eval(confParser['flags']['RemoteMachine']):
 
-    path = {0:'sro/CantorNatom16KTemp1000KEnsemble8',
-            1:'sro/NiCoCrNatom1KTemp1000K',
-           }[1]
-    rwj = utl.ReadWriteJson()
-    data = rwj.Read('%s/Run0/sroAnalysis/sro.json'%path)
-    #
-    pairIndx = '0'
-    rss = 0.20
-    #
-    symbols = Symbols()
-#    ax = utl.PltErr(None,None,Plot=False)
-    for items in data:
-        timestep = items['timestep']
-        bin_edges, wc, err = items[pairIndx]
+#     path = {0:'sro/CantorNatom16KTemp1000KEnsemble8',
+#             1:'sro/NiCoCrNatom1KTemp1000K',
+#            }[1]
+#     rwj = utl.ReadWriteJson()
+#     data = rwj.Read('%s/Run0/sroAnalysis/sro.json'%path)
+#     #
+#     pairIndx = '0'
+#     rss = 0.20
+#     #
+#     symbols = Symbols()
+# #    ax = utl.PltErr(None,None,Plot=False)
+#     for items in data:
+#         timestep = items['timestep']
+#         bin_edges, wc, err = items[pairIndx]
 
     
-    for pairIndx in range(6):
-        ax = utl.PltErr(None,None,Plot=False)
+#     for pairIndx in range(6):
+#         ax = utl.PltErr(None,None,Plot=False)
 
-        bin_edges, wc, err = items[str(pairIndx)]
-        utl.PltErr(bin_edges,wc,yerr=2*np.array(err),
-                    Plot=False,
-                    ax=ax,
-                    attrs=symbols.GetAttrs(count=0,zorder=2),      
-                  )
+#         bin_edges, wc, err = items[str(pairIndx)]
+#         utl.PltErr(bin_edges,wc,yerr=2*np.array(err),
+#                     Plot=False,
+#                     ax=ax,
+#                     attrs=symbols.GetAttrs(count=0,zorder=2),      
+#                   )
 
 
-        cutoff = 20.0 #eval(confParser['SroAnalysis']['cutoff'])
-        utl.PltErr([0,cutoff],[rss,rss],
-                    xlim=[0.0,cutoff],
-    #                ylim=[0.1,.7],
-                    ax=ax,
-                    attrs={'fmt':'-.r'},
-                    title='png/wc_nicocr_indx%s.png'%(pairIndx),
-                    DrawFrame=DRAW_FRAME,
-                   )
+#         cutoff = 20.0 #eval(confParser['SroAnalysis']['cutoff'])
+#         utl.PltErr([0,cutoff],[rss,rss],
+#                     xlim=[0.0,cutoff],
+#     #                ylim=[0.1,.7],
+#                     ax=ax,
+#                     attrs={'fmt':'-.r'},
+#                     title='png/wc_nicocr_indx%s.png'%(pairIndx),
+#                     DrawFrame=DRAW_FRAME,
+#                    )
+
 
 
 # #### timeseries
 
-# In[6]:
+# In[ ]:
 
 
 if not eval(confParser['flags']['RemoteMachine']):
 
     path = {0:'sro/CantorNatom16KTemp1000KEnsemble8',
             1:'sro/NiCoCrNatom1KTemp1000K',
-            2:'sro/nicocr/kmc/NiCoCrNatom1KTemp1000K'
+            2:'sro/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+            3:'.'
            }[2]
+    alloy = 'nicocr'
+    runs = range(8) #[7] #range(8)
+    rss = 0.33 #0.2 #0.33
+    every_nrow = 1 #--- don't change
+    inn = 2 #--- 1st nearest neighbor
+    nneighbors = 3 #--- len(sroBins)-1
+    
+    indices = {'nicocr':'0 1 2 3 4 5'.split(),
+               'cantor':' '.join(list(map(str,range(15)))).split()}[alloy]
+    pairs = {'nicocr':'NiNi NiCo NiCr CoCo CoCr CrCr'.split(),
+              'cantor':' '.join(list(map(str,range(15)))).split()
+            }[alloy]
+    
     rwj = utl.ReadWriteJson()
-    for irun in range(8):
+    for irun in runs:
         data = rwj.Read('%s/Run%s/sroAnalysis/sro.json'%(path,irun))
         #
-        rss = 0.33
         #--- parse
         symbols = Symbols()
         legend=Legends()
         legend.Set(bbox_to_anchor=(0.92,0.48,0.5,0.5),labelspacing=.4)
         ax = utl.PltErr(None,None,Plot=False)
-        for pairIndx, label in zip('0 1 2 3 4 5'.split(),'NiNi NiCo NiCr CoCo CoCr CrCr'.split()):
+        for pairIndx, label in zip(indices,pairs):
             sro_data = np.concatenate([list(map(lambda x:
-                                 np.concatenate([np.array([x['timestep']]),np.array(x[pairIndx]).flatten()]),
+                                 np.concatenate([np.array([x['time']]),np.array(x[pairIndx]).flatten()]),
                                  data))])
-
-        #    ax = utl.PltErr(None,None,Plot=False)
-        #    for items in data:
-            timesteps = sro_data[:,0]
-            wc = sro_data[:,2]/rss-1.0
-            err = sro_data[:,3]
+            timesteps = sro_data[::every_nrow,0]
+            r = sro_data[::every_nrow,1:1+nneighbors]
+            wc = sro_data[::every_nrow,1+nneighbors:1+2*nneighbors]/rss-1.0
+            err = sro_data[::every_nrow,1+2*nneighbors:1+3*nneighbors]
 
 
-            np.savetxt('sro/sro_irun%s_indx_%s.txt'%(irun,pairIndx),np.c_[timesteps,wc,err])
+            #--- output
+            np.savetxt('sro/sro_irun%s_indx%s_nn%s.txt'%(irun,pairIndx,inn),np.c_[timesteps,wc[:,inn],err[:,inn]])
 
-            utl.PltErr(timesteps,wc,yerr=err,
+            utl.PltErr(timesteps,-wc[:,inn],yerr=err[:,inn],
                         Plot=False,
                         ax=ax,
-                        attrs=symbols.GetAttrs(count=int(pairIndx),zorder=2,nevery=1280,label=r'$\mathrm{%s}$'%label),      
+                        attrs=symbols.GetAttrs(count=int(pairIndx)%7,zorder=2,nevery=1280,label=r'$\mathrm{%s}$'%label),      
                       )
 
 
-    #    cutoff = 20.0 #eval(confParser['SroAnalysis']['cutoff'])
-        print(timesteps[-1]/2)
         utl.PltErr([0,timesteps[-1]],[0,0],
-    #                 xlim=[0.0,cutoff],
-    #                ylim=[0,1],
                     ax=ax,
                     attrs={'fmt':'-.r'},
                     legend=legend.Get(),
-                    title='png/wc_time_nicocr.png',
+#                     title='png/wc_time_nicocr_nn%s.png'%inn,
                     DrawFrame=DRAW_FRAME,
                    )
 
 
-# In[36]:
+
+# In[ ]:
 
 
-ax = utl.PltErr(None,None,Plot=False)
+if not eval(confParser['flags']['RemoteMachine']):
+    pref = 1e6
+    indices = {'nicocr':'0 1 2 3 4 5'.split(),
+               'cantor':'0 5 9 12 14'.split()}[alloy]
+    pairs = {'nicocr':'NiNi NiCo NiCr CoCo CoCr CrCr'.split(),
+              'cantor':'NiNi CoCo CrCr FeFe MnMn '.split()
+            }[alloy]
 
-for sro_indx, label in zip('0 1 2 3 4 5'.split(),'NiNi NiCo NiCr CoCo CoCr CrCr'.split()):
-    data = list(map(lambda x:np.loadtxt('sro/sro_irun%s_indx_%s.txt'%(x,sro_indx)),range(8)))
-
-    temp_vac = Temperature(
-            [int(sro_indx)],[list(range(8))],
-    #         verbose = True,
-                     )
-    #--- parse data
-    temp_vac.Parse( list(map(lambda x:'sro/sro_irun%s_indx_%s.txt'%(x[1],x[0]),
-                          temp_vac.temps_runs ))
+    
+    ax = utl.PltErr(None,None,Plot=False)
+    legend=Legends()
+    legend.Set(bbox_to_anchor=(-0.02,0.52,0.5,0.5),
+                 labelspacing=.2,
+                    fontsize=12,
               )
+    count = 0
+    for sro_indx, label in zip(indices,pairs):
+        temp_vac = Temperature(
+                [int(sro_indx)],[runs],
+        #         verbose = True,
+                         )
+        #--- parse data
+        temp_vac.Parse( list(map(lambda x:'sro/sro_irun%s_indx%s_nn%s.txt'%(x[1],x[0],inn),
+                              temp_vac.temps_runs ))
+                  )
 
-    temp_vac.EnsAverage()
+        temp_vac.EnsAverage(n_bins_per_decade=32)
 
 
-    timesteps = temp_vac.data_averaged[int(sro_indx)][:,0]
-    wc = temp_vac.data_averaged[int(sro_indx)][:,1]
+        timesteps = temp_vac.data_averaged[int(sro_indx)][:,0]
+        wc = temp_vac.data_averaged[int(sro_indx)][:,1]
+        yerr = temp_vac.data_averaged[int(sro_indx)][:,2]
 
-    utl.PltErr(timesteps,wc,yerr=None,
-                Plot=False,
+        utl.PltErr(pref*timesteps,-wc,#yerr=yerr,
+                    Plot=False,
+                    ax=ax,
+                    attrs=symbols.GetAttrs(count=count%7,zorder=2,nevery=4,label=r'$\mathrm{%s}$'%label),      
+                  )
+        count += 1
+
+    utl.PltErr([0,pref*timesteps[-1]],[0,0],
+#                        xlim=[0.0,0.1],
+                    ylim=[-0.3,0.3],
                 ax=ax,
-                attrs=symbols.GetAttrs(count=int(sro_indx),zorder=2,nevery=2,label=r'$\mathrm{%s}$'%label),      
-              )
+                attrs={'fmt':'-.r','color':'C0'},
+                  legend=legend.Get(),
+                title='png/wc_time_cantor_inn%s.png'%inn,
+                DrawFrame=DRAW_FRAME,
+               )
 
 
-# In[7]:
+# In[ ]:
 
 
-data
 
 
-# In[32]:
+
+# In[ ]:
 
 
-temp_vac.data_averaged
+
+
+
+# In[ ]:
+
+
+
 
