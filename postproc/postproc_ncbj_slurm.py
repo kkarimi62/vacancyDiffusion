@@ -37,7 +37,7 @@ if __name__ == '__main__':
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
                 '11':'ni/mlmc/latest_void5th',
                 '12':'msd_definition/ni/temp0_6th',
-                '13':'ni/koreanPotential/size0_vac',
+                '13':'ni/koreanPotential/size0_vac_ws',
                 '14':'ni/shengPotential/temp0_vac',
                 '15':'vacancy/shengPotential/temp0_vac_ws',
                 '16':'vacancy/koreanPotential/size0_vac_ws',
