@@ -40,7 +40,7 @@ if __name__ == '__main__':
                 '13':'ni/koreanPotential/size0_vac_ws',
                 '14':'ni/shengPotential/temp0_vac',
                 '15':'vacancy/shengPotential/temp0_vac_ws',
-                '16':'vacancy/koreanPotential/size0_vac_ws',
+                '16':'vacancy/koreanPotential/size0_vac',
                 }['16']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
@@ -54,7 +54,7 @@ if __name__ == '__main__':
                                 '13':'/../simulations/ni/koreanPotential/size0',
                                 '14':'/../simulations/ni/shengPotential/temp0',
                                 '15':'/ni/shengPotential/temp0_vac_ws',
-                                '16':'/ni/koreanPotential/size0_vac_ws',
+                                '16':'/ni/koreanPotential/size0_vac',
                             }['16'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
