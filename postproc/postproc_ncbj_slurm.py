@@ -38,7 +38,7 @@ if __name__ == '__main__':
                 '11':'ni/mlmc/latest_void5th',
                 '12':'msd_definition/ni/temp0_6th',
                 '13':'ni/koreanPotential/size0',
-                '14':'ni/shengPotential/temp0_vac',
+                '14':'ni/shengPotential/temp0_vac_ws',
                 '15':'vacancy/shengPotential/temp0_4th',
                 }['14']
     DeleteExistingFolder = True
