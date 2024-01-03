@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(8)
+    runs     = range(1)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 '14':'ni/shengPotential/temp0_vac',
                 '15':'vacancy/shengPotential/temp0_vac_ws',
                 '16':'vacancy/koreanPotential/size0_vac_ws',
-                }['13']
+                }['16']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                 '14':'/../simulations/ni/shengPotential/temp0',
                                 '15':'/ni/shengPotential/temp0_vac_ws',
                                 '16':'/ni/koreanPotential/size0_vac_ws',
-                            }['13'] #--- source
+                            }['16'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -66,7 +66,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 0
+    keyno = 1
     convert_to_py = True
 #---
 #---
