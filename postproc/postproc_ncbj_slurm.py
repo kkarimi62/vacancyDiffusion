@@ -24,14 +24,13 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(8)
+    runs     = range(1)
     nNode    = 1
     nThreads = 1
     jobname  = {
                 '4':'flickers/cantorNatom1K/multipleTemp/temp0',
                 '5':'energyTimeseries/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '3':'msd/cantor/kmc/cantorNatom1KTemp1000K',
-                '7':'msdPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '8':'energyBarrierPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
                 '11':'ni/mlmc/latest_void5th',
@@ -42,7 +41,8 @@ if __name__ == '__main__':
                 '16':'vacancy/koreanPotential/size0_vac',
                 '16':'vacancy/koreanPotential/size0_vac',
                 '6':'msd/cantorNatom1K/multipleTemp/temp0',
-                }['6']
+                '7':'msd2nd/cantorNatom1K/multipleTemp/temp0',
+                }['7']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -56,7 +56,8 @@ if __name__ == '__main__':
                                 '15':'/ni/shengPotential/temp0_vac_ws',
                                 '16':'/ni/koreanPotential/size0_vac',
                                 '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
-                            }['6'] #--- source
+                                '7':'/msd/cantorNatom1K/multipleTemp/temp0', 
+                            }['7'] #--- source
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -67,7 +68,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 0
+    keyno = 1
     convert_to_py = True
 #---
 #---

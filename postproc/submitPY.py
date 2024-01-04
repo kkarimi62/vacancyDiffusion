@@ -3,8 +3,8 @@ if __name__ == '__main__':
     import os
     import numpy as np
     #---
-    lnums = [ 44, 58 ]
-    script = 'postproc.py postproc_ncbj_slurm.py'.split()[1]
+    lnums = [ 44, 59 ]
+    script = 'postproc.py postproc_ncbj_slurm.py '.split()[1]
     PHI  = dict(zip(range(6),np.linspace(1000,2000,6,dtype=int)))
 
     string=open(script).readlines() #--- python script
@@ -27,10 +27,10 @@ if __name__ == '__main__':
                 temp = PHI[key]
             #---	
                 inums = lnums[ 0 ] - 1
-                string[ inums ] = "\t\'6\':\'msd/cantorNatom1K/multipleTemp/temp%s\',\n" % (key) #--- change job name
+                string[ inums ] = "\t\'6\':\'msd2nd/cantorNatom1K/multipleTemp/temp%s\',\n" % (key) #--- change job name
         #---	densities
                 inums = lnums[ 1 ] - 1
-                string[ inums ] = "\t\'6\':\'/../simulations/cantorNatom1K/multipleTemp/temp%s\',\n"%(key)
+                string[ inums ] = "\t\'6\':\'/msd/cantorNatom1K/multipleTemp/temp%s\',\n"%(key)
         #
                 sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
                 os.system( 'python3 junk%s.py'%count )
