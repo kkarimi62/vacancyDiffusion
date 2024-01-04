@@ -3,12 +3,12 @@ if __name__ == '__main__':
     import os
     import numpy as np
     #---
-    lnums = [ 38, 106   ]
+    lnums = [ 39, 107   ]
 #    lnums = [ 38, 99   ]
     string=open('simulations-ncbj.py').readlines() #--- python script
 #    string=open('simulations.py').readlines() #--- python script
     #---
-    PHI = dict(zip(range(6),np.linspace(1000,2000,6)))
+    PHI = dict(zip(range(1,6),np.linspace(1200,2000,5))) #dict(zip(range(6),np.linspace(1000,2000,6)))
 #	PHI = dict(zip(range(16),np.linspace(1500,2500,16)))
 #		{
 #             '0':1,
@@ -28,7 +28,7 @@ if __name__ == '__main__':
             #---	densities
                 inums = lnums[ 0 ] - 1
 #                string[ inums ] = "\t4:\'nicocrNatom1K/md/temp%s\',\n"%(iphi) #--- change job name
-                string[ inums ] = "\t5:\'cantorNatom1K/multipleTemp/temp%s\',\n"%(iphi) #--- change job name
+                string[ inums ] = "\t7:\'ni/FoilesPotential/temp%s\',\n"%(iphi) #--- change job name
             #---
                 inums = lnums[ 1 ] - 1
 #                 string[ inums ] = "\t7:\' -var buff 0.0 -var T %s -var rnd %%s -var P 0.0 -var nevery 10000 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData equilibrated.dat\'%%np.random.randint(1001,9999),\n"%(temp)
