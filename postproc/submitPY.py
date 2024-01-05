@@ -9,17 +9,6 @@ if __name__ == '__main__':
 
     string=open(script).readlines() #--- python script
     #---
-#	PHI  = dict(zip(range(11),np.arange(1000,1440,40)))
-#		{ 
-#             '0':'FeNi',
-#            '1':'CoNiFe',
-#           '2':'CoNiCrFe',
-#           '3' :'CoCrFeMn',
-#            '4':'CoNiCrFeMn',
-#            '5':'Co5Cr2Fe40Mn27Ni26'
-#			'6':'cuzr',
-#		}
-
     nphi = len(PHI)
     #---
     count = 0
@@ -27,10 +16,10 @@ if __name__ == '__main__':
                 temp = PHI[key]
             #---	
                 inums = lnums[ 0 ] - 1
-                string[ inums ] = "\t\'14\':\'ni/FoilesPotential/temp%s\',\n" % (key) #--- change job name
+                string[ inums ] = "\t\'14\':\'vacancy/FoilesPotential/temp%s_total\',\n" % (key) #--- change job name
         #---	densities
                 inums = lnums[ 1 ] - 1
-                string[ inums ] = "\t\'14\':\'/../simulations/ni/FoilesPotential/temp%s\',\n"%(key)
+                string[ inums ] = "\t\'14\':\'/ni/FoilesPotential/temp%s\',\n"%(key)
         #
                 sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
                 os.system( 'python3 junk%s.py'%count )
