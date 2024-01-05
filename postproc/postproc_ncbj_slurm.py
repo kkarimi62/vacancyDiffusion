@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(8)
+    runs     = range(1)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -40,7 +40,8 @@ if __name__ == '__main__':
                 '14':'ni/FoilesPotential/temp0',
                 '15':'vacancy/FoilesPotential/temp0',
                 '5':'cantorNatom1K/multipleTemp/temp0',#'ni/FoilesPotential/temp0',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                }['5']
+                '6':'cantorNatom1K/multipleTemp/temp0/msd',#'ni/FoilesPotential/temp0',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                }['6']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -50,12 +51,12 @@ if __name__ == '__main__':
                                 '12':'/../simulations/ni/koreanPotential/NiNatom1KTemp1000K', 
                                 '13':'/../simulations/ni/koreanPotential/size0',
                                 '16':'/ni/koreanPotential/size0_vac',
-                                '6':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
                                 '7':'/msd/cantorNatom1K/multipleTemp/temp0', 
                                 '14':'/../simulations/ni/FoilesPotential/temp0',
                                 '15':'/ni/FoilesPotential/temp0',
                             '5':'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                            }['5'] #--- source 
+                        '6':'cantorNatom1K/multipleTemp/temp0',#'ni/FoilesPotential/temp0',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                            }['6'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -66,7 +67,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 0
+    keyno = 1
     convert_to_py = True
 #---
 #---
