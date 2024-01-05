@@ -39,7 +39,7 @@ if __name__ == '__main__':
                 '7':'msd2nd/cantorNatom1K/multipleTemp/temp0_total',
                 '14':'ni/FoilesPotential/temp0',
                 '15':'vacancy/FoilesPotential/temp0',
-                '5':'ni/FoilesPotential/temp0',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                '5':'cantorNatom1K/multipleTemp/temp0',#'ni/FoilesPotential/temp0',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 }['5']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
@@ -54,7 +54,7 @@ if __name__ == '__main__':
                                 '7':'/msd/cantorNatom1K/multipleTemp/temp0', 
                                 '14':'/../simulations/ni/FoilesPotential/temp0',
                                 '15':'/ni/FoilesPotential/temp0',
-                            '5':'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                            '5':'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                             }['5'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
