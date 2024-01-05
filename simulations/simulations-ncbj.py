@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
         nruns	 = 8
         #
-        nThreads = 8 #32
+        nThreads = 16 #8 #32
         nNode	 = 1
         #
         jobname  = {
@@ -34,10 +34,10 @@ if __name__ == '__main__':
                     2:'NiCoCrNatom1KTemp1400K', 
                     3:'Ni2ndMultTemp/Temp600K',#'NicoCrMultTemp/Temp600K',#'CantorNatom128KTemp1400K', 
                     4:'nicocrTemp1000K/n1',
-                    5:'cantorNatom1K/multipleTemp/temp5',
                     6:'ni/koreanPotential/size0',
                     7:'ni/FoilesPotential/temp0',
-                   }[7]
+                    5:'cantorNatom1K/multipleTemp/temp0',
+                   }[5]
         sourcePath = os.getcwd() +\
                     {	
                         0:'/junk',
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                     0:' -var natoms 100000 -var cutoff 3.52 -var ParseData 0 -var ntype 3 -var DumpFile dumpInit.xyz -var WriteData data_init.txt',
                     6:' -var T 300 -var DataFile Equilibrated_300.dat',
                     4:' -var T 600.0 -var t_sw 20.0 -var DataFile Equilibrated_600.dat -var nevery 100 -var ParseData 1 -var WriteData swapped_600.dat', 
-                    5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 2000 -var ntype 1 -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_perfect_crystal.dat -var seed0 %s -var seed1 %s -var seed2 %s -var seed3 %s'%tuple(np.random.randint(1001,9999,size=4)), 
+                    5:' -var buff 0.0 -var nevery 1000 -var ParseData 0 -var natoms 2000 -var ntype 5 -var cutoff 3.54  -var DumpFile dumpMin.xyz -var WriteData data_perfect_crystal.dat -var seed0 %s -var seed1 %s -var seed2 %s -var seed3 %s'%tuple(np.random.randint(1001,9999,size=4)), 
                     51:' -var buff 0.0 -var nevery 1000 -var ParseData 1 -var DataFile data_defect_crystal.dat -var DumpFile dumpMin.xyz -var WriteData data_minimized.dat', 
                     7:' -var buff 0.0 -var T 600.0 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile data_minimized.txt -var DumpFile dumpThermalized.xyz -var WriteData Equilibrated_600.dat',
                     71:' -var buff 0.0 -var T 0.1 -var P 0.0 -var nevery 100 -var ParseData 1 -var DataFile swapped_600.dat -var DumpFile dumpThermalized2.xyz -var WriteData Equilibrated_0.dat',
@@ -130,10 +130,10 @@ if __name__ == '__main__':
     #        print('EXEC=',EXEC)
         #
         EXEC_lmp = ['lmp_g++_openmpi'][0]
-        durtn = ['23:59:59','95:59:59','167:59:59','335:59:50','671:59:59'][ 0 ]
-        qos='interq short normal long'.split()[1]
+        durtn = ['23:59:59','95:59:59','167:59:59','335:59:50','671:59:59'][ -1 ]
+        qos='interq short normal long'.split()[-1]
         mem = '16gb' #'22gb'
-        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][2]
+        partition = ['INTEL_PHI','INTEL_CASCADE','INTEL_SKYLAKE','INTEL_IVY','INTEL_HASWELL'][1]
         #--
         DeleteExistingFolder = True
 
