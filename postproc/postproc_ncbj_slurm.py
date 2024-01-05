@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(8)
+    runs     = range(1)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -36,13 +36,11 @@ if __name__ == '__main__':
                 '12':'msd_definition/ni/temp0_6th',
                 '13':'ni/koreanPotential/size0_vac_ws',
                 '16':'vacancy/koreanPotential/size0_vac',
-                '16':'vacancy/koreanPotential/size0_vac',
-                '6':'msd/cantorNatom1K/multipleTemp/temp0',
                 '7':'msd2nd/cantorNatom1K/multipleTemp/temp0_total',
                 '14':'ni/FoilesPotential/temp0',
                 '15':'vacancy/FoilesPotential/temp0',
-                '5':'vacancy/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                }['5']
+                '6':'vacancy2nd_total/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                }['6']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -57,7 +55,8 @@ if __name__ == '__main__':
                                 '14':'/../simulations/ni/FoilesPotential/temp0',
                                 '15':'/ni/FoilesPotential/temp0',
                                 '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                            }['5'] #--- source 
+                                '6':'/vacancy/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                            }['6'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -68,7 +67,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 0
+    keyno = 1
     convert_to_py = True
 #---
 #---
