@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(1)
+    runs     = range(8)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -39,8 +39,8 @@ if __name__ == '__main__':
                 '7':'msd2nd/cantorNatom1K/multipleTemp/temp0_total',
                 '14':'ni/FoilesPotential/temp0',
                 '15':'vacancy/FoilesPotential/temp0',
-                '6':'vacancy2nd_total/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                }['6']
+                '5':'nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                }['5']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
@@ -55,8 +55,7 @@ if __name__ == '__main__':
                                 '14':'/../simulations/ni/FoilesPotential/temp0',
                                 '15':'/ni/FoilesPotential/temp0',
                                 '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                                '6':'/vacancy/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                            }['6'] #--- source 
+                            }['5'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -67,7 +66,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 1
+    keyno = 0
     convert_to_py = True
 #---
 #---
