@@ -3,7 +3,7 @@ if __name__ == '__main__':
     import os
     import numpy as np
     #---
-    lnums = [ 42, 57 ]
+    lnums = [ 43, 58 ]
     script = 'postproc.py postproc_ncbj_slurm.py '.split()[1]
     PHI  = dict(zip(range(6),np.linspace(1000,2000,6,dtype=int)))
 
