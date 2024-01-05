@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 '6':'msd/cantorNatom1K/multipleTemp/temp0',
                 '7':'msd2nd/cantorNatom1K/multipleTemp/temp0_total',
                 '14':'ni/FoilesPotential/temp0',
-                '15':'vacancy/FoilesPotential/temp0_total',
+                '15':'vacancy/FoilesPotential/temp0',
                 }['15']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
