@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(1)
+    runs     = range(8)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -39,9 +39,9 @@ if __name__ == '__main__':
                 '7':'msd2nd/cantorNatom1K/multipleTemp/temp0_total',
                 '14':'ni/FoilesPotential/temp0',
                 '15':'vacancy/FoilesPotential/temp0',
-                '5':'nicocr/kmc/NiCoCrNatom1KTemp1000K/msd_total',
+                '5':'nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 }['5']
-    DeleteExistingFolder = False
+    DeleteExistingFolder = True
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
                                 '4':'/../simulations/nicocrTemp1000K/n0',
@@ -54,7 +54,7 @@ if __name__ == '__main__':
                                 '7':'/msd/cantorNatom1K/multipleTemp/temp0', 
                                 '14':'/../simulations/ni/FoilesPotential/temp0',
                                 '15':'/ni/FoilesPotential/temp0',
-                                '5':'/nicocr/kmc/NiCoCrNatom1KTemp1000K',
+                                '5':'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                             }['5'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
@@ -66,7 +66,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 1
+    keyno = 0
     convert_to_py = True
 #---
 #---
