@@ -27,7 +27,7 @@ if __name__ == '__main__':
                 temp = PHI[key]
             #---	
                 inums = lnums[ 0 ] - 1
-                string[ inums ] = "\t\'14\':\'ni/FoilesPotential/temp0\',\n" % (key) #--- change job name
+                string[ inums ] = "\t\'14\':\'ni/FoilesPotential/temp%s\',\n" % (key) #--- change job name
         #---	densities
                 inums = lnums[ 1 ] - 1
                 string[ inums ] = "\t\'14\':\'/../simulations/ni/FoilesPotential/temp%s\',\n"%(key)
