@@ -16,10 +16,10 @@ if __name__ == '__main__':
                 temp = PHI[key]
             #---	
                 inums = lnums[ 0 ] - 1
-                string[ inums ] = "\t\'5\':\'ni/FoilesPotential/temp%s/msd\',\n" % (key) #--- change job name
+                string[ inums ] = "\t\'5\':\'nicocr/kmc/NiCoCrNatom1KTemp%sK/msd\',\n" % (temp) #--- change job name
         #---	densities
                 inums = lnums[ 1 ] - 1
-                string[ inums ] = "\t\'5\':\'/ni/FoilesPotential/temp%s\',\n"%(key)
+                string[ inums ] = "\t\'5\':\'/nicocr/kmc/NiCoCrNatom1KTemp%sK\',\n"%(temp)
         #
                 sfile=open('junk%s.py'%count,'w');sfile.writelines(string);sfile.close()
                 os.system( 'python3 junk%s.py'%count )
