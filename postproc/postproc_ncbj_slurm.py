@@ -40,9 +40,9 @@ if __name__ == '__main__':
                 '14':'ni/FoilesPotential/temp0',
                 '15':'vacancy/FoilesPotential/temp0',
                 '6':'nicocr/kmc/NiCoCrNatom1KTemp1000K/msd',
-'5':'energyBarrier/ni/FoilesPotential/temp0',#'ni/FoilesPotential/temp0',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
+'5':'ni/FoilesPotential/temp0/msd',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 }['5']
-    DeleteExistingFolder = True
+    DeleteExistingFolder = False
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
                                 '4':'/../simulations/nicocrTemp1000K/n0',
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                 '14':'/../simulations/ni/FoilesPotential/temp0',
                                 '15':'/ni/FoilesPotential/temp0',
                                  '6':'/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                            '5':'/../simulations/ni/FoilesPotential/temp0', 
+                            '5':'/ni/FoilesPotential/temp0', 
         #'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                             }['5'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
