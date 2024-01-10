@@ -24,7 +24,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
 if __name__ == '__main__':
     import os
 
-    runs     = range(1)
+    runs     = range(8)
     nNode    = 1
     nThreads = 1
     jobname  = {
@@ -32,7 +32,6 @@ if __name__ == '__main__':
                 '3':'msd/cantor/kmc/cantorNatom1KTemp1000K',
                 '8':'energyBarrierPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
-                '11':'ni/mlmc/latest_void5th',
                 '12':'msd_definition/ni/temp0_6th',
                 '13':'ni/koreanPotential/size0_vac_ws',
                 '16':'vacancy/koreanPotential/size0_vac',
@@ -41,13 +40,13 @@ if __name__ == '__main__':
                 '15':'vacancy/FoilesPotential/temp0',
                 '6':'nicocr/kmc/NiCoCrNatom1KTemp1000K/msd',
 '5':'cantorNatom1K/multipleTemp/temp0/msd',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                }['5']
+                '11':'ni/void_2d',
+                }['11']
     DeleteExistingFolder = False
     readPath = os.getcwd() + {
                                 '3':'/../simulations/NiCoCrNatom1KTemp1000K',
                                 '4':'/../simulations/nicocrTemp1000K/n0',
                                 '9':'/../simulations/nicocr/md/nicocrNatom1K/md/temp0',
-                                '11':'/../../crystalDefect/test/mlmc/ni/latest_void5th', 
                                 '12':'/../simulations/ni/koreanPotential/NiNatom1KTemp1000K', 
                                 '13':'/../simulations/ni/koreanPotential/size0',
                                 '16':'/ni/koreanPotential/size0_vac',
@@ -57,7 +56,8 @@ if __name__ == '__main__':
                                  '6':'/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                             '5':'/cantorNatom1K/multipleTemp/temp0', 
         #'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                            }['5'] #--- source 
+                                '11':'/../../crystalDefect/simulations/ni/void_2d', 
+                            }['11'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'test.ipynb',
         }
-    keyno = 1
+    keyno = 0
     convert_to_py = True
 #---
 #---
