@@ -40,7 +40,7 @@ if __name__ == '__main__':
                 '14':'ni/FoilesPotential/temp0',
                 '15':'vacancy/FoilesPotential/temp0',
                 '6':'nicocr/kmc/NiCoCrNatom1KTemp1000K/msd',
-'5':'ni/FoilesPotential/temp0/msd',#'cantorNatom1K/multipleTemp/temp0/msd',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
+'5':'ni/FoilesPotential/temp0',#'cantorNatom1K/multipleTemp/temp0/msd',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 }['5']
     DeleteExistingFolder = True
     readPath = os.getcwd() + {
