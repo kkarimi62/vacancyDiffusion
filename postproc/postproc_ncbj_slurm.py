@@ -55,7 +55,7 @@ if __name__ == '__main__':
                                 '14':'/../simulations/ni/FoilesPotential/temp0',
                                 '15':'/ni/FoilesPotential/temp0',
                                  '6':'/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                            '5':'/cantorNatom1K/multipleTemp/temp0', 
+                            '5':'/../simulations/cantorNatom1K/multipleTemp/temp0', 
         #'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                             }['5'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
