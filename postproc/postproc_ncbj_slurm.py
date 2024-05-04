@@ -8,7 +8,7 @@ def makeOAR( EXEC_DIR, node, core, tpartitionime, PYFIL, argv, argvv):
     confParser.set('input files','input_path',argv)
     confParser.set('Vacancy Dynamics','input_path',argvv)
     #--- write
-    confParser.write(open('configuration.ini','w'))	
+    confParser.write(open('configuration_updated.ini','w'))	
     #--- set environment variables
 
     someFile = open( 'oarScript.sh', 'w' )
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         os.system( 'mkdir -p %s' % ( writPath ) ) # --- create folder
 #		os.system( 'cp utility.py LammpsPostProcess2nd.py OvitosCna.py %s' % ( writPath ) ) #--- cp python module
         makeOAR( writPath, 1, 1, durtn, PYFIL, argv+"/Run%s"%counter, argv) # --- make oar script
-        os.system( 'chmod +x oarScript.sh; mv oarScript.sh %s; cp configuration.ini %s;cp %s/%s %s' % ( writPath, writPath, EXEC_DIR, PYFIL, writPath ) ) # --- create folder & mv oar scrip & cp executable
+        os.system( 'chmod +x oarScript.sh; mv oarScript.sh %s; mv configuration_updated.ini %s/configuration.ini;cp %s/%s %s' % ( writPath, writPath, EXEC_DIR, PYFIL, writPath ) ) # --- create folder & mv oar scrip & cp executable
         jobname0 = jobname.replace('/','_')
         os.system( 'sbatch --partition=%s --mem=%s --time=%s --job-name %s.%s --output %s.%s.out --error %s.%s.err \
                                  --chdir %s --ntasks-per-node=%s --nodes=%s %s/oarScript.sh >> jobID.txt'\
