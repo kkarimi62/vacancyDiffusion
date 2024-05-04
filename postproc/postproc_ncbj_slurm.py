@@ -28,7 +28,6 @@ if __name__ == '__main__':
     nNode    = 1
     nThreads = 1
     jobname  = {
-                '4':'flickers/cantorNatom1K/multipleTemp/temp0',
                 '8':'energyBarrierPerType/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '9':'nicocr/md/nicocrNatom1K/md/temp0',
                 '11':'ni/void_2d/msd',
@@ -40,9 +39,10 @@ if __name__ == '__main__':
                 '15':'vacancy/FoilesPotential/temp0',
                 '6':'nicocr/kmc/NiCoCrNatom1KTemp1000K/msd',
 '5':'cantorNatom1K/multipleTemp/temp0/msd',#'cantorNatom1K/multipleTemp/temp0/msd',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                '3':'msd/ni/void/results/md/test',
-                }['3']
-    DeleteExistingFolder = True
+                '3':'msd/ni/void/results/md',
+                '4':'msd/ni/void/results/kmc',
+                }['4']
+    DeleteExistingFolder = False
     readPath = os.getcwd() + {
                                 '4':'/../simulations/nicocrTemp1000K/n0',
                                 '9':'/../simulations/nicocr/md/nicocrNatom1K/md/temp0',
@@ -56,8 +56,9 @@ if __name__ == '__main__':
                                  '6':'/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                             '5':'/cantorNatom1K/multipleTemp/temp0', 
         #'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
-                                '3':'/../../crystalDefect/simulations/ni/void/results/md/test',
-                            }['3'] #--- source 
+                                '3':'/../../crystalDefect/simulations/ni/void/results/md',
+                                '4':'/../../crystalDefect/simulations/ni/void/results/kmc',
+                            }['4'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -68,7 +69,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'md.ipynb',
         }
-    keyno = 2
+    keyno = 0
     convert_to_py = True
 #---
 #---
