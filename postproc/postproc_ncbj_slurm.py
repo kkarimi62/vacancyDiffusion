@@ -57,7 +57,7 @@ if __name__ == '__main__':
                             '5':'/cantorNatom1K/multipleTemp/temp0', 
         #'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                                 '3':'/../../crystalDefect/simulations/ni/void/results/md',
-                                '4':'msd/ni/void/results/kmc',#'/../../crystalDefect/simulations/ni/void/results/kmc',
+                                '4':'/msd/ni/void/results/kmc',#'/../../crystalDefect/simulations/ni/void/results/kmc',
                             }['4'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
