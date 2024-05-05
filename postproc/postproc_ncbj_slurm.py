@@ -41,7 +41,7 @@ if __name__ == '__main__':
 '5':'cantorNatom1K/multipleTemp/temp0/msd',#'cantorNatom1K/multipleTemp/temp0/msd',#'nicocr/kmc/NiCoCrNatom1KTemp1000K',
                 '3':'msd/ni/void/results/md',
                 '4':'msd/ni/void/results/kmc/msd',
-                }['4']
+                }['3']
     DeleteExistingFolder = False
     readPath = os.getcwd() + {
                                 '4':'/../simulations/nicocrTemp1000K/n0',
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         #'/../simulations/cantorNatom1K/multipleTemp/temp0', #'/../simulations/ni/FoilesPotential/temp0',#'/../simulations/nicocr/kmc/NiCoCrNatom1KTemp1000K',
                                 '3':'/../../crystalDefect/simulations/ni/void/results/md',
                                 '4':'/msd/ni/void/results/kmc',#'/../../crystalDefect/simulations/ni/void/results/kmc',
-                            }['4'] #--- source 
+                            }['3'] #--- source 
     EXEC_DIR = '.'     #--- path for executable file
     durtn = '23:59:59'
     mem = '32gb'
@@ -69,7 +69,7 @@ if __name__ == '__main__':
         1:'vacancyDynamics.ipynb',
         2:'md.ipynb',
         }
-    keyno = 1
+    keyno = 2
     convert_to_py = True
 #---
 #---
